@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider = "prisma-client"
+//   output   = "../src/generated"
+// }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  password      String
+  name          String 
+  role          String     @default("STUDENT")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  studentModules StudentModule[]
+  completions   Completion[]
+  certificates   Certificate[]
+  
+}
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  grade       Int
+  subject     String
+  content     String   @db.LongText
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  activities  Activity[]
+  quizzes     Quiz[]
+  enrollments StudentModule[]
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.LongText
+  order     Int
+  createdAt DateTime @default(now())
+
+  completions Completion[] @relation("LessonCompletion")
+
+  @@index([moduleId])
+}
+
+model Activity {
+  id        String     @id @default(cuid())
+  moduleId  String
+  module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  type      String     // DRAG_AND_DROP, MATCHING, INTERACTIVE
+  title     String
+  content   String     @db.LongText
+  createdAt DateTime   @default(now())
+
+  completions Completion[] @relation("ActivityCompletion")
+
+  @@index([moduleId])
+}
+
+model Quiz {
+  id           String   @id @default(cuid())
+  moduleId     String
+  module       Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title        String
+  questions    String   @db.LongText // JSON array
+  type         String   @default("MULTIPLE_CHOICE") // MULTIPLE_CHOICE, TRUE_FALSE, LONG_TEXT
+  passingScore Int      @default(70)
+  createdAt    DateTime @default(now())
+
+  completions Completion[] @relation("QuizCompletion")
+
+  @@index([moduleId])
+}
+
+// SINGLE COMPLETION TABLE FOR EVERYTHING
+model Completion {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Only ONE of these will be filled (lesson, activity, or quiz)
+  lessonId      String?
+  lesson        Lesson?  @relation("LessonCompletion", fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  activityId    String?
+  activity      Activity? @relation("ActivityCompletion", fields: [activityId], references: [id], onDelete: Cascade)
+  
+  quizId        String?
+  quiz          Quiz?    @relation("QuizCompletion", fields: [quizId], references: [id], onDelete: Cascade)
+  
+  // Data
+  score         Float?   // For activity & quiz
+  passed        Boolean? // For quiz
+  answer        String?  @db.LongText // For activity & quiz answers
+  attemptCount  Int      @default(1)  // For quiz retakes
+  
+  completedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, lessonId], name: "user_lesson")
+  @@unique([userId, activityId], name: "user_activity")
+  @@unique([userId, quizId], name: "user_quiz")
+  @@index([userId])
+  @@index([lessonId])
+  @@index([activityId])
+  @@index([quizId])
+}
+
+model StudentModule {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId    String
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  isCompleted Boolean   @default(false)
+
+  @@unique([userId, moduleId])
+  @@index([userId])
+  @@index([moduleId])
+}
+
+model Certificate {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId          String
+  moduleName        String
+  certificateNumber String   @unique
+  issuedAt          DateTime @default(now())
+  expiresAt         DateTime?
+
+  @@index([userId])
+}
