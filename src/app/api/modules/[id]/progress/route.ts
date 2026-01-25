@@ -6,20 +6,23 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const moduleId = params.id;
+  const { id: moduleId } = await params;
   const userId = (session.user as any).id;
 
   try {
     // Get all lessons, activities, quizzes in module
     const [lessons, activities, quizzes] = await Promise.all([
-      prisma.lesson.findMany({ where: { moduleId } }),
+      prisma.lesson.findMany({
+        where: { moduleId },
+        orderBy: { order: "asc" },
+      }),
       prisma.activity.findMany({ where: { moduleId } }),
       prisma.quiz.findMany({ where: { moduleId } }),
     ]);
@@ -34,17 +37,47 @@ export async function GET(
           { quiz: { moduleId } },
         ],
       },
+      include: {
+        lesson: true,
+        activity: true,
+        quiz: true,
+      },
     });
 
+    // Map completions to items
     const completedLessonIds = completions
       .filter((c) => c.lessonId)
-      .map((c) => c.lessonId);
+      .map((c) => c.lessonId!);
     const completedActivityIds = completions
       .filter((c) => c.activityId)
-      .map((c) => c.activityId);
+      .map((c) => c.activityId!);
     const completedQuizIds = completions
       .filter((c) => c.quizId)
-      .map((c) => c.quizId);
+      .map((c) => c.quizId!);
+
+    // Create lesson items with completion status
+    const lessonItems = lessons.map((lesson) => ({
+      id: lesson.id,
+      title: lesson.title,
+      order: lesson.order,
+      isCompleted: completedLessonIds.includes(lesson.id),
+    }));
+
+    // Create activity items with completion status
+    const activityItems = activities.map((activity) => ({
+      id: activity.id,
+      title: activity.title,
+      type: activity.type,
+      isCompleted: completedActivityIds.includes(activity.id),
+    }));
+
+    // Create quiz items with completion status
+    const quizItems = quizzes.map((quiz) => ({
+      id: quiz.id,
+      title: quiz.title,
+      type: quiz.type,
+      isCompleted: completedQuizIds.includes(quiz.id),
+    }));
 
     const lessonsCompleted = completedLessonIds.length;
     const activitiesCompleted = completedActivityIds.length;
@@ -65,11 +98,7 @@ export async function GET(
           lessons.length > 0
             ? Math.round((lessonsCompleted / lessons.length) * 100)
             : 0,
-        items: lessons.map((l) => ({
-          id: l.id,
-          title: l.title,
-          isCompleted: completedLessonIds.includes(l.id),
-        })),
+        items: lessonItems,
       },
       activities: {
         completed: activitiesCompleted,
@@ -78,11 +107,7 @@ export async function GET(
           activities.length > 0
             ? Math.round((activitiesCompleted / activities.length) * 100)
             : 0,
-        items: activities.map((a) => ({
-          id: a.id,
-          title: a.title,
-          isCompleted: completedActivityIds.includes(a.id),
-        })),
+        items: activityItems,
       },
       quizzes: {
         completed: quizzesCompleted,
@@ -91,11 +116,7 @@ export async function GET(
           quizzes.length > 0
             ? Math.round((quizzesCompleted / quizzes.length) * 100)
             : 0,
-        items: quizzes.map((q) => ({
-          id: q.id,
-          title: q.title,
-          isCompleted: completedQuizIds.includes(q.id),
-        })),
+        items: quizItems,
       },
       overall: {
         completed: completedItems,
