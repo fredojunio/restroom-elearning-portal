@@ -1,6 +1,6 @@
 "use client";
 
-import { Certificate } from "../generated/client";
+import { Certificate } from "@prisma/client";
 
 interface CertificateDisplayProps {
   certificate: Certificate;

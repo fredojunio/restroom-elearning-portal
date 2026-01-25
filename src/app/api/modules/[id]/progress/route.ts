@@ -46,14 +46,14 @@ export async function GET(
 
     // Map completions to items
     const completedLessonIds = completions
-      .filter((c) => c.lessonId)
-      .map((c) => c.lessonId!);
+      .filter((c: any) => c.lessonId)
+      .map((c: any) => c.lessonId!);
     const completedActivityIds = completions
-      .filter((c) => c.activityId)
-      .map((c) => c.activityId!);
+      .filter((c: any) => c.activityId)
+      .map((c: any) => c.activityId!);
     const completedQuizIds = completions
-      .filter((c) => c.quizId)
-      .map((c) => c.quizId!);
+      .filter((c: any) => c.quizId)
+      .map((c: any) => c.quizId!);
 
     // Create lesson items with completion status
     const lessonItems = lessons.map((lesson) => ({

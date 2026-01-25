@@ -58,14 +58,14 @@ export async function GET(req: NextRequest) {
         );
 
         const completedModules = moduleProgress.filter(
-          (m) => m.progress === 100,
+          (m: any) => m.progress === 100,
         ).length;
         const avgProgress =
           moduleProgress.length > 0
             ? Math.round(
-                moduleProgress.reduce((sum, m) => sum + m.progress, 0) /
-                  moduleProgress.length,
-              )
+              moduleProgress.reduce((sum: number, m: any) => sum + m.progress, 0) /
+              moduleProgress.length,
+            )
             : 0;
 
         return {
