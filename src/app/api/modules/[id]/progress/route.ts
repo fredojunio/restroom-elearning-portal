@@ -56,7 +56,7 @@ export async function GET(
       .map((c: any) => c.quizId!);
 
     // Create lesson items with completion status
-    const lessonItems = lessons.map((lesson) => ({
+    const lessonItems = lessons.map((lesson: any) => ({
       id: lesson.id,
       title: lesson.title,
       order: lesson.order,
@@ -64,7 +64,7 @@ export async function GET(
     }));
 
     // Create activity items with completion status
-    const activityItems = activities.map((activity) => ({
+    const activityItems = activities.map((activity: any) => ({
       id: activity.id,
       title: activity.title,
       type: activity.type,
@@ -72,7 +72,7 @@ export async function GET(
     }));
 
     // Create quiz items with completion status
-    const quizItems = quizzes.map((quiz) => ({
+    const quizItems = quizzes.map((quiz: any) => ({
       id: quiz.id,
       title: quiz.title,
       type: quiz.type,

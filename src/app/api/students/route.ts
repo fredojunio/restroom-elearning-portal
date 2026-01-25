@@ -21,14 +21,14 @@ export async function GET(req: NextRequest) {
 
     // Get progress for each student
     const studentsWithProgress = await Promise.all(
-      users.map(async (user) => {
+      users.map(async (user: any) => {
         const completions = await prisma.completion.findMany({
           where: { userId: user.id },
         });
 
         const modules = await prisma.module.findMany();
         const moduleProgress = await Promise.all(
-          modules.map(async (module) => {
+          modules.map(async (module: any) => {
             const moduleCompletions = await prisma.completion.findMany({
               where: {
                 userId: user.id,
