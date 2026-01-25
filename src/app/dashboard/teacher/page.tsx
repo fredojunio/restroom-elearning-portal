@@ -5,22 +5,37 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-interface Student {
+interface Module {
   id: string;
+  title: string;
+  subject: string;
+  grade: number;
+  _count?: {
+    lessons: number;
+    activities: number;
+    quizzes: number;
+  };
+}
+
+interface StudentProgress {
   name: string;
   email: string;
-  progress: number;
+  modulesCompleted: number;
+  averageProgress: number;
 }
 
 export default function TeacherDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [modules, setModules] = useState<Module[]>([]);
+  const [students, setStudents] = useState<StudentProgress[]>([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalModules: 0,
     totalStudents: 0,
-    avgCompletion: 0,
+    avgStudentProgress: 0,
+    pendingGradings: 0,
   });
-  const [loading, setLoading] = useState(true);
 
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: "/" });
@@ -33,56 +48,87 @@ export default function TeacherDashboard() {
   }, [status, router]);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/modules");
-        const modules = await res.json();
-
-        setStats({
-          totalModules: modules.length,
-          totalStudents: 0,
-          avgCompletion: 0,
-        });
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (session?.user) {
-      fetchStats();
+      fetchDashboardData();
     }
   }, [session]);
 
+  const fetchDashboardData = async () => {
+    try {
+      const [modulesRes, studentsRes] = await Promise.all([
+        fetch("/api/modules"),
+        fetch("/api/students"),
+      ]);
+
+      const modulesData = await modulesRes.json();
+      const studentsData = await studentsRes.json();
+
+      setModules(modulesData);
+      setStudents(studentsData);
+
+      const avgProgress =
+        studentsData.length > 0
+          ? Math.round(
+              studentsData.reduce(
+                (sum: number, s: StudentProgress) => sum + s.averageProgress,
+                0,
+              ) / studentsData.length,
+            )
+          : 0;
+
+      setStats({
+        totalModules: modulesData.length,
+        totalStudents: studentsData.length,
+        avgStudentProgress: avgProgress,
+        pendingGradings: 0, // Would fetch from quizzes with pending
+      });
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white shadow-sm sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">👨‍🏫</span>
+              </div>
+              <span className="font-bold text-xl text-gray-900">EduLearn</span>
+            </div>
+          </div>
+        </nav>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading teacher dashboard...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Navigation Header */}
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
+      <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">📚</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">👨‍🏫</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">EduLearn</span>
-            <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-              Teacher
-            </span>
+            <div>
+              <span className="font-bold text-xl text-gray-900">EduLearn</span>
+              <p className="text-xs text-gray-600">Teacher Portal</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="text-right">
+            <div className="hidden md:block text-right">
               <p className="text-sm font-semibold text-gray-900">
                 {session?.user?.name}
               </p>
@@ -99,60 +145,274 @@ export default function TeacherDashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">
-            Teacher Dashboard
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Welcome, {session?.user?.name?.split(" ")[0]}! 👋
           </h1>
-          <p className="text-gray-600 mt-2">Welcome, {session?.user?.name}</p>
+          <p className="text-gray-600">
+            Manage your courses and monitor student progress
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm font-semibold mb-2">
-              Total Modules
-            </h3>
-            <p className="text-4xl font-bold text-blue-600">
-              {stats.totalModules}
-            </p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold mb-1">
+                  Total Modules
+                </p>
+                <p className="text-3xl font-bold text-blue-600">
+                  {stats.totalModules}
+                </p>
+              </div>
+              <div className="text-4xl opacity-20">📚</div>
+            </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm font-semibold mb-2">
-              Students Enrolled
-            </h3>
-            <p className="text-4xl font-bold text-green-600">
-              {stats.totalStudents}
-            </p>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-600">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold mb-1">
+                  Students Enrolled
+                </p>
+                <p className="text-3xl font-bold text-green-600">
+                  {stats.totalStudents}
+                </p>
+              </div>
+              <div className="text-4xl opacity-20">👥</div>
+            </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-gray-600 text-sm font-semibold mb-2">
-              Avg. Completion
-            </h3>
-            <p className="text-4xl font-bold text-purple-600">
-              {stats.avgCompletion}%
-            </p>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-600">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold mb-1">
+                  Avg. Student Progress
+                </p>
+                <p className="text-3xl font-bold text-purple-600">
+                  {stats.avgStudentProgress}%
+                </p>
+              </div>
+              <div className="text-4xl opacity-20">📊</div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-600">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold mb-1">
+                  Pending Grading
+                </p>
+                <p className="text-3xl font-bold text-orange-600">
+                  {stats.pendingGradings}
+                </p>
+              </div>
+              <div className="text-4xl opacity-20">✏️</div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link
+        {/* Students Section */}
+        {students.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Student Progress
+              </h2>
+              <Link
+                href="/analytics"
+                className="text-blue-600 hover:underline text-sm font-semibold"
+              >
+                View All →
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-10">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                        Student Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                        Modules Completed
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                        Progress
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {students.slice(0, 5).map((student, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50 transition">
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {student.name}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-gray-600">
+                            {student.email}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                            {student.modulesCompleted}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="w-32">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-semibold text-gray-700">
+                                {student.averageProgress}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full transition-all"
+                                style={{ width: `${student.averageProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modules Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Your Modules</h2>
+            {/* <Link
               href="/modules/create"
-              className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
             >
-              <h3 className="font-semibold text-blue-900">Create New Module</h3>
-              <p className="text-sm text-blue-700">Add a new learning module</p>
-            </Link>
-            <Link
-              href="/analytics"
-              className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition"
-            >
-              <h3 className="font-semibold text-green-900">View Analytics</h3>
-              <p className="text-sm text-green-700">Check student progress</p>
-            </Link>
+              + New Module
+            </Link> */}
           </div>
+
+          {/* Quick Actions */}
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Link href="/modules/create" className="group">
+              <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition cursor-pointer h-full">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:translate-x-1 transition">
+                      Create New Module
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Build a new learning module with lessons, activities, and
+                      quizzes
+                    </p>
+                  </div>
+                  <div className="text-4xl">➕</div>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/analytics" className="group">
+              <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition cursor-pointer h-full">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:translate-x-1 transition">
+                      View Analytics
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Check detailed student progress and performance metrics
+                    </p>
+                  </div>
+                  <div className="text-4xl">📈</div>
+                </div>
+              </div>
+            </Link>
+          </div> */}
+
+          {modules.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+              <div className="text-6xl mb-4">📚</div>
+              <p className="text-gray-600 text-lg mb-4">
+                No modules created yet
+              </p>
+              <Link
+                href="/modules/create"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Create Your First Module
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {modules.map((module) => (
+                <Link
+                  key={module.id}
+                  href={`/modules/${module.id}/edit`}
+                  className="group"
+                >
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition h-full flex flex-col">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
+                      <h3 className="text-xl font-bold mb-2 group-hover:translate-x-1 transition">
+                        {module.title}
+                      </h3>
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-semibold">
+                          Grade {module.grade}
+                        </span>
+                        <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-semibold">
+                          {module.subject}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 flex-1 flex flex-col">
+                      {/* Stats */}
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                          <p className="text-2xl font-bold text-blue-600">
+                            {module._count?.lessons || 0}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">Lessons</p>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                          <p className="text-2xl font-bold text-green-600">
+                            {module._count?.activities || 0}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Activities
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                          <p className="text-2xl font-bold text-purple-600">
+                            {module._count?.quizzes || 0}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-1">Quizzes</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-6 pt-0 border-t border-gray-200">
+                      <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
+                        Manage Module
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
