@@ -1,379 +1,298 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  HelpCircle,
+  ChevronRight,
+  ChevronLeft,
+  Send,
+  Trophy,
+  LayoutDashboard
+} from "lucide-react";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 
 interface Question {
   id: string;
   question: string;
-  type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "LONG_TEXT";
-  correctAnswer?: number | boolean | string;
+  type: "MULTIPLE_CHOICE" | "TRUE_FALSE" | "MULTIPLE_SELECT" | "TEXT_INPUT";
   options?: string[];
-  points?: number;
-  minWords?: number;
-  maxWords?: number;
+  correctAnswer?: any;
 }
 
-interface Quiz {
-  id: string;
-  title: string;
-  type: string;
-  questions: Question[];
-  passingScore: number;
-  moduleId: string;
-}
+const dummyQuiz = {
+  id: "quiz-1",
+  title: "Restroom Engineering Final Assessment",
+  moduleId: "mod-1",
+  questions: [
+    {
+      id: "q1",
+      type: "MULTIPLE_CHOICE",
+      question: "What is the minimum required turning radius for a wheelchair-accessible restroom?",
+      options: ["48 inches", "60 inches", "72 inches", "55 inches"],
+    },
+    {
+      id: "q2",
+      type: "TRUE_FALSE",
+      question: "Automatic sensors are mandatory for all public restrooms regarless of local codes.",
+      options: ["True", "False"],
+    },
+    {
+      id: "q3",
+      type: "MULTIPLE_SELECT",
+      question: "Which of the following are considered anti-microbial materials?",
+      options: ["Copper Alloys", "Untreated Wood", "Silver-ion infused plastics", "Porous Sandstone"],
+    },
+    {
+      id: "q4",
+      type: "TEXT_INPUT",
+      question: "Briefly explain why slip resistance is critical for flooring in high-moisture environments.",
+    }
+  ] as Question[]
+};
 
-export default function QuizPage() {
+export default function EnhancedQuizPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
-  const quizId = params.id as string;
-
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
-  const [submitted, setSubmitted] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [direction, setDirection] = useState(0); // For slide direction
 
-  useEffect(() => {
-    if (!session) {
-      router.push("/auth/login");
-      return;
-    }
-    fetchQuiz();
-  }, [quizId, session, router]);
+  const currentQuestion = dummyQuiz.questions[currentIdx];
 
-  const fetchQuiz = async () => {
-    try {
-      const res = await fetch(`/api/quizzes/${quizId}`);
-      if (!res.ok) throw new Error("Quiz not found");
-      const data = await res.json();
-      setQuiz(data);
-      // Initialize answers object
-      const initialAnswers: Record<string, any> = {};
-      data.questions.forEach((q: Question) => {
-        initialAnswers[q.id] = null;
-      });
-      setAnswers(initialAnswers);
-    } catch (error) {
-      console.error("Failed to fetch quiz:", error);
-    } finally {
-      setLoading(false);
+  const handleAnswer = (val: any) => {
+    setAnswers(prev => ({ ...prev, [currentQuestion.id]: val }));
+  };
+
+  const handleMultipleSelect = (optionIdx: number) => {
+    const current = (answers[currentQuestion.id] || []) as number[];
+    const updated = current.includes(optionIdx)
+      ? current.filter(i => i !== optionIdx)
+      : [...current, optionIdx];
+    handleAnswer(updated);
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx < dummyQuiz.questions.length - 1) {
+      setDirection(1);
+      setCurrentIdx(currentIdx + 1);
     }
   };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: value,
-    }));
-  };
-
-  const handleSubmit = async () => {
-    const answersArray = quiz!.questions.map((q) => answers[q.id]);
-
-    try {
-      const res = await fetch(`/api/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quizId,
-          score: 0,
-          passed: false,
-          answer: JSON.stringify(answersArray),
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to submit quiz");
-      const data = await res.json();
-      setResults(data);
-      setSubmitted(true);
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
-      alert("Failed to submit quiz");
+  const prevQuestion = () => {
+    if (currentIdx > 0) {
+      setDirection(-1);
+      setCurrentIdx(currentIdx - 1);
     }
   };
 
-  if (loading) {
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+    confetti({
+      particleCount: 150,
+      spread: 100,
+      origin: { y: 0.6 }
+    });
+  };
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0
+    })
+  };
+
+  if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading quiz...</p>
-        </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="max-w-xl w-full bg-white rounded-[2rem] p-12 shadow-2xl border border-slate-100 text-center"
+        >
+          <div className="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Trophy className="w-10 h-10" />
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 mb-2">Quiz Completed!</h1>
+          <p className="text-slate-500 mb-8">You've successfully finished the assessment for {dummyQuiz.title}.</p>
+
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="p-4 bg-slate-50 rounded-2xl">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Score</span>
+              <span className="text-2xl font-black text-slate-900">100%</span>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-2xl">
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</span>
+              <span className="text-2xl font-black text-green-600">PASSED</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/dashboard" className="flex-1 px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
+              <LayoutDashboard className="w-5 h-5" />
+              Dashboard
+            </Link>
+            <Link href={`/modules/${dummyQuiz.moduleId}`} className="flex-1 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+              Module View
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </motion.div>
       </div>
     );
   }
-
-  if (!quiz) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 text-lg">Quiz not found</p>
-          <Link
-            href="/dashboard"
-            className="text-blue-600 hover:underline mt-4 inline-block"
-          >
-            Back to Dashboard
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (submitted && results) {
-    return <QuizResults quiz={quiz} results={results} />;
-  }
-
-  const currentQuestion = quiz.questions[currentQuestionIndex];
-  const isAnswered =
-    answers[currentQuestion.id] !== null && answers[currentQuestion.id] !== "";
-  const allAnswered = quiz.questions.every(
-    (q) => answers[q.id] !== null && answers[q.id] !== "",
-  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-4">{quiz.title}</h1>
-          <p className="text-purple-100 mb-4">
-            {quiz.type === "MULTIPLE_CHOICE"
-              ? "Multiple Choice Quiz"
-              : quiz.type === "TRUE_FALSE"
-                ? "True/False Quiz"
-                : "Long Text Answer Quiz"}
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Progress Bar */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <span className="font-semibold text-gray-700">
-              Question {currentQuestionIndex + 1} of {quiz.questions.length}
-            </span>
-            <span className="text-sm text-gray-600">
-              {
-                quiz.questions.filter(
-                  (q) => answers[q.id] !== null && answers[q.id] !== "",
-                ).length
-              }{" "}
-              / {quiz.questions.length} answered
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="bg-purple-600 h-3 rounded-full transition-all"
-              style={{
-                width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Question Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            {currentQuestion.question}
-          </h2>
-
-          {/* Multiple Choice Questions */}
-          {currentQuestion.type === "MULTIPLE_CHOICE" && (
-            <div className="space-y-3">
-              {currentQuestion.options?.map((option, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleAnswerChange(currentQuestion.id, idx)}
-                  className={`w-full p-4 text-left rounded-lg border-2 transition ${
-                    answers[currentQuestion.id] === idx
-                      ? "border-purple-600 bg-purple-50"
-                      : "border-gray-200 hover:border-purple-400"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                        answers[currentQuestion.id] === idx
-                          ? "border-purple-600 bg-purple-600"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      {answers[currentQuestion.id] === idx && (
-                        <span className="text-white text-sm font-bold">✓</span>
-                      )}
-                    </div>
-                    <span
-                      className={`font-semibold ${
-                        answers[currentQuestion.id] === idx
-                          ? "text-purple-600"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {option}
-                    </span>
-                  </div>
-                </button>
-              ))}
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden">
+      {/* Quiz Progress Header */}
+      <header className="fixed top-0 left-0 right-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+              <HelpCircle className="w-6 h-6" />
             </div>
-          )}
-
-          {/* True/False Questions */}
-          {currentQuestion.type === "TRUE_FALSE" && (
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => handleAnswerChange(currentQuestion.id, true)}
-                className={`p-6 rounded-lg border-2 transition font-semibold text-lg ${
-                  answers[currentQuestion.id] === true
-                    ? "border-green-600 bg-green-50 text-green-700"
-                    : "border-gray-200 hover:border-green-400 text-gray-700"
-                }`}
-              >
-                True
-              </button>
-              <button
-                onClick={() => handleAnswerChange(currentQuestion.id, false)}
-                className={`p-6 rounded-lg border-2 transition font-semibold text-lg ${
-                  answers[currentQuestion.id] === false
-                    ? "border-red-600 bg-red-50 text-red-700"
-                    : "border-gray-200 hover:border-red-400 text-gray-700"
-                }`}
-              >
-                False
-              </button>
-            </div>
-          )}
-
-          {/* Long Text Questions */}
-          {currentQuestion.type === "LONG_TEXT" && (
             <div>
-              <textarea
-                value={answers[currentQuestion.id] || ""}
-                onChange={(e) =>
-                  handleAnswerChange(currentQuestion.id, e.target.value)
-                }
-                placeholder="Type your answer here..."
-                className="w-full h-48 p-4 border-2 border-gray-200 rounded-lg focus:border-purple-600 focus:ring-2 focus:ring-purple-100 outline-none resize-none"
-              />
-              <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  {currentQuestion.minWords
-                    ? `Minimum: ${currentQuestion.minWords} words`
-                    : "No minimum"}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {answers[currentQuestion.id]
-                    ? `${
-                        answers[currentQuestion.id]
-                          .trim()
-                          .split(/\s+/)
-                          .filter((w: string) => w.length > 0).length
-                      } words`
-                    : "0 words"}
-                </span>
-              </div>
+              <h2 className="text-sm font-bold text-slate-900 line-clamp-1">{dummyQuiz.title}</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Question {currentIdx + 1} of {dummyQuiz.questions.length}</p>
             </div>
-          )}
+          </div>
+          <Link href={`/modules/${dummyQuiz.moduleId}`} className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
         </div>
+        <div className="absolute bottom-0 left-0 h-[2px] bg-indigo-600 transition-all duration-500" style={{ width: `${((currentIdx + 1) / dummyQuiz.questions.length) * 100}%` }} />
+      </header>
 
-        {/* Navigation */}
-        <div className="flex gap-4">
-          <button
-            onClick={() =>
-              setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))
-            }
-            disabled={currentQuestionIndex === 0}
-            className="flex-1 px-6 py-3 bg-gray-200 text-gray-900 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50 transition"
+      <main className="max-w-3xl mx-auto px-6 pt-32 pb-24">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentIdx}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full"
           >
-            ← Previous
+            <div className="mb-12">
+              <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest mb-4">
+                {currentQuestion.type.replace('_', ' ')}
+              </span>
+              <h1 className="text-3xl md:text-4xl font-black leading-tight text-slate-900">
+                {currentQuestion.question}
+              </h1>
+            </div>
+
+            {/* Answer Types */}
+            <div className="space-y-4">
+              {currentQuestion.type === "MULTIPLE_CHOICE" && currentQuestion.options?.map((opt, i) => (
+                <AnswerCard
+                  key={i}
+                  label={opt}
+                  selected={answers[currentQuestion.id] === i}
+                  onClick={() => handleAnswer(i)}
+                />
+              ))}
+
+              {currentQuestion.type === "TRUE_FALSE" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <AnswerCard label="True" selected={answers[currentQuestion.id] === true} onClick={() => handleAnswer(true)} />
+                  <AnswerCard label="False" selected={answers[currentQuestion.id] === false} onClick={() => handleAnswer(false)} />
+                </div>
+              )}
+
+              {currentQuestion.type === "MULTIPLE_SELECT" && currentQuestion.options?.map((opt, i) => (
+                <AnswerCard
+                  key={i}
+                  label={opt}
+                  selected={(answers[currentQuestion.id] || []).includes(i)}
+                  onClick={() => handleMultipleSelect(i)}
+                  multi
+                />
+              ))}
+
+              {currentQuestion.type === "TEXT_INPUT" && (
+                <motion.textarea
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  value={answers[currentQuestion.id] || ""}
+                  onChange={(e) => handleAnswer(e.target.value)}
+                  placeholder="Type your response here..."
+                  className="w-full h-48 p-6 bg-white border-2 border-slate-100 rounded-[2rem] focus:border-indigo-500 outline-none transition-all shadow-sm resize-none text-lg font-medium"
+                />
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Persistent Navigation Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent">
+        <div className="max-w-3xl mx-auto flex items-center justify-between pointer-events-auto">
+          <button
+            disabled={currentIdx === 0}
+            onClick={prevQuestion}
+            className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all disabled:opacity-0"
+          >
+            <ChevronLeft className="w-6 h-6" />
           </button>
 
-          {currentQuestionIndex < quiz.questions.length - 1 ? (
+          {currentIdx === dummyQuiz.questions.length - 1 ? (
             <button
-              onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition"
+              onClick={handleSubmit}
+              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold flex items-center gap-3 hover:bg-indigo-700 hover:scale-105 transition-all shadow-xl shadow-indigo-100"
             >
-              Next →
+              <span>Submit Assessment</span>
+              <Send className="w-5 h-5" />
             </button>
           ) : (
             <button
-              onClick={handleSubmit}
-              disabled={!allAnswered}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition"
+              onClick={nextQuestion}
+              className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center gap-3 hover:bg-slate-800 hover:scale-105 transition-all shadow-xl shadow-slate-200"
             >
-              Submit Quiz
+              <span>Continue</span>
+              <ChevronRight className="w-5 h-5" />
             </button>
           )}
         </div>
-
-        {/* Question Indicators */}
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Questions</h3>
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {quiz.questions.map((q, idx) => (
-              <button
-                key={q.id}
-                onClick={() => setCurrentQuestionIndex(idx)}
-                className={`w-10 h-10 rounded-lg font-semibold transition ${
-                  currentQuestionIndex === idx
-                    ? "bg-purple-600 text-white"
-                    : answers[q.id] !== null && answers[q.id] !== ""
-                      ? "bg-green-100 text-green-700 border border-green-300"
-                      : "bg-gray-100 text-gray-700 border border-gray-200"
-                }`}
-              >
-                {idx + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }
 
-// Quiz Results Component
-function QuizResults({ quiz, results }: { quiz: Quiz; results: any }) {
+function AnswerCard({ label, selected, onClick, multi = false }: any) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Quiz Submitted!
-          </h1>
-          <p className="text-gray-600 text-lg mb-8">
-            Your answers have been recorded and will be reviewed.
-          </p>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <p className="text-blue-700 text-sm">
-              Thank you for completing {quiz.title}. If this was an auto-graded
-              quiz, your results will appear shortly.
-            </p>
-          </div>
-
-          <div className="flex gap-4 justify-center">
-            <Link
-              href="/dashboard"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Back to Dashboard
-            </Link>
-            <Link
-              href={`/modules/${quiz.moduleId}`}
-              className="px-6 py-3 bg-gray-200 text-gray-900 rounded-lg font-semibold hover:bg-gray-300 transition"
-            >
-              Back to Module
-            </Link>
-          </div>
-        </div>
+    <motion.button
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`w-full group p-6 rounded-[2rem] border-2 transition-all flex items-center justify-between text-left ${selected
+          ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100"
+          : "bg-white border-slate-100 text-slate-600 hover:border-indigo-300 hover:shadow-md"
+        }`}
+    >
+      <span className="text-lg font-bold">{label}</span>
+      <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all ${selected
+          ? "bg-white border-white text-indigo-600"
+          : "border-slate-100 group-hover:border-indigo-200"
+        }`}>
+        {selected && <CheckCircle2 className="w-5 h-5" />}
       </div>
-    </div>
+    </motion.button>
   );
 }
