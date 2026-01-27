@@ -101,7 +101,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4"
               >
-                Hero Identifier (Email)
+                Email
               </label>
               <input
                 id="email"
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4"
               >
-                Secret Access Key
+                Password
               </label>
               <input
                 id="password"

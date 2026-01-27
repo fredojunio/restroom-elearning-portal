@@ -396,9 +396,9 @@ export default function ModuleDetailPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3 opacity-30">
             <ShieldCheck className="text-slate-900 w-5 h-5" />
-            <span className="font-black text-[10px] uppercase tracking-widest text-slate-900">Toilet Hero Academy</span>
+            <span className="font-black text-[10px] uppercase tracking-widest text-slate-900">Restroom Association</span>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-200">© 2026 Mission Ops Command</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-200">© 2026 Restroom Association</p>
         </div>
       </footer>
     </div>

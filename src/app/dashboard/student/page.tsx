@@ -361,9 +361,9 @@ export default function StudentDashboard() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3 opacity-50">
             <ShieldCheck className="text-slate-900 w-5 h-5" />
-            <span className="font-black text-[10px] uppercase tracking-widest text-slate-900">Toilet Hero Academy</span>
+            <span className="font-black text-[10px] uppercase tracking-widest text-slate-900">Restroom Association</span>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-300">© 2026 Academy Command Centre</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-300">© 2026 Restroom Association</p>
         </div>
       </footer>
     </div>

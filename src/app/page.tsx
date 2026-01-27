@@ -314,11 +314,11 @@ export default function LandingPage() {
             <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
               <ShieldCheck className="text-white w-5 h-5" />
             </div>
-            <span className="font-black text-sm tracking-tight text-slate-900 uppercase">Toilet Hero Academy</span>
+            <span className="font-black text-sm tracking-tight text-slate-900 uppercase">Restroom Association</span>
           </div>
 
           <p className="text-slate-300 font-black text-[10px] uppercase tracking-[0.4em]">
-            © 2026 Primary School Safety Initiative
+            © 2026 Restroom Association
           </p>
 
           <div className="flex gap-8">
