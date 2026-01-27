@@ -46,7 +46,7 @@ export function Navbar({ role = "STUDENT" }: NavbarProps) {
           <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">📚</span>
           </div>
-          <span className="font-bold text-xl text-gray-900">EduLearn</span>
+          <span className="font-bold text-xl text-gray-900">Toilet Hero</span>
           {getRoleBadge()}
         </div>
 

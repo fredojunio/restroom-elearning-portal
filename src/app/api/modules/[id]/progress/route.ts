@@ -124,10 +124,10 @@ export async function GET(
         percentage: overallPercentage,
       },
     });
-  } catch (error) {
-    console.error("Error fetching progress:", error);
+  } catch (error: any) {
+    console.error("Error fetching progress for module:", moduleId, error);
     return NextResponse.json(
-      { error: "Failed to fetch progress" },
+      { error: "Failed to fetch progress", details: error.message },
       { status: 500 },
     );
   }

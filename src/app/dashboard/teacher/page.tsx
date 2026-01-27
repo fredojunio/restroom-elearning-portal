@@ -69,11 +69,11 @@ export default function TeacherDashboard() {
       const avgProgress =
         studentsData.length > 0
           ? Math.round(
-              studentsData.reduce(
-                (sum: number, s: StudentProgress) => sum + s.averageProgress,
-                0,
-              ) / studentsData.length,
-            )
+            studentsData.reduce(
+              (sum: number, s: StudentProgress) => sum + s.averageProgress,
+              0,
+            ) / studentsData.length,
+          )
           : 0;
 
       setStats({
@@ -98,7 +98,7 @@ export default function TeacherDashboard() {
               <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">👨‍🏫</span>
               </div>
-              <span className="font-bold text-xl text-gray-900">EduLearn</span>
+              <span className="font-bold text-xl text-gray-900">Toilet Hero</span>
             </div>
           </div>
         </nav>
@@ -122,7 +122,7 @@ export default function TeacherDashboard() {
               <span className="text-white font-bold text-lg">👨‍🏫</span>
             </div>
             <div>
-              <span className="font-bold text-xl text-gray-900">EduLearn</span>
+              <span className="font-bold text-xl text-gray-900">Toilet Hero</span>
               <p className="text-xs text-gray-600">Teacher Portal</p>
             </div>
           </div>

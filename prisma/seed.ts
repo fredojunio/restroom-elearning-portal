@@ -95,19 +95,73 @@ async function main() {
 
   // ===== 4. Create Lessons =====
   console.log("\n📖 Creating lessons...");
-  const lesson1 = await prisma.lesson.upsert({
-    where: { id: "lesson-1" },
+
+  // Lessons for Module 1
+  const m1l1 = await prisma.lesson.upsert({
+    where: { id: "m1-l1" },
     update: {},
     create: {
-      id: "lesson-1",
+      id: "m1-l1",
       moduleId: module1.id,
-      title: "Introduction to Multiplication",
-      content:
-        "Multiplication is a way of adding groups of equal sizes. For example, 3 × 4 means 3 groups of 4.",
+      title: "Germs: The Invisible Enemy",
+      content: "Germs are tiny organisms that can cause disease. In a restroom, they often hide on frequently touched surfaces like door handles and faucets.",
       order: 1,
     },
   });
-  console.log(`✓ Lesson created: ${lesson1.title}`);
+  const m1l2 = await prisma.lesson.upsert({
+    where: { id: "m1-l2" },
+    update: {},
+    create: {
+      id: "m1-l2",
+      moduleId: module1.id,
+      title: "The Splash Zone",
+      content: "When you flush a toilet with the lid open, tiny water droplets can travel up to 6 feet! This is called the 'toilet plume'.",
+      order: 2,
+    },
+  });
+
+  // Lessons for Module 2
+  const m2l1 = await prisma.lesson.upsert({
+    where: { id: "m2-l1" },
+    update: {},
+    create: {
+      id: "m2-l1",
+      moduleId: module2.id,
+      title: "Aim and Accuracy",
+      content: "A true hero always ensures they leave the station cleaner than they found it. Aim is the first step in restroom mastery.",
+      order: 1,
+    },
+  });
+
+  // Lessons for Module 3
+  const m3l1 = await prisma.lesson.upsert({
+    where: { id: "m3-l1" },
+    update: {},
+    create: {
+      id: "m3-l1",
+      moduleId: module3.id,
+      title: "The 20-Second Scrub",
+      content: "Washing your hands for at least 20 seconds is the golden rule. Sing the 'Happy Birthday' song twice to get the timing right!",
+      order: 1,
+    },
+  });
+
+  console.log(`✓ Lessons created for all modules`);
+
+  // ===== 4.1 Create Activities =====
+  console.log("\n🎮 Creating activities...");
+  const a1 = await prisma.activity.upsert({
+    where: { id: "m1-a1" },
+    update: {},
+    create: {
+      id: "m1-a1",
+      moduleId: module1.id,
+      title: "Germ Detection Mission",
+      type: "DRAG_AND_DROP",
+      content: "Identify and drag the germs into the sanitizer portal.",
+    }
+  });
+  console.log(`✓ Activity created: ${a1.title}`);
 
   // ===== 5. Create Quizzes with Different Types =====
   console.log("\n❓ Creating quizzes...");

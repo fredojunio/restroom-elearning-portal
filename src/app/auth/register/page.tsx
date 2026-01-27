@@ -63,7 +63,7 @@ export default function RegisterPage() {
           <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
             Create Account
           </h1>
-          <p className="text-center text-gray-600 mb-8">Join EduLearn Portal</p>
+          <p className="text-center text-gray-600 mb-8">Join Portal</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
