@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
+import PlayfulButton from "@/components/PlayfulButton";
 
 // --- Types & Dummy Data ---
 
@@ -324,15 +325,18 @@ const GermStoryGame = ({ onComplete }: { onComplete: () => void }) => {
 
             <div className="mt-8 flex flex-col items-center gap-6">
                 {!isFinished ? (
-                    <button
+                    <PlayfulButton
                         onClick={handleWash}
-                        className="px-12 py-5 bg-sky-600 text-white rounded-[2rem] font-black text-xl shadow-[0_15px_30px_rgba(14,165,233,0.3)] hover:bg-sky-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 group"
+                        color="blue"
+                        className="px-12 py-5"
                     >
-                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-                            🧼
+                        <div className="flex items-center gap-4 group">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                                🧼
+                            </div>
+                            WASH HANDS!
                         </div>
-                        WASH HANDS!
-                    </button>
+                    </PlayfulButton>
                 ) : (
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
@@ -470,13 +474,16 @@ const GameLauncherSlide = ({ title, gameType, content, onStart }: any) => (
                 </span>
                 <h2 className="text-4xl font-black text-blue-900 mb-4">{title}</h2>
                 <p className="text-xl text-slate-600 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
-                <button
+                <PlayfulButton
                     onClick={onStart}
-                    className="px-12 py-5 bg-orange-600 text-white rounded-3xl font-black text-xl shadow-xl shadow-orange-200 hover:bg-orange-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
+                    color="orange"
+                    className="px-12 py-5 mx-auto"
                 >
-                    <Target className="w-6 h-6" />
-                    Begin Challenge
-                </button>
+                    <div className="flex items-center gap-3">
+                        <Target className="w-6 h-6" />
+                        Begin Challenge
+                    </div>
+                </PlayfulButton>
             </div>
         </div>
     </div>
@@ -501,13 +508,16 @@ const QuizLauncherSlide = ({ title, content, mascot, onStart }: any) => (
                 </div>
                 <h2 className="text-4xl font-black text-blue-900 mb-4">{title}</h2>
                 <p className="text-xl text-slate-600 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
-                <button
+                <PlayfulButton
                     onClick={onStart}
-                    className="px-12 py-5 bg-purple-600 text-white rounded-3xl font-black text-xl shadow-xl shadow-purple-200 hover:bg-purple-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
+                    color="purple"
+                    className="px-12 py-5 mx-auto"
                 >
-                    <Send className="w-6 h-6" />
-                    Review Knowledge
-                </button>
+                    <div className="flex items-center gap-3">
+                        <Send className="w-6 h-6" />
+                        Review Knowledge
+                    </div>
+                </PlayfulButton>
             </div>
         </div>
     </div>
@@ -860,26 +870,29 @@ export default function LessonDetailPage() {
 
                     <div className="min-w-[200px] flex justify-end">
                         {currentIdx === totalSlides - 1 ? (
-                            <button
+                            <PlayfulButton
                                 onClick={handleComplete}
                                 disabled={isMarked}
-                                className={`group relative w-full px-10 py-5 ${isMarked ? 'bg-green-600' : 'bg-slate-900'} text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95`}
+                                color={isMarked ? "green" : "blue"}
+                                className="w-full px-10 py-5"
                             >
-                                <span className="relative z-10">{isMarked ? 'Completed' : 'Mark Complete'}</span>
-                                {!isMarked && <CheckCircle className="relative z-10 w-5 h-5" />}
-                            </button>
+                                <div className="flex items-center justify-center gap-3">
+                                    <span>{isMarked ? 'Completed' : 'Mark Complete'}</span>
+                                    {!isMarked && <CheckCircle className="w-5 h-5" />}
+                                </div>
+                            </PlayfulButton>
                         ) : (
-                            <button
+                            <PlayfulButton
                                 onClick={handleNext}
                                 disabled={isSlideLocked}
-                                className={`group w-full px-10 py-5 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 shadow-2xl transition-all ${isSlideLocked
-                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                                    : 'bg-slate-900 shadow-xl shadow-slate-200 hover:bg-sky-500 hover:scale-105 active:scale-95'
-                                    }`}
+                                color={isSlideLocked ? "blue" : "blue"}
+                                className={`w-full px-10 py-5 ${isSlideLocked ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                             >
-                                <span>{isSlideLocked ? 'Locked Slide' : 'Continue Mission'}</span>
-                                {!isSlideLocked && <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
-                            </button>
+                                <div className="flex items-center justify-center gap-4">
+                                    <span>{isSlideLocked ? 'Locked Slide' : 'Next'}</span>
+                                    {!isSlideLocked && <ChevronRight className="w-5 h-5" />}
+                                </div>
+                            </PlayfulButton>
                         )}
                     </div>
                 </div>
@@ -917,12 +930,13 @@ export default function LessonDetailPage() {
                                 You've successfully mastered this module through games, quizzes, and study. Your progress is saved!
                             </p>
                             <div className="space-y-4 relative z-10">
-                                <Link
-                                    href={`/modules/${moduleId}`}
-                                    className="block w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black shadow-xl hover:bg-slate-800 transition-all uppercase tracking-widest text-sm"
+                                <PlayfulButton
+                                    onClick={() => router.push(`/modules/${moduleId}`)}
+                                    color="green"
+                                    className="w-full py-6"
                                 >
                                     Return to Module
-                                </Link>
+                                </PlayfulButton>
                                 <button
                                     onClick={() => router.push(`/dashboard`)}
                                     className="block w-full py-4 text-slate-300 font-black text-[10px] uppercase tracking-[0.3em] hover:text-blue-600 transition-all"

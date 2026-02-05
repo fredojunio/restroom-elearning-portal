@@ -176,9 +176,9 @@ export default function StudentDashboard() {
           {enrolledModules.length === 0 ? (
             <div className="bg-slate-50 rounded-[3rem] p-24 text-center border border-dashed border-slate-200 relative overflow-hidden">
               {/* Worried Mascot Decoration */}
-              <div className="absolute top-1/2 left-10 -translate-y-1/2 opacity-20 pointer-events-none hidden md:block">
+              <div className="absolute top-1/2 left-10 -translate-y-1/2 pointer-events-none hidden md:block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/mascots/mascot-worried.png" alt="Decoration" className="w-32" />
+                <img src="/mascots/mascot-worried.png" alt="Decoration" className="w-40" />
               </div>
 
               <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-slate-100 relative z-10">
@@ -188,7 +188,7 @@ export default function StudentDashboard() {
               <p className="text-slate-300 text-xs mt-2 relative z-10">Contact your supervisor to enroll in new missions.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
               {enrolledModules.map((module, idx) => (
                 <motion.div
                   key={module.id}
