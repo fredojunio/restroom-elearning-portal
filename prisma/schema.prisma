@@ -27,7 +27,8 @@ model User {
   role          String     @default("STUDENT")
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-
+  image         String?    @db.LongText
+  
   // Relations
   studentModules StudentModule[]
   completions   Completion[]

@@ -43,6 +43,7 @@ interface Slide {
     gameType?: string;
     questions?: Question[];
     order: number;
+    mascot?: string;
 }
 
 const dummySlides: Slide[] = [
@@ -51,33 +52,53 @@ const dummySlides: Slide[] = [
         type: "title",
         title: "Welcome to Toilet Heroes",
         subtitle: "Clean Toilets Keep Us Healthy",
+        content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
         order: 1
     },
     {
         id: "slide-2",
         type: "content",
-        title: "The Battle Against Germs",
-        content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
-        order: 2
+        title: "Hi there, Hero",
+        content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
+        order: 2,
+        mascot: "/mascots/mascot-greeting.png"
     },
     {
         id: "slide-3",
-        type: "game",
-        title: "Germ Hunter Challenge",
-        gameType: "Drag to Disinfect",
-        content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
-        order: 3
+        type: "content",
+        title: "Meet the Invisible Germs",
+        content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
+        order: 3,
+        mascot: "/mascots/mascot-pointing.png"
     },
     {
         id: "slide-4",
-        type: "image",
-        title: "Where Do They Hide?",
-        image: "🦠",
-        content: "Germs often gather on door handles and light switches. Look closely!",
+        type: "game",
+        title: "Germ Hunter Game",
+        gameType: "Drag to Disinfect",
+        content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
         order: 4
     },
     {
         id: "slide-5",
+        type: "image",
+        title: "How Germs Travel",
+        image: "🦠",
+        content: "Germs often gather on door handles and light switches. Look closely!",
+        order: 5,
+        mascot: "/mascots/mascot-pointing.png"
+    },
+    {
+        id: "slide-germ-story",
+        type: "game",
+        title: "Tiny Germs, Big Impact",
+        gameType: "Story Interaction",
+        content: "A simple story: Toilet → Hands → Face. Children see the animated germ moving and must tap \"Wash Hands\" to stop it in its tracks!\n\nOutcome: Empowers children to see handwashing as a shield.",
+        order: 6,
+        mascot: "/mascots/mascot-scared.png"
+    },
+    {
+        id: "slide-6",
         type: "quiz",
         title: "Master Knowledge Review",
         content: "Prove you're a Toilet Hero by passing this quick check!",
@@ -100,14 +121,14 @@ const dummySlides: Slide[] = [
                 question: "Describe one way you can help keep your school restroom clean."
             }
         ],
-        order: 5
+        order: 7
     },
     {
-        id: "slide-6",
+        id: "slide-7",
         type: "title",
         title: "🎉 Legendary Toilet Hero!",
         subtitle: "You've mastered the fundamentals of restroom hygiene. Go forth and shine!",
-        order: 6
+        order: 8
     }
 ];
 
@@ -203,19 +224,148 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     );
 };
 
+// --- Germ Story Component ---
+
+const GermStoryGame = ({ onComplete }: { onComplete: () => void }) => {
+    const [germPos, setGermPos] = useState(0); // 0: Toilet, 1: Hands, 2: Face
+    const [isShielded, setIsShielded] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
+
+    useEffect(() => {
+        if (isFinished || isShielded) return;
+
+        const interval = setInterval(() => {
+            setGermPos((prev) => {
+                if (prev < 2) return prev + 1;
+                return 0; // Loop back for animation effect
+            });
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [isFinished, isShielded]);
+
+    const handleWash = () => {
+        setIsShielded(true);
+        setTimeout(() => {
+            setIsFinished(true);
+            onComplete();
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#0ea5e9', '#ffffff']
+            });
+        }, 1000);
+    };
+
+    return (
+        <div className="relative w-full max-w-4xl h-[500px] bg-sky-50/50 backdrop-blur-sm border-4 border-white rounded-[3rem] overflow-hidden flex flex-col items-center justify-center p-8">
+            <div className="absolute top-8 left-8 text-left">
+                <h4 className="text-sm font-black text-blue-900/40 uppercase tracking-widest mb-1">Story Mode</h4>
+                <p className="text-xs text-blue-900/30 font-bold italic">See how germs travel...</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-12 w-full max-w-3xl items-center relative py-20">
+                {/* Connection Lines */}
+                <div className="absolute top-1/2 left-[15%] right-[15%] h-1 bg-blue-100 -translate-y-1/2 z-0">
+                    <div className="absolute top-0 left-0 bottom-0 bg-blue-400 w-full animate-pulse" />
+                </div>
+
+                {/* Path Points */}
+                <div className="flex flex-col items-center gap-6 relative z-10 transition-all duration-500">
+                    <div className="w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center text-6xl border-4 border-blue-50">
+                        🚽
+                    </div>
+                    <span className="text-sm font-black text-blue-900 uppercase tracking-widest bg-white/80 px-4 py-1.5 rounded-full shadow-sm">Toilet</span>
+                </div>
+
+                <div className="flex flex-col items-center gap-6 relative z-10 transition-all duration-500">
+                    <div className="w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center text-6xl border-4 border-blue-50 relative">
+                        🤲
+                        {isShielded && (
+                            <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1.4, opacity: 1 }}
+                                className="absolute -inset-4 bg-sky-500/20 rounded-full border-4 border-sky-500 flex items-center justify-center backdrop-blur-sm z-50 shadow-[0_0_30px_rgba(14,165,233,0.5)]"
+                            >
+                                <ShieldCheck className="w-16 h-16 text-sky-600" />
+                            </motion.div>
+                        )}
+                    </div>
+                    <span className="text-sm font-black text-blue-900 uppercase tracking-widest bg-white/80 px-4 py-1.5 rounded-full shadow-sm">Hands</span>
+                </div>
+
+                <div className="flex flex-col items-center gap-6 relative z-10 transition-all duration-500">
+                    <div className="w-32 h-32 bg-white rounded-3xl shadow-xl flex items-center justify-center text-6xl border-4 border-blue-50">
+                        👧
+                    </div>
+                    <span className="text-sm font-black text-blue-900 uppercase tracking-widest bg-white/80 px-4 py-1.5 rounded-full shadow-sm">Face</span>
+                </div>
+
+                {/* The Moving Germ */}
+                {!isShielded && (
+                    <motion.div
+                        animate={{
+                            x: germPos === 0 ? '-100%' : germPos === 1 ? '0%' : '100%',
+                            opacity: [0, 1, 1, 0],
+                            scale: [1, 1.2, 1.2, 1]
+                        }}
+                        transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-6xl pointer-events-none drop-shadow-lg"
+                    >
+                        🦠
+                    </motion.div>
+                )}
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-6">
+                {!isFinished ? (
+                    <button
+                        onClick={handleWash}
+                        className="px-12 py-5 bg-sky-600 text-white rounded-[2rem] font-black text-xl shadow-[0_15px_30px_rgba(14,165,233,0.3)] hover:bg-sky-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-4 group"
+                    >
+                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
+                            🧼
+                        </div>
+                        WASH HANDS!
+                    </button>
+                ) : (
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-green-100 text-green-700 px-10 py-4 rounded-3xl flex items-center gap-3 font-black uppercase tracking-widest shadow-inner border border-green-200"
+                    >
+                        <CheckCircle className="w-6 h-6" />
+                        Mission Accomplished!
+                    </motion.div>
+                )}
+                <p className="text-blue-900/50 font-medium text-center max-w-md bg-white/40 px-6 py-3 rounded-2xl backdrop-blur-sm border border-white/40">
+                    Stop germs from reaching your face! Use the shield of hygiene.
+                </p>
+            </div>
+        </div>
+    );
+};
+
 // --- Sub-Components (Standard Slides) ---
 
 const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
-    <div className="flex flex-col items-center justify-center text-center h-full space-y-8">
+    <div className="flex flex-col items-center justify-center text-center h-full space-y-8 relative">
+
         <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", bounce: 0.5 }}
-            className="text-[10rem] mb-4 drop-shadow-2xl"
+            className="mb-4 drop-shadow-2xl"
         >
-            🚽
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mascots/mascot-pose.png" alt="Mascot" className="w-56 h-auto" />
         </motion.div>
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-slate-900 leading-none pb-2 uppercase">
+        <h1 className="font-nerko tracking-wide text-6xl md:text-8xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center">
             {title}
         </h1>
         <p className="text-2xl text-slate-400 font-black uppercase tracking-[0.3em] max-w-2xl leading-relaxed">
@@ -224,24 +374,46 @@ const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
     </div>
 );
 
-const ContentSlide = ({ title, content }: Partial<Slide>) => (
-    <div className="flex flex-col h-full max-w-4xl mx-auto py-12">
-        <div className="flex items-center gap-4 mb-10">
+const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => (
+    <div className="flex flex-col h-full max-w-5xl mx-auto py-6 relative">
+        <div className="flex items-center gap-4 mb-10 relative z-10">
             <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center shadow-xl rotate-3">
                 <BookOpen className="w-8 h-8" />
             </div>
-            <h2 className="text-5xl font-black tracking-tighter text-slate-900 uppercase">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
                 {title}
             </h2>
         </div>
-        <div className="text-2xl leading-relaxed text-slate-500 space-y-6 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8">
-            {content}
+
+        <div className="flex flex-col lg:flex-row gap-12 lg:items-start lg:items-center lg:justify-center relative z-10">
+            <div className="flex-1 text-xl md:text-2xl leading-relaxed text-slate-500 space-y-6 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8">
+                {content}
+            </div>
+
+            {mascot && (
+                <div className="hidden lg:block flex-shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={mascot} alt="Mascot" className="w-80 h-auto drop-shadow-2xl" />
+                </div>
+            )}
         </div>
+
+        {!mascot && (
+            <div className="absolute -right-16 bottom-0 hidden lg:block pointer-events-none opacity-20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mascots/mascot-sitting.png" alt="Studying Hero" className="w-64" />
+            </div>
+        )}
     </div>
 );
 
-const ImageSlide = ({ title, image, content }: Partial<Slide>) => (
-    <div className="flex flex-col items-center justify-center h-full text-center max-w-4xl mx-auto space-y-10">
+const ImageSlide = ({ title, image, content, mascot }: Partial<Slide>) => (
+    <div className="flex flex-col items-center justify-center h-full text-center max-w-4xl mx-auto space-y-10 relative">
+        {/* Mascot Decoration */}
+        <div className="absolute -right-16 bottom-0 hidden lg:block pointer-events-none">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mascot || "/mascots/mascot-sitting.png"} alt="Studying Hero" className="w-64 -scale-x-100" />
+        </div>
         <div className="w-80 h-80 bg-white rounded-[4rem] border-2 border-slate-100 flex items-center justify-center text-[10rem] shadow-2xl relative group">
             <motion.span
                 animate={{
@@ -259,15 +431,15 @@ const ImageSlide = ({ title, image, content }: Partial<Slide>) => (
             </div>
         </div>
         <div>
-            <h2 className="text-5xl font-black tracking-tighter text-slate-900 mb-4 uppercase">{title}</h2>
-            <p className="text-2xl text-slate-400 font-medium leading-relaxed">{content}</p>
+            <h2 className="text-5xl font-black tracking-tighter text-blue-900 mb-4 uppercase">{title}</h2>
+            <p className="text-2xl text-slate-500 font-medium leading-relaxed">{content}</p>
         </div>
     </div>
 );
 
 const VideoSlide = ({ title, content }: Partial<Slide>) => (
     <div className="flex flex-col h-full max-w-5xl mx-auto py-8 space-y-10 text-center">
-        <h2 className="text-5xl font-black tracking-tighter text-slate-900 leading-tight uppercase">{title}</h2>
+        <h2 className="text-5xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
         <div className="aspect-video w-full bg-slate-900 rounded-[4rem] overflow-hidden shadow-2xl shadow-sky-900/10 relative group flex items-center justify-center border-8 border-white">
             <MonitorPlay className="w-32 h-32 text-white/5" />
             <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/10 transition-all" />
@@ -296,8 +468,8 @@ const GameLauncherSlide = ({ title, gameType, content, onStart }: any) => (
                 <span className="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
                     {gameType}
                 </span>
-                <h2 className="text-4xl font-black text-slate-900 mb-4">{title}</h2>
-                <p className="text-xl text-slate-500 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
+                <h2 className="text-4xl font-black text-blue-900 mb-4">{title}</h2>
+                <p className="text-xl text-slate-600 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
                 <button
                     onClick={onStart}
                     className="px-12 py-5 bg-orange-600 text-white rounded-3xl font-black text-xl shadow-xl shadow-orange-200 hover:bg-orange-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
@@ -310,19 +482,25 @@ const GameLauncherSlide = ({ title, gameType, content, onStart }: any) => (
     </div>
 );
 
-const QuizLauncherSlide = ({ title, content, onStart }: any) => (
+const QuizLauncherSlide = ({ title, content, mascot, onStart }: any) => (
     <div className="flex flex-col items-center justify-center h-full text-center space-y-8 max-w-3xl mx-auto font-sans">
         <div className="p-12 bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-purple-100/50 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 text-purple-500/5 scale-150 -rotate-12 group-hover:-rotate-45 transition-transform duration-1000">
                 <HelpCircle className="w-64 h-64" />
             </div>
 
+            {/* Mascot */}
+            <div className="absolute -right-4 bottom-0 hidden sm:block pointer-events-none">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={mascot || "/mascots/mascot-scared.png"} alt="Nervous Hero" className="w-32 rotate-12" />
+            </div>
+
             <div className="relative z-10">
                 <div className="w-24 h-24 bg-purple-600 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl -rotate-3">
                     <HelpCircle className="w-12 h-12" />
                 </div>
-                <h2 className="text-4xl font-black text-slate-900 mb-4">{title}</h2>
-                <p className="text-xl text-slate-500 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
+                <h2 className="text-4xl font-black text-blue-900 mb-4">{title}</h2>
+                <p className="text-xl text-slate-600 font-medium mb-10 max-w-sm mx-auto leading-relaxed">{content}</p>
                 <button
                     onClick={onStart}
                     className="px-12 py-5 bg-purple-600 text-white rounded-3xl font-black text-xl shadow-xl shadow-purple-200 hover:bg-purple-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
@@ -517,13 +695,13 @@ export default function LessonDetailPage() {
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
             {/* 1. Header (Sticky) */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Link
                         href={`/modules/${moduleId}`}
                         className="flex items-center gap-3 text-slate-400 hover:text-slate-900 transition-all group"
                     >
-                        <div className="p-2.5 bg-slate-50 group-hover:bg-sky-50 rounded-xl transition-colors">
-                            <ArrowLeft className="w-5 h-5" />
+                        <div className="p-2 bg-slate-50 group-hover:bg-sky-50 rounded-xl transition-colors">
+                            <ArrowLeft className="w-4 h-4" />
                         </div>
                         <span className="hidden sm:inline font-black text-[10px] uppercase tracking-widest">End Mission</span>
                     </Link>
@@ -569,23 +747,30 @@ export default function LessonDetailPage() {
             </header>
 
             {/* 3. Main Slide Content Area */}
-            <main className="relative pt-24 pb-32 min-h-screen flex items-center justify-center bg-white overflow-hidden">
+            <main className="relative pt-16 pb-24 h-screen flex items-center justify-center overflow-hidden">
+                {/* --- Background Image --- */}
+                <div
+                    className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
+                    style={{ backgroundImage: `url('${(currentIdx >= 2 && currentIdx <= 5) ? '/images/lesson-bg-germs.jpg' : '/images/lesson-bg.jpg'}')` }}
+                />
+                <div className="fixed inset-0 z-0 bg-white/5 backdrop-blur-[1px]" />
+
                 {/* --- Floating Background Decorations --- */}
-                <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="fixed inset-0 pointer-events-none z-10">
                     <motion.div
                         variants={bubbleVariants}
                         animate="animate"
-                        className="absolute top-20 left-[5%] w-64 h-64 bg-sky-50 rounded-full blur-3xl opacity-50"
+                        className="absolute top-20 left-[5%] w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-20"
                     />
                     <motion.div
                         variants={bubbleVariants}
                         animate="animate"
                         style={{ transitionDelay: "1s" }}
-                        className="absolute bottom-40 right-[10%] w-96 h-96 bg-yellow-50 rounded-full blur-3xl opacity-50"
+                        className="absolute bottom-40 right-[10%] w-96 h-96 bg-yellow-100 rounded-full blur-3xl opacity-20"
                     />
                 </div>
 
-                <div className="max-w-6xl w-full px-6 min-h-[600px] flex items-center justify-center relative z-10">
+                <div className="max-w-6xl w-full px-6 flex items-center justify-center relative z-20">
                     <AnimatePresence mode="wait" custom={direction}>
                         <motion.div
                             key={currentIdx}
@@ -599,10 +784,10 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className="w-full flex items-center justify-center"
+                            className="w-full bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-[4rem] p-8 md:p-12 border border-white/40 max-h-[calc(100vh-200px)] flex items-center justify-center relative overflow-hidden"
                         >
                             {/* Dynamic Slide Switcher */}
-                            <div className="w-full bg-transparent">
+                            <div className="w-full">
                                 {currentSlide.type === "title" && <TitleSlide {...currentSlide} />}
                                 {currentSlide.type === "content" && <ContentSlide {...currentSlide} />}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
@@ -611,7 +796,11 @@ export default function LessonDetailPage() {
                                 {/* Game Logic */}
                                 {currentSlide.type === "game" && (
                                     gameState === "playing" ? (
-                                        <GermHunterGame onComplete={() => setGameState('completed')} />
+                                        currentSlide.gameType === "Story Interaction" ? (
+                                            <GermStoryGame onComplete={() => setGameState('completed')} />
+                                        ) : (
+                                            <GermHunterGame onComplete={() => setGameState('completed')} />
+                                        )
                                     ) : (
                                         <GameLauncherSlide
                                             {...currentSlide}
@@ -641,7 +830,7 @@ export default function LessonDetailPage() {
             </main>
 
             {/* 4. Navigation Footer */}
-            <footer className="fixed bottom-0 left-0 right-0 z-30 bg-white/60 backdrop-blur-md p-8 border-t border-slate-200/50">
+            <footer className="fixed bottom-0 left-0 right-0 z-30 bg-white/60 backdrop-blur-md p-5 border-t border-slate-200/50">
                 <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
 
                     <button
@@ -707,16 +896,27 @@ export default function LessonDetailPage() {
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-white max-w-lg w-full rounded-[3.5rem] p-16 text-center shadow-2xl border border-slate-100"
+                            className="bg-white max-w-lg w-full rounded-[3.5rem] p-16 text-center shadow-2xl border border-slate-100 relative overflow-visible"
                         >
-                            <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner rotate-3">
+                            {/* Mascot Celebration */}
+                            <motion.div
+                                initial={{ y: 50, opacity: 0 }}
+                                animate={{ y: -60, opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="absolute -top-24 left-1/2 -translate-x-1/2 pointer-events-none"
+                            >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="/mascots/mascot-winning.png" alt="Winner" className="w-48 drop-shadow-2xl" />
+                            </motion.div>
+
+                            <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner rotate-3 relative z-10">
                                 <Trophy className="w-12 h-12" />
                             </div>
-                            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">Congratulations!</h2>
-                            <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed">
+                            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter relative z-10">Congratulations!</h2>
+                            <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed relative z-10">
                                 You've successfully mastered this module through games, quizzes, and study. Your progress is saved!
                             </p>
-                            <div className="space-y-4">
+                            <div className="space-y-4 relative z-10">
                                 <Link
                                     href={`/modules/${moduleId}`}
                                     className="block w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black shadow-xl hover:bg-slate-800 transition-all uppercase tracking-widest text-sm"

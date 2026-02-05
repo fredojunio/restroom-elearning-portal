@@ -5,16 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
+import { Navbar } from "@/components/Navbar";
 import {
   ShieldCheck,
-  LogOut,
   BookOpen,
-  Trophy,
-  Zap,
   ArrowRight,
-  TrendingUp,
-  LayoutDashboard,
-  Gamepad2,
   CheckCircle2
 } from "lucide-react";
 
@@ -44,15 +39,6 @@ export default function StudentDashboard() {
   const router = useRouter();
   const [enrolledModules, setEnrolledModules] = useState<EnrolledModule[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalModules: 0,
-    completedModules: 0,
-    averageProgress: 0,
-  });
-
-  const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: "/" });
-  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -83,25 +69,6 @@ export default function StudentDashboard() {
       );
 
       setEnrolledModules(modulesWithProgress);
-
-      const completed = modulesWithProgress.filter(
-        (m) => m.progress.percentage === 100,
-      ).length;
-      const avgProgress =
-        modulesWithProgress.length > 0
-          ? Math.round(
-            modulesWithProgress.reduce(
-              (sum, m) => sum + m.progress.percentage,
-              0,
-            ) / modulesWithProgress.length,
-          )
-          : 0;
-
-      setStats({
-        totalModules: modulesWithProgress.length,
-        completedModules: completed,
-        averageProgress: avgProgress,
-      });
     } catch (error) {
       console.error("Failed to fetch modules:", error);
     } finally {
@@ -140,6 +107,8 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-sky-100 selection:text-sky-900 overflow-x-hidden">
+      <Navbar role="STUDENT" />
+
       {/* --- Floating Background Decorations --- */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div
@@ -155,130 +124,104 @@ export default function StudentDashboard() {
         />
       </div>
 
-      {/* Navigation Header */}
-      <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3">
-              <motion.div
-                whileHover={{ rotate: 360, scale: 1.1 }}
-                transition={{ duration: 0.8, type: "spring" }}
-                className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-200"
-              >
-                <ShieldCheck className="text-white w-6 h-6" />
-              </motion.div>
-              <div className="flex flex-col">
-                <span className="font-black text-lg tracking-tighter text-slate-900 leading-none">TOILET HERO</span>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-sky-500">Dashboard</span>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex flex-col items-end">
-              <p className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                {session?.user?.name}
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
         {/* Welcome Section */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-black tracking-tighter text-slate-900 mb-2 leading-none">
-            Hi there, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600">
-              Hero {session?.user?.name?.split(" ")[0]}!
-            </span>
-          </h1>
-          <p className="text-slate-400 font-medium text-lg mt-4">Continue your training and keep our school safe.</p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {[
-            { label: "Missions Active", value: stats.totalModules, icon: <BookOpen className="w-6 h-6" />, color: "bg-sky-50 text-sky-500 shadow-sky-100" },
-            { label: "Medals Earned", value: stats.completedModules, icon: <Trophy className="w-6 h-6" />, color: "bg-yellow-50 text-yellow-500 shadow-yellow-100" },
-            { label: "Training Score", value: `${stats.averageProgress}%`, icon: <Zap className="w-6 h-6" />, color: "bg-green-50 text-green-500 shadow-green-100" },
-          ].map((stat, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-100 border border-slate-50 flex items-center justify-between group hover:scale-[1.02] transition-transform"
-            >
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{stat.label}</p>
-                <p className="text-4xl font-black text-slate-900">{stat.value}</p>
-              </div>
-              <div className={`w-16 h-16 ${stat.color} rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform`}>
-                {stat.icon}
-              </div>
-            </motion.div>
-          ))}
+        <div className="mb-16 relative">
+          <div className="flex justify-between items-end">
+            <div>
+              <h1 className="text-6xl font-black tracking-tighter text-slate-900 mb-4 leading-[0.9]">
+                Hi there, <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600">
+                  Hero {session?.user?.name?.split(" ")[0]}!
+                </span>
+              </h1>
+              <p className="text-slate-400 font-medium text-xl max-w-xl">
+                Welcome to your command center. Access your modules and track your progress to become the ultimate school guardian.
+              </p>
+            </div>
+            {/* Flying Mascot */}
+            {/* <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="hidden lg:block absolute right-0 bottom-0 pointer-events-none"
+            > */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* <img
+                src="/mascots/mascot-flying.png"
+                alt="Flying Hero"
+                className="w-64 h-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+              />
+            </motion.div> */}
+          </div>
         </div>
 
         {/* Modules Section */}
-        <div>
-          <div className="flex items-center justify-between mb-10">
+        <div className="relative">
+          {/* Typing Mascot Decoration */}
+          <div className="hidden lg:block absolute right-0 -top-16 opacity-100 pointer-events-none z-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mascots/mascot-typing.png" alt="Study Mode" className="w-40 -scale-x-100" />
+          </div>
+
+          <div className="flex items-center justify-between mb-10 relative z-10">
             <div className="flex items-center gap-4">
-              <h2 className="text-3xl font-black tracking-tighter text-slate-900">Training Modules</h2>
-              <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full font-black text-[10px] uppercase tracking-widest">
-                {enrolledModules.length} Total
+              <h2 className="text-3xl font-black tracking-tighter text-slate-900 uppercase">Training Modules</h2>
+              <span className="px-4 py-1.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-slate-200">
+                {enrolledModules.length} Active
               </span>
             </div>
           </div>
 
           {enrolledModules.length === 0 ? (
-            <div className="bg-slate-50 rounded-[3rem] p-16 text-center border border-dashed border-slate-200">
-              <BookOpen className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No active training missions found.</p>
+            <div className="bg-slate-50 rounded-[3rem] p-24 text-center border border-dashed border-slate-200 relative overflow-hidden">
+              {/* Worried Mascot Decoration */}
+              <div className="absolute top-1/2 left-10 -translate-y-1/2 opacity-20 pointer-events-none hidden md:block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mascots/mascot-worried.png" alt="Decoration" className="w-32" />
+              </div>
+
+              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-slate-100 relative z-10">
+                <BookOpen className="w-10 h-10 text-slate-200" />
+              </div>
+              <p className="text-slate-400 font-black uppercase tracking-widest text-sm relative z-10">No active training missions found.</p>
+              <p className="text-slate-300 text-xs mt-2 relative z-10">Contact your supervisor to enroll in new missions.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {enrolledModules.map((module, idx) => (
                 <motion.div
                   key={module.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
                 >
                   <Link href={`/modules/${module.id}`} className="group block h-full">
-                    <div className="bg-white rounded-[3rem] shadow-xl shadow-slate-100 border border-slate-50 overflow-hidden flex flex-col h-full hover:shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    <div className="bg-white rounded-[3rem] shadow-xl shadow-slate-100 border border-slate-50 overflow-hidden flex flex-col h-full hover:shadow-2xl transition-all hover:-translate-y-2 active:scale-[0.98]">
                       {/* Card Header */}
-                      <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-8 text-white relative overflow-hidden">
+                      <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-10 text-white relative overflow-hidden">
                         <div className="relative z-10">
-                          <div className="flex gap-2 mb-4">
-                            <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-sky-400">
+                          <div className="flex gap-2 mb-6">
+                            <span className="px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest text-sky-400 backdrop-blur-md">
                               Grade {module.grade}
                             </span>
-                            <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <span className="px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-400 backdrop-blur-md">
                               {module.subject}
                             </span>
                           </div>
-                          <h3 className="text-2xl font-black tracking-tighter leading-tight group-hover:translate-x-1 transition-transform uppercase">
+                          <h3 className="text-3xl font-black tracking-tighter leading-none uppercase pr-8">
                             {module.title}
                           </h3>
                         </div>
                         {/* Decor */}
-                        <div className="absolute top-0 right-0 p-4 opacity-10 scale-[3] pointer-events-none">
+                        <div className="absolute top-0 right-0 p-6 opacity-20 scale-[4] rotate-[15deg] pointer-events-none translate-x-4 -translate-y-4">
                           <ShieldCheck className="w-12 h-12" />
                         </div>
                       </div>
 
                       {/* Card Content */}
-                      <div className="p-8 flex-1 flex flex-col">
-                        <p className="text-slate-400 font-medium text-sm leading-relaxed mb-8 flex-1">
+                      <div className="p-10 flex-1 flex flex-col">
+                        <p className="text-slate-500 font-medium text-sm leading-relaxed mb-10 flex-1">
                           {module.description}
                         </p>
 
@@ -286,35 +229,37 @@ export default function StudentDashboard() {
                         <div className="space-y-4">
                           <div className="flex justify-between items-end">
                             <div>
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Missions Progress</p>
-                              <p className="text-xl font-black text-slate-900">{module.progress.percentage}%</p>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Mission Integrity</p>
+                              <p className="text-2xl font-black text-slate-900">{module.progress.percentage}%</p>
                             </div>
-                            <p className="text-[10px] font-black text-slate-300">
-                              {module.progress.completed}/{module.progress.total} TASKS
-                            </p>
+                            <div className="flex flex-col items-end">
+                              <p className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">
+                                {module.progress.completed}/{module.progress.total} TASKS
+                              </p>
+                            </div>
                           </div>
-                          <div className="w-full bg-slate-50 rounded-full h-2.5 overflow-hidden">
+                          <div className="w-full bg-slate-50 rounded-full h-3 overflow-hidden p-0.5 border border-slate-100">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${module.progress.percentage}%` }}
                               className={`h-full rounded-full transition-all ${module.progress.percentage === 100
                                 ? "bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.5)]"
-                                : "bg-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.5)]"
+                                : "bg-gradient-to-r from-sky-400 to-blue-500 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
                                 }`}
                             />
                           </div>
                         </div>
 
                         {/* Action Badge */}
-                        <div className="mt-8">
+                        <div className="mt-10">
                           {module.progress.percentage === 100 ? (
-                            <div className="w-full py-4 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest border border-green-100">
+                            <div className="w-full py-5 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest border border-green-100 shadow-sm shadow-green-100">
                               <CheckCircle2 className="w-4 h-4" />
                               Mission Accomplished
                             </div>
                           ) : (
-                            <div className="w-full py-4 bg-slate-900 text-white rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest group-hover:bg-sky-500 transition-colors shadow-lg">
-                              Resume Mission
+                            <div className="w-full py-5 bg-slate-900 text-white rounded-3xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest group-hover:bg-sky-500 transition-all shadow-xl shadow-slate-200">
+                              Resume Training
                               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </div>
                           )}
@@ -327,43 +272,19 @@ export default function StudentDashboard() {
             </div>
           )}
         </div>
-
-        {/* Hero Tips Section */}
-        <div className="mt-20">
-          <div className="bg-gradient-to-br from-indigo-50/50 to-sky-50/50 rounded-[3rem] p-12 border border-white">
-            <h3 className="text-2xl font-black tracking-tighter text-slate-900 mb-8 flex items-center gap-3 uppercase">
-              <TrendingUp className="text-sky-500 w-6 h-6" />
-              Academy Excellence Tips
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {[
-                { icon: "📖", title: "Master Lessons", desc: "Read every scroll carefully to uncover secret hygiene techniques." },
-                { icon: "🎮", title: "Skill Drills", desc: "Perfect your coordination with interactive training simulations." },
-                { icon: "❓", title: "Final Exams", desc: "Prove your knowledge to earn legendary graduation artifacts." },
-              ].map((tip, idx) => (
-                <div key={idx} className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
-                    {tip.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-black text-slate-800 uppercase text-xs tracking-widest mb-2">{tip.title}</h4>
-                    <p className="text-slate-500 text-sm font-medium leading-relaxed">{tip.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-slate-100 bg-white">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-3 opacity-50">
-            <ShieldCheck className="text-slate-900 w-5 h-5" />
-            <span className="font-black text-[10px] uppercase tracking-widest text-slate-900">Restroom Association</span>
+      <footer className="py-24 border-t border-slate-100 bg-white/50 backdrop-blur-sm relative z-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity cursor-default">
+            <ShieldCheck className="text-slate-900 w-6 h-6" />
+            <div className="flex flex-col">
+              <span className="font-black text-[12px] uppercase tracking-[0.2em] text-slate-900 leading-none">Restroom Association</span>
+              <span className="text-[10px] font-bold text-slate-400 mt-1">Global Safety Standards</span>
+            </div>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-300">© 2026 Restroom Association</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-300">© 2026 Toilet Hero Academy</p>
         </div>
       </footer>
     </div>

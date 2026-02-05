@@ -5,6 +5,12 @@
   --foreground: #171717;
 }
 
+@layer utilities {
+  .font-nerko {
+    font-family: var(--font-nerko-one), system-ui, sans-serif;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
