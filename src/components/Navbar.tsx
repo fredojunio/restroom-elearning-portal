@@ -136,8 +136,8 @@ export function Navbar({ role = "STUDENT" }: NavbarProps) {
               {(session?.user as any)?.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={(session.user as any).image}
-                  alt={session.user.name || "User"}
+                  src={(session?.user as any)?.image}
+                  alt={session?.user?.name || "User"}
                   className="w-full h-full object-cover"
                 />
               ) : (
