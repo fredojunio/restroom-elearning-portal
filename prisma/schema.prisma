@@ -56,13 +56,38 @@ model Lesson {
   moduleId  String
   module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title     String
-  content   String   @db.LongText
   order     Int
   createdAt DateTime @default(now())
+
+  slides    Slide[]
 
   completions Completion[] @relation("LessonCompletion")
 
   @@index([moduleId])
+}
+
+model Slide {
+  id        String   @id @default(cuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order     Int
+  
+  type      String   // title, content, image, video, game, quiz, comparison, celebration
+  title     String
+  subtitle  String?
+  content   String?  @db.Text
+  image     String?  // Can be an emoji or an image path
+  videoUrl  String?
+  gameType  String?
+  mascot    String?
+  
+  // For quiz slides, we can store questions as JSON
+  questions Json?    // Array of Question objects as defined in frontend
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonId])
 }
 
 model Activity {

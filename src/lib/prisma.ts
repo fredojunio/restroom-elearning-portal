@@ -1,4 +1,4 @@
-// lib/prisma.ts
+// lib/prisma.ts - updated with modular slides support
 // import { PrismaClient } from "../generated/client";
 import { PrismaClient } from "@prisma/client";
 

@@ -23,6 +23,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import PlayfulButton from "@/components/PlayfulButton";
+import { moduleTwoSlides, Module2Slide } from "@/data/module-2";
 
 // --- Types & Dummy Data ---
 
@@ -449,6 +450,224 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                     )}
                 </AnimatePresence>
             </div>
+        </div>
+    );
+};
+
+
+const WhosNextGame = ({ onComplete }: { onComplete: () => void }) => {
+    return (
+        <div className="flex flex-col items-center justify-center p-10 bg-purple-50 rounded-[3rem] border-4 border-purple-200">
+            <h3 className="text-2xl font-black text-purple-900 mb-4">Who's Next?</h3>
+            <p className="text-purple-700 mb-8 text-center max-w-md">
+                Game logic coming soon! Imagine a line of people waiting...
+            </p>
+            <PlayfulButton onClick={onComplete} color="purple">
+                Finish Game
+            </PlayfulButton>
+        </div>
+    );
+};
+
+const HeroOrOopsGame = ({ onComplete }: { onComplete: () => void }) => {
+    const [scenarios] = useState([
+        { id: 1, title: "Flushing after use", isHero: true, image: "🚽" },
+        { id: 2, title: "Leaving tissues on the floor", isHero: false, image: "🧻" },
+        { id: 3, title: "Washing hands with soap", isHero: true, image: "🧼" },
+    ]);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
+
+    const handleChoice = (choice: boolean) => {
+        if (choice === scenarios[currentStep].isHero) {
+            setFeedback('correct');
+            confetti({ particleCount: 30, spread: 40 });
+            setTimeout(() => {
+                if (currentStep < scenarios.length - 1) {
+                    setCurrentStep(currentStep + 1);
+                    setFeedback('none');
+                } else {
+                    onComplete();
+                }
+            }, 1000);
+        } else {
+            setFeedback('wrong');
+            setTimeout(() => setFeedback('none'), 1000);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center p-8 bg-sky-50 rounded-[3rem] border-4 border-sky-200 w-full max-w-md mx-auto relative">
+            <div className="mb-4 flex flex-col items-center">
+                <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-2">Progress: {currentStep + 1}/{scenarios.length}</span>
+                <div className="w-48 h-2 bg-sky-100 rounded-full overflow-hidden">
+                    <motion.div className="h-full bg-sky-500" animate={{ width: `${((currentStep + 1) / scenarios.length) * 100}%` }} />
+                </div>
+            </div>
+
+            <div className="w-40 h-40 bg-white rounded-3xl flex items-center justify-center text-8xl shadow-xl mb-8">
+                {scenarios[currentStep].image}
+            </div>
+
+            <h3 className="text-2xl font-black text-slate-800 mb-2 text-center">{scenarios[currentStep].title}</h3>
+            <p className="text-slate-500 font-bold mb-8 text-center">Is this a Toilet Hero choice?</p>
+
+            <div className="flex gap-4 w-full">
+                <button
+                    onClick={() => handleChoice(true)}
+                    className="flex-1 py-4 bg-green-500 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all flex flex-col items-center gap-2"
+                >
+                    <span>👍 Toilet Hero</span>
+                </button>
+                <button
+                    onClick={() => handleChoice(false)}
+                    className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all flex flex-col items-center gap-2"
+                >
+                    <span>👎 Oops</span>
+                </button>
+            </div>
+
+            <AnimatePresence>
+                {feedback !== 'none' && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className={`absolute inset-0 flex items-center justify-center rounded-[3rem] backdrop-blur-sm z-10 ${feedback === 'correct' ? 'bg-green-500/20' : 'bg-red-500/20'}`}
+                    >
+                        <div className={`p-10 rounded-full shadow-2xl text-white text-6xl ${feedback === 'correct' ? 'bg-green-500' : 'bg-red-500'}`}>
+                            {feedback === 'correct' ? '✨' : '❌'}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
+    const [messes, setMesses] = useState([
+        { id: 1, type: 'tissue', x: '20%', y: '60%', fixed: false },
+        { id: 2, type: 'spill', x: '70%', y: '70%', fixed: false },
+        { id: 3, type: 'unflushed', x: '50%', y: '40%', fixed: false },
+    ]);
+    const [activeTool, setActiveTool] = useState<'none' | 'bin' | 'wipe' | 'flush'>('none');
+    const [score, setScore] = useState(0);
+
+    const handleMessClick = (messId: number, messType: string) => {
+        if (
+            (messType === 'tissue' && activeTool === 'bin') ||
+            (messType === 'spill' && activeTool === 'wipe') ||
+            (messType === 'unflushed' && activeTool === 'flush')
+        ) {
+            setMesses(prev => prev.map(m => m.id === messId ? { ...m, fixed: true } : m));
+            setScore(s => s + 100);
+            confetti({ particleCount: 20, spread: 30 });
+        }
+    };
+
+    useEffect(() => {
+        if (messes.every(m => m.fixed)) {
+            setTimeout(onComplete, 1500);
+        }
+    }, [messes, onComplete]);
+
+    return (
+        <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+            <div className="w-full flex justify-between items-center mb-6 px-4">
+                <div className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-sm">SCORE: {score}</div>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+                    <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div className="h-full bg-green-500" animate={{ width: `${(messes.filter(m => m.fixed).length / messes.length) * 100}%` }} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="relative w-full aspect-video bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8">
+                {/* Scenario background */}
+                <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>
+
+                {messes.map(mess => !mess.fixed && (
+                    <motion.button
+                        key={mess.id}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => handleMessClick(mess.id, mess.type)}
+                        className="absolute text-6xl p-4 cursor-pointer hover:drop-shadow-xl transition-all"
+                        style={{ left: mess.x, top: mess.y }}
+                    >
+                        {mess.type === 'tissue' && '🧻'}
+                        {mess.type === 'spill' && '💧'}
+                        {mess.type === 'unflushed' && '💩'}
+                    </motion.button>
+                ) || mess.fixed && mess.type === 'unflushed' && (
+                    <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-40 animate-pulse pointer-events-none">✨</div>
+                ))}
+            </div>
+
+            <div className="flex gap-4">
+                <button
+                    onClick={() => setActiveTool('bin')}
+                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'bin' ? 'bg-orange-500 text-white border-orange-200 scale-110 shadow-xl' : 'bg-white text-orange-500 border-slate-50 shadow-sm'}`}
+                >
+                    <span className="text-2xl">🗑️</span>
+                    <span className="text-xs">Tap Bin</span>
+                </button>
+                <button
+                    onClick={() => setActiveTool('wipe')}
+                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'wipe' ? 'bg-blue-500 text-white border-blue-200 scale-110 shadow-xl' : 'bg-white text-blue-500 border-slate-50 shadow-sm'}`}
+                >
+                    <span className="text-2xl">🧽</span>
+                    <span className="text-xs">Tap Wipe</span>
+                </button>
+                <button
+                    onClick={() => setActiveTool('flush')}
+                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'flush' ? 'bg-sky-500 text-white border-sky-200 scale-110 shadow-xl' : 'bg-white text-sky-500 border-slate-50 shadow-sm'}`}
+                >
+                    <span className="text-2xl">🔘</span>
+                    <span className="text-xs">Tap Flush</span>
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
+    const pledgeItems = content?.split('\n').map(item => item.replace('• ', '').trim()) || [];
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto p-4">
+            <h2 className="text-4xl md:text-6xl font-black text-blue-900 mb-4 tracking-tighter uppercase">{title}</h2>
+            <p className="text-xl md:text-2xl text-slate-500 font-bold mb-12 uppercase tracking-widest">"{subtitle}"</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-12">
+                {pledgeItems.map((item, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] border-2 border-slate-100 flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all group"
+                    >
+                        <div className="w-12 h-12 bg-yellow-100 text-yellow-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <Trophy className="w-6 h-6" />
+                        </div>
+                        <p className="text-slate-700 font-black leading-tight uppercase text-sm">{item}</p>
+                    </motion.div>
+                ))}
+            </div>
+
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.8 }}
+            >
+                <PlayfulButton color="orange" className="px-12 py-6">
+                    I am a Toilet Hero!
+                </PlayfulButton>
+            </motion.div>
         </div>
     );
 };
@@ -1058,7 +1277,35 @@ export default function LessonDetailPage() {
     // Quiz states
     const [quizState, setQuizState] = useState<'idle' | 'playing' | 'completed'>('idle');
 
-    const slides = dummySlides;
+    const [slides, setSlides] = useState<Slide[]>(dummySlides);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchLesson = async () => {
+            try {
+                const response = await fetch(`/api/lessons/${params.lessonId}`);
+                if (!response.ok) throw new Error("Failed to fetch lesson data");
+                const data = await response.json();
+
+                if (data.slides && data.slides.length > 0) {
+                    setSlides(data.slides);
+                } else if (data.module && data.module.title.includes("Be a Toilet Hero")) {
+                    // Use Module 2 dummy slides if no DB slides & module matches
+                    setSlides(moduleTwoSlides as unknown as Slide[]);
+                }
+            } catch (err) {
+                console.error("Error fetching lesson:", err);
+                // Gracefully fallback to dummySlides
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (params.lessonId) {
+            fetchLesson();
+        }
+    }, [params.lessonId]);
+
     const totalSlides = slides.length;
     const currentSlide = slides[currentIdx];
 
@@ -1130,6 +1377,26 @@ export default function LessonDetailPage() {
             transition: { duration: 0.3 }
         }),
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-sky-50 flex items-center justify-center font-sans overflow-hidden">
+                <div className="flex flex-col items-center gap-6">
+                    <motion.div
+                        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                        className="text-8xl"
+                    >
+                        🧼
+                    </motion.div>
+                    <div className="space-y-2 text-center">
+                        <h2 className="text-2xl font-black text-blue-900 uppercase tracking-widest animate-pulse">Prepping the Classroom...</h2>
+                        <p className="text-blue-900/40 font-bold italic">Getting your hero training ready!</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
@@ -1241,13 +1508,25 @@ export default function LessonDetailPage() {
                                 {currentSlide.type === "content" && <ContentSlide {...currentSlide} />}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
                                 {currentSlide.type === "video" && <VideoSlide {...currentSlide} />}
-                                {currentSlide.type === "celebration" && <CelebrationSlide {...currentSlide} />}
+                                {currentSlide.type === "celebration" && (
+                                    currentSlide.title.includes("Pledge") ? (
+                                        <PledgeSlide {...currentSlide} />
+                                    ) : (
+                                        <CelebrationSlide {...currentSlide} />
+                                    )
+                                )}
 
                                 {/* Game Logic */}
                                 {currentSlide.type === "game" && (
                                     gameState === "playing" ? (
                                         currentSlide.gameType === "Story Interaction" ? (
                                             <HandwashingGame onComplete={() => setGameState('completed')} />
+                                        ) : currentSlide.gameType === "WhosNext" ? (
+                                            <WhosNextGame onComplete={() => setGameState('completed')} />
+                                        ) : currentSlide.gameType === "HeroOrOops" ? (
+                                            <HeroOrOopsGame onComplete={() => setGameState('completed')} />
+                                        ) : currentSlide.gameType === "CleanupChallenge" ? (
+                                            <CleanupChallengeGame onComplete={() => setGameState('completed')} />
                                         ) : (
                                             <GermHunterGame onComplete={() => setGameState('completed')} />
                                         )

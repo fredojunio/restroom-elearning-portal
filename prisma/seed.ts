@@ -50,8 +50,8 @@ async function main() {
   // Create modules (let IDs auto-generate)
   const module1 = await prisma.module.create({
     data: {
-      title: "Why Clean Toilets Matter",
-      description: "Understanding shared spaces & germs",
+      title: "Clean Toilets Keep Us Healthy",
+      description: "Module A: Introduction to Hygiene",
       grade: 3,
       subject: "Cleaner",
       content: "Content...",
@@ -60,24 +60,14 @@ async function main() {
   console.log(`✓ Module created: ${module1.title}`);
   const module2 = await prisma.module.create({
     data: {
-      title: "Using the Toilet the Right Way",
-      description: "Proper usage and etiquette",
+      title: "Be a Toilet Hero Every Day",
+      description: "Module B: Habits, Respect & Responsibility",
       grade: 3,
       subject: "Cleaner",
       content: "Content...",
     },
   });
   console.log(`✓ Module created: ${module2.title}`);
-  const module3 = await prisma.module.create({
-    data: {
-      title: "Handwashing Super Skills",
-      description: "Hygiene mastery with soap",
-      grade: 3,
-      subject: "Cleaner",
-      content: "Content...",
-    },
-  });
-  console.log(`✓ Module created: ${module3.title}`);
 
   //   const scienceModule = await prisma.module.upsert({
   //     where: { id: "science-101" },
@@ -97,54 +87,17 @@ async function main() {
   console.log("\n📖 Creating lessons...");
 
   // Lessons for Module 1
-  const m1l1 = await prisma.lesson.upsert({
-    where: { id: "m1-l1" },
-    update: {},
-    create: {
-      id: "m1-l1",
-      moduleId: module1.id,
-      title: "Germs: The Invisible Enemy",
-      content: "Germs are tiny organisms that can cause disease. In a restroom, they often hide on frequently touched surfaces like door handles and faucets.",
-      order: 1,
-    },
-  });
-  const m1l2 = await prisma.lesson.upsert({
-    where: { id: "m1-l2" },
-    update: {},
-    create: {
-      id: "m1-l2",
-      moduleId: module1.id,
-      title: "The Splash Zone",
-      content: "When you flush a toilet with the lid open, tiny water droplets can travel up to 6 feet! This is called the 'toilet plume'.",
-      order: 2,
-    },
-  });
-
-  // Lessons for Module 2
-  const m2l1 = await prisma.lesson.upsert({
-    where: { id: "m2-l1" },
-    update: {},
-    create: {
-      id: "m2-l1",
-      moduleId: module2.id,
-      title: "Aim and Accuracy",
-      content: "A true hero always ensures they leave the station cleaner than they found it. Aim is the first step in restroom mastery.",
-      order: 1,
-    },
-  });
-
-  // Lessons for Module 3
-  const m3l1 = await prisma.lesson.upsert({
-    where: { id: "m3-l1" },
-    update: {},
-    create: {
-      id: "m3-l1",
-      moduleId: module3.id,
-      title: "The 20-Second Scrub",
-      content: "Washing your hands for at least 20 seconds is the golden rule. Sing the 'Happy Birthday' song twice to get the timing right!",
-      order: 1,
-    },
-  });
+  // const m1l1 = await prisma.lesson.upsert({
+  //   where: { id: "m1-l1" },
+  //   update: {},
+  //   create: {
+  //     id: "m1-l1",
+  //     moduleId: module1.id,
+  //     title: "Germs: The Invisible Enemy",
+  //     content: "Germs are tiny organisms that can cause disease. In a restroom, they often hide on frequently touched surfaces like door handles and faucets.",
+  //     order: 1,
+  //   },
+  // });
 
   console.log(`✓ Lessons created for all modules`);
 
