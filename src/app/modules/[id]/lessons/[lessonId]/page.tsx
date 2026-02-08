@@ -16,7 +16,8 @@ import {
     Trophy,
     Send,
     Target,
-    ShieldCheck
+    ShieldCheck,
+    Star
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -48,6 +49,7 @@ interface Slide {
     questions?: Question[];
     order: number;
     mascot?: string;
+    background?: string;
 }
 
 const dummySlides: Slide[] = [
@@ -607,28 +609,32 @@ const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
                 ))}
             </div>
 
-            <div className="flex gap-4">
-                <button
-                    onClick={() => setActiveTool('bin')}
-                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'bin' ? 'bg-orange-500 text-white border-orange-200 scale-110 shadow-xl' : 'bg-white text-orange-500 border-slate-50 shadow-sm'}`}
-                >
-                    <span className="text-2xl">🗑️</span>
-                    <span className="text-xs">Tap Bin</span>
-                </button>
-                <button
-                    onClick={() => setActiveTool('wipe')}
-                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'wipe' ? 'bg-blue-500 text-white border-blue-200 scale-110 shadow-xl' : 'bg-white text-blue-500 border-slate-50 shadow-sm'}`}
-                >
-                    <span className="text-2xl">🧽</span>
-                    <span className="text-xs">Tap Wipe</span>
-                </button>
-                <button
-                    onClick={() => setActiveTool('flush')}
-                    className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all flex flex-col items-center gap-2 border-4 ${activeTool === 'flush' ? 'bg-sky-500 text-white border-sky-200 scale-110 shadow-xl' : 'bg-white text-sky-500 border-slate-50 shadow-sm'}`}
-                >
-                    <span className="text-2xl">🔘</span>
-                    <span className="text-xs">Tap Flush</span>
-                </button>
+            <div className="flex gap-6">
+                {[
+                    { id: 'bin' as const, label: 'Pick Up', icon: '🗑️', color: 'yellow' },
+                    { id: 'wipe' as const, label: 'Wipe', icon: '🧽', color: 'orange' },
+                    { id: 'flush' as const, label: 'Flush', icon: '🔘', color: 'yellow' }
+                ].map((tool) => (
+                    <motion.button
+                        key={tool.id}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setActiveTool(tool.id)}
+                        className={`relative w-28 md:w-32 aspect-square flex flex-col items-center justify-center gap-2 rounded-[2rem] border-[6px] border-white transition-all 
+                            ${activeTool === tool.id
+                                ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 scale-110 shadow-[0_12px_0_#ca8a04]'
+                                : 'bg-gradient-to-b from-yellow-400 to-orange-400 shadow-[0_8px_0_#b45309] opacity-90'
+                            }`}
+                    >
+                        <span className="text-3xl md:text-4xl filter drop-shadow-sm">{tool.icon}</span>
+                        <span className="font-black text-white text-[10px] md:text-xs uppercase tracking-widest drop-shadow-[0_2px_1px_rgba(0,0,0,0.5)]">
+                            {tool.label}
+                        </span>
+
+                        {/* Shine Effect */}
+                        <div className="absolute top-2 left-4 right-4 h-4 bg-white/20 rounded-full blur-[1px] pointer-events-none" />
+                    </motion.button>
+                ))}
             </div>
         </div>
     );
@@ -636,6 +642,21 @@ const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
 
 const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
     const pledgeItems = content?.split('\n').map(item => item.replace('• ', '').trim()) || [];
+    const [checkedItems, setCheckedItems] = useState<number[]>([]);
+
+    const toggleItem = (index: number) => {
+        if (checkedItems.includes(index)) {
+            setCheckedItems(checkedItems.filter(i => i !== index));
+        } else {
+            setCheckedItems([...checkedItems, index]);
+            confetti({
+                particleCount: 15,
+                spread: 30,
+                origin: { y: 0.8 },
+                colors: ['#fbbf24', '#ffffff']
+            });
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto p-4">
@@ -643,20 +664,29 @@ const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
             <p className="text-xl md:text-2xl text-slate-500 font-bold mb-12 uppercase tracking-widest">"{subtitle}"</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-12">
-                {pledgeItems.map((item, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] border-2 border-slate-100 flex flex-col items-center justify-center text-center shadow-lg hover:shadow-xl transition-all group"
-                    >
-                        <div className="w-12 h-12 bg-yellow-100 text-yellow-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <Trophy className="w-6 h-6" />
-                        </div>
-                        <p className="text-slate-700 font-black leading-tight uppercase text-sm">{item}</p>
-                    </motion.div>
-                ))}
+                {pledgeItems.map((item, i) => {
+                    const isChecked = checkedItems.includes(i);
+                    return (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            onClick={() => toggleItem(i)}
+                            className={`cursor-pointer p-8 rounded-[2rem] border-4 transition-all group flex flex-col items-center justify-center text-center ${isChecked
+                                ? "bg-yellow-50 border-yellow-400 shadow-xl scale-105"
+                                : "bg-white/80 border-slate-100 hover:border-yellow-200"
+                                }`}
+                        >
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${isChecked ? "bg-yellow-400 text-white" : "bg-yellow-100 text-yellow-500"
+                                }`}>
+                                <Star className={`w-6 h-6 ${isChecked ? "fill-current" : ""}`} />
+                            </div>
+                            <p className={`font-black leading-tight uppercase text-sm transition-colors ${isChecked ? "text-yellow-700" : "text-slate-700"
+                                }`}>{item}</p>
+                        </motion.div>
+                    );
+                })}
             </div>
 
             <motion.div
@@ -664,8 +694,19 @@ const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.8 }}
             >
-                <PlayfulButton color="orange" className="px-12 py-6">
-                    I am a Toilet Hero!
+                <PlayfulButton
+                    color={checkedItems.length === pledgeItems.length ? "orange" : "blue"}
+                    className="px-12 py-6"
+                    disabled={checkedItems.length !== pledgeItems.length}
+                    onClick={() => {
+                        confetti({
+                            particleCount: 200,
+                            spread: 100,
+                            origin: { y: 0.6 }
+                        });
+                    }}
+                >
+                    {checkedItems.length === pledgeItems.length ? "I am a Toilet Hero!" : "Complete the Pledge First!"}
                 </PlayfulButton>
             </motion.div>
         </div>
@@ -953,7 +994,7 @@ const QuizLauncherSlide = ({ title, content, mascot, onStart }: any) => (
         </div>
     </div>
 );
-const CelebrationSlide = ({ title, content }: Partial<Slide>) => (
+const CelebrationSlide = ({ title, subtitle, content, mascot }: Partial<Slide>) => (
     <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full max-w-6xl mx-auto gap-8 lg:gap-20 relative p-4 lg:p-6 overflow-y-auto no-scrollbar">
         {/* Mascot Side */}
         <motion.div
@@ -968,7 +1009,7 @@ const CelebrationSlide = ({ title, content }: Partial<Slide>) => (
                     transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
                 >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/mascots/mascot-hero.png" alt="Hero Mascot" className="w-[150px] md:w-[350px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]" />
+                    <img src={mascot || "/mascots/mascot-hero.png"} alt="Hero Mascot" className="w-[150px] md:w-[350px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]" />
                 </motion.div>
                 {/* Sparkles around mascot */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -998,9 +1039,14 @@ const CelebrationSlide = ({ title, content }: Partial<Slide>) => (
                 transition={{ delay: 0.3 }}
                 className="space-y-4"
             >
-                <h1 className="text-2xl md:text-4xl font-black text-blue-800 leading-none tracking-tighter uppercase drop-shadow-sm">
+                <h1 className="text-2xl md:text-5xl font-black text-blue-900 leading-none tracking-tighter uppercase drop-shadow-sm">
                     {title}
                 </h1>
+                {subtitle && (
+                    <h2 className="text-xl md:text-4xl font-black text-orange-500 tracking-tighter leading-tight italic">
+                        {subtitle}
+                    </h2>
+                )}
                 <div className="h-1.5 md:h-2 w-24 md:w-32 bg-yellow-400 rounded-full mx-auto lg:mx-0" />
             </motion.div>
 
@@ -1459,13 +1505,15 @@ export default function LessonDetailPage() {
                 <div
                     className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
                     style={{
-                        backgroundImage: `url('${currentSlide.type === 'comparison'
-                            ? '/images/toilet-comparison-bg.jpg'
-                            : currentSlide.type === 'celebration'
-                                ? '/images/celebration-bg.jpg'
-                                : (currentIdx >= 2 && currentIdx <= 5)
-                                    ? '/images/lesson-bg-germs.jpg'
-                                    : '/images/lesson-bg.jpg'
+                        backgroundImage: `url('${currentSlide.background
+                            ? currentSlide.background
+                            : currentSlide.type === 'comparison'
+                                ? '/images/toilet-comparison-bg.jpg'
+                                : currentSlide.type === 'celebration'
+                                    ? '/images/celebration-bg.jpg'
+                                    : (currentIdx >= 2 && currentIdx <= 5)
+                                        ? '/images/lesson-bg-germs.jpg'
+                                        : '/images/lesson-bg.jpg'
                             }')`
                     }}
                 />

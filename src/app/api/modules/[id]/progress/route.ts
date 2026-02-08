@@ -17,32 +17,30 @@ export async function GET(
   const userId = (session.user as any).id;
 
   try {
-    // Get all lessons, activities, quizzes in module
-    const [lessons, activities, quizzes] = await Promise.all([
+    console.log(`[API/Progress] Fetching progress for module: ${moduleId}, user: ${userId}`);
+    const start = Date.now();
+
+    // Get all lessons, activities, quizzes in module and completions in parallel
+    const [lessons, activities, quizzes, completions] = await Promise.all([
       prisma.lesson.findMany({
         where: { moduleId },
         orderBy: { order: "asc" },
       }),
       prisma.activity.findMany({ where: { moduleId } }),
       prisma.quiz.findMany({ where: { moduleId } }),
+      prisma.completion.findMany({
+        where: {
+          userId,
+          OR: [
+            { lesson: { moduleId } },
+            { activity: { moduleId } },
+            { quiz: { moduleId } },
+          ],
+        },
+      })
     ]);
 
-    // Get all completions for this user in this module
-    const completions = await prisma.completion.findMany({
-      where: {
-        userId,
-        OR: [
-          { lesson: { moduleId } },
-          { activity: { moduleId } },
-          { quiz: { moduleId } },
-        ],
-      },
-      include: {
-        lesson: true,
-        activity: true,
-        quiz: true,
-      },
-    });
+    console.log(`[API/Progress] Db queries took ${Date.now() - start}ms`);
 
     // Map completions to items
     const completedLessonIds = completions

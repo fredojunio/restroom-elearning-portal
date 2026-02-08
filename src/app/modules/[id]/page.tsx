@@ -100,7 +100,12 @@ export default function ModuleDetailPage() {
       const progressData = await progressRes.json();
 
       setModule(moduleData);
-      setProgress(progressData);
+      setProgress(progressData.overall ? progressData : {
+        lessons: { completed: 0, total: 0, percentage: 0, items: [] },
+        activities: { completed: 0, total: 0, percentage: 0, items: [] },
+        quizzes: { completed: 0, total: 0, percentage: 0, items: [] },
+        overall: { completed: 0, total: 0, percentage: 0 }
+      });
     } catch (error) {
       console.error("Failed to fetch module data:", error);
     } finally {

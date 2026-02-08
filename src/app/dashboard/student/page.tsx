@@ -59,12 +59,29 @@ export default function StudentDashboard() {
 
       const modulesWithProgress = await Promise.all(
         modulesData.map(async (module: Module) => {
-          const progressRes = await fetch(`/api/modules/${module.id}/progress`);
-          const progressData = await progressRes.json();
-          return {
-            ...module,
-            progress: progressData.overall,
-          };
+          try {
+            const progressRes = await fetch(`/api/modules/${module.id}/progress`);
+            const progressData = await progressRes.json();
+
+            return {
+              ...module,
+              progress: progressData.overall || {
+                completed: 0,
+                total: 0,
+                percentage: 0
+              },
+            };
+          } catch (error) {
+            console.error(`Failed to fetch progress for module ${module.id}:`, error);
+            return {
+              ...module,
+              progress: {
+                completed: 0,
+                total: 0,
+                percentage: 0
+              },
+            };
+          }
         }),
       );
 
@@ -230,19 +247,19 @@ export default function StudentDashboard() {
                           <div className="flex justify-between items-end">
                             <div>
                               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Mission Integrity</p>
-                              <p className="text-2xl font-black text-slate-900">{module.progress.percentage}%</p>
+                              <p className="text-2xl font-black text-slate-900">{(module.progress?.percentage || 0)}%</p>
                             </div>
                             <div className="flex flex-col items-end">
                               <p className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">
-                                {module.progress.completed}/{module.progress.total} TASKS
+                                {(module.progress?.completed || 0)}/{(module.progress?.total || 0)} TASKS
                               </p>
                             </div>
                           </div>
                           <div className="w-full bg-slate-50 rounded-full h-3 overflow-hidden p-0.5 border border-slate-100">
                             <motion.div
                               initial={{ width: 0 }}
-                              animate={{ width: `${module.progress.percentage}%` }}
-                              className={`h-full rounded-full transition-all ${module.progress.percentage === 100
+                              animate={{ width: `${module.progress?.percentage || 0}%` }}
+                              className={`h-full rounded-full transition-all ${(module.progress?.percentage || 0) === 100
                                 ? "bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.5)]"
                                 : "bg-gradient-to-r from-sky-400 to-blue-500 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
                                 }`}
@@ -252,7 +269,7 @@ export default function StudentDashboard() {
 
                         {/* Action Badge */}
                         <div className="mt-10">
-                          {module.progress.percentage === 100 ? (
+                          {(module.progress?.percentage || 0) === 100 ? (
                             <div className="w-full py-5 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest border border-green-100 shadow-sm shadow-green-100">
                               <CheckCircle2 className="w-4 h-4" />
                               Mission Accomplished

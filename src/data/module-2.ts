@@ -11,6 +11,7 @@ export interface Module2Slide {
     questions?: any[];
     order: number;
     mascot?: string;
+    background?: string;
 }
 
 export const moduleTwoSlides: Module2Slide[] = [
@@ -20,7 +21,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         title: "Be a Toilet Hero Every Day",
         subtitle: "Module B: Habits, Respect & Responsibility",
         content: "Format: Learn Through Play",
-        order: 1
+        order: 1,
+        background: "/backgrounds/module-2-bg.jpg"
     },
     {
         id: "m2-slide-2",
@@ -29,7 +31,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Section 1: Hello Again!",
         content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!\n\n(Mascot welcomes the student back.)",
         mascot: "/mascots/mascot-greeting.png",
-        order: 2
+        order: 2,
+        background: "/backgrounds/module-2-bg.jpg"
     },
     {
         id: "m2-slide-3",
@@ -91,5 +94,51 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "I Promise To...",
         content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
         order: 10
+    },
+    {
+        id: "m2-quiz-1",
+        type: "quiz",
+        title: "Quick Hero Quiz!",
+        content: "Prove you're a Toilet Hero by passing this quick check!",
+        questions: [
+            {
+                id: "m2-q1",
+                type: "MULTIPLE_CHOICE",
+                question: "What should you do after using the toilet?",
+                options: ["Flush properly!", "Leave it for later."],
+                correctAnswer: "Flush properly!"
+            },
+            {
+                id: "m2-q2",
+                type: "MULTIPLE_CHOICE",
+                question: "True or False: Toilets are shared spaces.",
+                options: ["TRUE!", "FALSE!"],
+                correctAnswer: "TRUE!"
+            },
+            {
+                id: "m2-q3",
+                type: "MULTIPLE_CHOICE",
+                question: "Who helps keep toilets clean?",
+                options: ["Everyone!", "Only the cleaners."],
+                correctAnswer: "Everyone!"
+            },
+            {
+                id: "m2-q4",
+                type: "MULTIPLE_CHOICE",
+                question: "Does a Toilet Hero help others?",
+                options: ["Yes, of course!", "No, just themselves."],
+                correctAnswer: "Yes, of course!"
+            }
+        ],
+        order: 11
+    },
+    {
+        id: "m2-celebration-final",
+        type: "celebration",
+        title: "Great Job!",
+        subtitle: "You Are Now An Official Toilet Hero!",
+        content: "Thank you for making Singapore's toilets clean and happy for everyone.\n\nYou have earned your Module B Certificate!",
+        mascot: "/mascots/mascot-winning.png",
+        order: 12
     }
 ];
