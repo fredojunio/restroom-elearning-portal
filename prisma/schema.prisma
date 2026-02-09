@@ -80,6 +80,8 @@ model Slide {
   videoUrl  String?
   gameType  String?
   mascot    String?
+  background String?
+  invertChoices Boolean? @default(false)
   
   // For quiz slides, we can store questions as JSON
   questions Json?    // Array of Question objects as defined in frontend

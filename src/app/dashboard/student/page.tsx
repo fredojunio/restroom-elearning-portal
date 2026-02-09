@@ -218,14 +218,6 @@ export default function StudentDashboard() {
                       {/* Card Header */}
                       <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-10 text-white relative overflow-hidden">
                         <div className="relative z-10">
-                          <div className="flex gap-2 mb-6">
-                            <span className="px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest text-sky-400 backdrop-blur-md">
-                              Grade {module.grade}
-                            </span>
-                            <span className="px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-400 backdrop-blur-md">
-                              {module.subject}
-                            </span>
-                          </div>
                           <h3 className="text-3xl font-black tracking-tighter leading-none uppercase pr-8">
                             {module.title}
                           </h3>

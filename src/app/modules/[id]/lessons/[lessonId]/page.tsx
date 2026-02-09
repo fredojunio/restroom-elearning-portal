@@ -50,6 +50,7 @@ interface Slide {
     order: number;
     mascot?: string;
     background?: string;
+    invertChoices?: boolean;
 }
 
 const dummySlides: Slide[] = [
@@ -139,6 +140,8 @@ const dummySlides: Slide[] = [
         type: "celebration",
         title: "What a Toilet Hero!",
         content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
+        mascot: "/mascots/mascot-hero.png",
+        background: "/images/celebration-bg.jpg",
         order: 9
     }
 ];
@@ -179,7 +182,7 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     };
 
     return (
-        <div className="relative w-full h-[500px] bg-slate-50 border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
+        <div className="relative w-full h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
             {/* Background Info */}
             <div className="absolute top-8 left-8 text-left">
                 <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Restroom Area</h4>
@@ -471,7 +474,7 @@ const WhosNextGame = ({ onComplete }: { onComplete: () => void }) => {
     );
 };
 
-const HeroOrOopsGame = ({ onComplete }: { onComplete: () => void }) => {
+const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void, invertChoices?: boolean }) => {
     const [scenarios] = useState([
         { id: 1, title: "Flushing after use", isHero: true, image: "🚽" },
         { id: 2, title: "Leaving tissues on the floor", isHero: false, image: "🧻" },
@@ -514,7 +517,12 @@ const HeroOrOopsGame = ({ onComplete }: { onComplete: () => void }) => {
             <h3 className="text-2xl font-black text-slate-800 mb-2 text-center">{scenarios[currentStep].title}</h3>
             <p className="text-slate-500 font-bold mb-8 text-center">Is this a Toilet Hero choice?</p>
 
-            <div className="flex gap-4 w-full">
+            <div className={`flex gap-4 w-full ${invertChoices ? 'flex-row' : 'flex-row-reverse'}`}>
+                {/* 
+                    NOTE: True (Hero) is green, False (Oops) is red.
+                    If invertChoices is false (Module 1): Oops (Red) Left, Hero (Green) Right. -> flex-row-reverse
+                    If invertChoices is true (Module 2): Hero (Green) Left, Oops (Red) Right. -> flex-row
+                */}
                 <button
                     onClick={() => handleChoice(true)}
                     className="flex-1 py-4 bg-green-500 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all flex flex-col items-center gap-2"
@@ -547,11 +555,11 @@ const HeroOrOopsGame = ({ onComplete }: { onComplete: () => void }) => {
     );
 };
 
-const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
+const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => void, background?: string }) => {
     const [messes, setMesses] = useState([
-        { id: 1, type: 'tissue', x: '20%', y: '60%', fixed: false },
-        { id: 2, type: 'spill', x: '70%', y: '70%', fixed: false },
-        { id: 3, type: 'unflushed', x: '50%', y: '40%', fixed: false },
+        { id: 1, type: 'tissue', x: '25%', y: '65%', fixed: false },
+        { id: 2, type: 'spill', x: '75%', y: '75%', fixed: false },
+        { id: 3, type: 'unflushed', x: '60%', y: '45%', fixed: false },
     ]);
     const [activeTool, setActiveTool] = useState<'none' | 'bin' | 'wipe' | 'flush'>('none');
     const [score, setScore] = useState(0);
@@ -588,7 +596,11 @@ const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
 
             <div className="relative w-full aspect-video bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8">
                 {/* Scenario background */}
-                <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>
+                {background ? (
+                    <img src={background} alt="Cleanup Challenge" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>
+                )}
 
                 {messes.map(mess => !mess.fixed && (
                     <motion.button
@@ -620,10 +632,10 @@ const CleanupChallengeGame = ({ onComplete }: { onComplete: () => void }) => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setActiveTool(tool.id)}
-                        className={`relative w-28 md:w-32 aspect-square flex flex-col items-center justify-center gap-2 rounded-[2rem] border-[6px] border-white transition-all 
+                        className={`relative w-28 md:w-32 aspect-square flex flex-col items-center justify-center gap-2 rounded-4xl border-[6px] border-white transition-all 
                             ${activeTool === tool.id
-                                ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 scale-110 shadow-[0_12px_0_#ca8a04]'
-                                : 'bg-gradient-to-b from-yellow-400 to-orange-400 shadow-[0_8px_0_#b45309] opacity-90'
+                                ? 'bg-linear-to-b from-yellow-300 to-yellow-500 scale-110 shadow-[0_12px_0_#ca8a04]'
+                                : 'bg-linear-to-b from-yellow-400 to-orange-400 shadow-[0_8px_0_#b45309] opacity-90'
                             }`}
                     >
                         <span className="text-3xl md:text-4xl filter drop-shadow-sm">{tool.icon}</span>
@@ -771,7 +783,7 @@ const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => (
 
 // --- Toilet Comparison Component ---
 
-const ToiletComparisonSlide = ({ onComplete }: { onComplete: () => void }) => {
+const ToiletComparisonSlide = ({ onComplete, invertChoices }: { onComplete: () => void, invertChoices?: boolean }) => {
     const [choice, setChoice] = useState<'none' | 'dirty' | 'clean'>('none');
 
     const handleChoice = (type: 'dirty' | 'clean') => {
@@ -801,65 +813,69 @@ const ToiletComparisonSlide = ({ onComplete }: { onComplete: () => void }) => {
                 </motion.div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-12 w-full max-w-4xl px-4">
-                    {/* Dirty Option */}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleChoice('dirty')}
-                        className={`group relative p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border-4 transition-all overflow-hidden ${choice === 'dirty'
-                            ? 'bg-red-50 border-red-500 shadow-2xl scale-105'
-                            : 'bg-white/60 backdrop-blur-md border-transparent hover:border-red-200'
-                            }`}
-                    >
-                        <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-red-100 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-inner">
-                                ☹️
-                            </div>
-                            <div className="text-center">
-                                <h4 className="text-xl md:text-2xl font-black text-red-700 mb-2">The "Oops" Toilet</h4>
-                                <p className="text-red-900/60 font-bold leading-tight text-sm md:text-base">
-                                    Dirty toilets can make our friends feel sick. We don't want that!
-                                </p>
-                            </div>
-                        </div>
-                        {choice === 'dirty' && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="absolute inset-0 bg-red-500/10 pointer-events-none"
-                            />
-                        )}
-                    </motion.button>
-
                     {/* Happy Option */}
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleChoice('clean')}
-                        className={`group relative p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border-4 transition-all overflow-hidden ${choice === 'clean'
-                            ? 'bg-green-50 border-green-500 shadow-2xl scale-105'
-                            : 'bg-white/60 backdrop-blur-md border-transparent hover:border-green-200'
-                            }`}
-                    >
-                        <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-inner">
-                                😁
+                    <div className={invertChoices ? 'order-1' : 'order-2'}>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleChoice('clean')}
+                            className={`group relative w-full p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border-4 transition-all overflow-hidden ${choice === 'clean'
+                                ? 'bg-green-50 border-green-500 shadow-2xl scale-105'
+                                : 'bg-white/60 backdrop-blur-md border-transparent hover:border-green-200'
+                                }`}
+                        >
+                            <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-inner">
+                                    😁
+                                </div>
+                                <div className="text-center">
+                                    <h4 className="text-xl md:text-2xl font-black text-green-700 mb-2">The Happy Toilet</h4>
+                                    <p className="text-green-900/60 font-bold leading-tight text-sm md:text-base">
+                                        Keeping it clean means everyone stays strong and ready to play.
+                                    </p>
+                                </div>
                             </div>
-                            <div className="text-center">
-                                <h4 className="text-xl md:text-2xl font-black text-green-700 mb-2">The Happy Toilet</h4>
-                                <p className="text-green-900/60 font-bold leading-tight text-sm md:text-base">
-                                    Keeping it clean means everyone stays strong and ready to play.
-                                </p>
+                            {choice === 'clean' && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 bg-green-500/10 pointer-events-none"
+                                />
+                            )}
+                        </motion.button>
+                    </div>
+
+                    {/* Dirty Option */}
+                    <div className={invertChoices ? 'order-2' : 'order-1'}>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleChoice('dirty')}
+                            className={`group relative w-full p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] border-4 transition-all overflow-hidden ${choice === 'dirty'
+                                ? 'bg-red-50 border-red-500 shadow-2xl scale-105'
+                                : 'bg-white/60 backdrop-blur-md border-transparent hover:border-red-200'
+                                }`}
+                        >
+                            <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-red-100 rounded-2xl flex items-center justify-center text-4xl md:text-5xl shadow-inner">
+                                    ☹️
+                                </div>
+                                <div className="text-center">
+                                    <h4 className="text-xl md:text-2xl font-black text-red-700 mb-2">The "Oops" Toilet</h4>
+                                    <p className="text-red-900/60 font-bold leading-tight text-sm md:text-base">
+                                        Dirty toilets can make our friends feel sick. We don't want that!
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        {choice === 'clean' && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="absolute inset-0 bg-green-500/10 pointer-events-none"
-                            />
-                        )}
-                    </motion.button>
+                            {choice === 'dirty' && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="absolute inset-0 bg-red-500/10 pointer-events-none"
+                                />
+                            )}
+                        </motion.button>
+                    </div>
                 </div>
 
                 <AnimatePresence>
@@ -994,91 +1010,119 @@ const QuizLauncherSlide = ({ title, content, mascot, onStart }: any) => (
         </div>
     </div>
 );
-const CelebrationSlide = ({ title, subtitle, content, mascot }: Partial<Slide>) => (
-    <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full max-w-6xl mx-auto gap-8 lg:gap-20 relative p-4 lg:p-6 overflow-y-auto no-scrollbar">
-        {/* Mascot Side */}
-        <motion.div
-            initial={{ x: -100, opacity: 0, rotate: -10 }}
-            animate={{ x: 0, opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", damping: 12, stiffness: 100 }}
-            className="shrink-0 flex justify-center lg:justify-end"
-        >
-            <div className="relative">
-                <motion.div
-                    animate={{ y: [0, -15, 0] }}
-                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={mascot || "/mascots/mascot-hero.png"} alt="Hero Mascot" className="w-[150px] md:w-[350px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]" />
-                </motion.div>
-                {/* Sparkles around mascot */}
-                <div className="absolute inset-0 pointer-events-none">
-                    {[...Array(5)].map((_, i) => (
-                        <motion.div
-                            key={i}
-                            animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 2, delay: i * 0.4 }}
-                            className="absolute text-yellow-400 text-2xl"
-                            style={{
-                                top: `${Math.random() * 100}%`,
-                                left: `${Math.random() * 100}%`
+const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Partial<Slide>) => {
+    // Robust fallback: if mascot is missing, infer from ID or title
+    const effectiveMascot = mascot && mascot.trim() !== ""
+        ? mascot
+        : (id?.includes("m2") || title?.includes("Module B") || title?.includes("Great Job"))
+            ? "/mascots/m2-mascot-final.png"
+            : "/mascots/mascot-hero.png";
+
+    console.log("CelebrationSlide render:", { id, title, mascot: effectiveMascot, image });
+
+    return (
+        <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full max-w-6xl mx-auto gap-8 lg:gap-20 relative p-4 lg:p-6 overflow-y-auto no-scrollbar">
+            {/* Mascot Side */}
+            <motion.div
+                initial={{ x: -100, opacity: 0, rotate: -10 }}
+                animate={{ x: 0, opacity: 1, rotate: 0 }}
+                transition={{ type: "spring", damping: 12, stiffness: 100 }}
+                className="shrink-0 flex justify-center lg:justify-end"
+            >
+                <div className="relative">
+                    <motion.div
+                        animate={{ y: [0, -15, 0] }}
+                        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                        className="relative"
+                    >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={effectiveMascot}
+                            alt="Hero Mascot"
+                            onLoad={() => console.log("Mascot loaded:", effectiveMascot)}
+                            onError={(e) => {
+                                console.error("Mascot failed to load:", effectiveMascot);
+                                // Fallback to hero if specific mascot fails, though it shouldn't
+                                if (effectiveMascot !== "/mascots/mascot-hero.png") {
+                                    (e.target as HTMLImageElement).src = "/mascots/mascot-hero.png";
+                                }
                             }}
-                        >
-                            ✨
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </motion.div>
-
-        {/* Content Side */}
-        <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left flex flex-col items-center lg:items-start max-w-xl">
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-4"
-            >
-                <h1 className="text-2xl md:text-5xl font-black text-blue-900 leading-none tracking-tighter uppercase drop-shadow-sm">
-                    {title}
-                </h1>
-                {subtitle && (
-                    <h2 className="text-xl md:text-4xl font-black text-orange-500 tracking-tighter leading-tight italic">
-                        {subtitle}
-                    </h2>
-                )}
-                <div className="h-1.5 md:h-2 w-24 md:w-32 bg-yellow-400 rounded-full mx-auto lg:mx-0" />
-            </motion.div>
-
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-4 md:space-y-6"
-            >
-                <div className="text-lg md:text-xl text-blue-900/70 font-bold leading-relaxed whitespace-pre-line">
-                    {content}
+                            className="w-[180px] md:w-[400px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+                        />
+                    </motion.div>
+                    {/* Sparkles around mascot */}
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(8)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+                                transition={{ repeat: Infinity, duration: 2, delay: i * 0.4 }}
+                                className="absolute text-yellow-400 text-2xl md:text-4xl"
+                                style={{
+                                    top: `${Math.random() * 100}%`,
+                                    left: `${Math.random() * 100}%`
+                                }}
+                            >
+                                ✨
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </motion.div>
 
-            <motion.div
-                initial={{ scale: 0, rotate: 20 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", bounce: 0.6, delay: 0.8 }}
-                className="relative group pt-4"
-            >
-                <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full scale-150 group-hover:bg-yellow-400/40 transition-all duration-500" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/toilet-hero-badge.png" alt="Hero Badge" className="w-40 md:w-56 relative z-10 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer" />
+            {/* Content Side */}
+            <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left flex flex-col items-center lg:items-start max-w-xl">
                 <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                    className="absolute inset-0 border-4 border-dashed border-white/40 rounded-full scale-110 opacity-50"
-                />
-            </motion.div>
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-4"
+                >
+                    <h1 className="text-3xl md:text-6xl font-black text-blue-900 leading-none tracking-tighter uppercase drop-shadow-md">
+                        {title}
+                    </h1>
+                    {subtitle && (
+                        <h2 className="text-xl md:text-4xl font-black text-orange-500 tracking-tighter leading-tight italic drop-shadow-sm">
+                            {subtitle}
+                        </h2>
+                    )}
+                    <div className="h-1.5 md:h-3 w-32 md:w-48 bg-yellow-400 rounded-full mx-auto lg:mx-0 shadow-lg" />
+                </motion.div>
+
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-4 md:space-y-6"
+                >
+                    <div className="text-lg md:text-xl text-blue-900/70 font-bold leading-relaxed whitespace-pre-line">
+                        {content}
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    initial={{ scale: 0, rotate: 20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", bounce: 0.6, delay: 0.8 }}
+                    className="relative group pt-4"
+                >
+                    <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full scale-150 group-hover:bg-yellow-400/40 transition-all duration-500" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src={image || "/images/toilet-hero-badge.png"}
+                        alt="Hero Badge"
+                        className="w-40 md:w-56 relative z-10 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer"
+                    />
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                        className="absolute inset-0 border-4 border-dashed border-white/40 rounded-full scale-110 opacity-50"
+                    />
+                </motion.div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 // --- Sub-Components (Quiz Flow) ---
 
@@ -1477,10 +1521,9 @@ export default function LessonDetailPage() {
                         ) : (
                             <div className="flex items-center gap-3">
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Completion</p>
-                                    <p className="text-[10px] font-black text-slate-900 uppercase leading-none">{Math.round(((currentIdx + 1) / totalSlides) * 100)}%</p>
+                                    <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest leading-none mb-1">Completion</p>
                                 </div>
-                                <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg">
+                                <div className="w-12 h-12 bg-sky-500 text-white rounded-xl flex items-center justify-center font-black text-xs shadow-lg">
                                     {Math.round(((currentIdx + 1) / totalSlides) * 100)}%
                                 </div>
                             </div>
@@ -1507,10 +1550,12 @@ export default function LessonDetailPage() {
                     style={{
                         backgroundImage: `url('${currentSlide.background
                             ? currentSlide.background
-                            : currentSlide.type === 'comparison'
-                                ? '/images/toilet-comparison-bg.jpg'
-                                : currentSlide.type === 'celebration'
-                                    ? '/images/celebration-bg.jpg'
+                            : currentSlide.type === 'celebration'
+                                ? (currentSlide.mascot?.includes('m2-mascot-final')
+                                    ? '/backgrounds/module-2-final-bg.png'
+                                    : '/images/celebration-bg.jpg')
+                                : currentSlide.type === 'comparison'
+                                    ? '/images/toilet-comparison-bg.jpg'
                                     : (currentIdx >= 2 && currentIdx <= 5)
                                         ? '/images/lesson-bg-germs.jpg'
                                         : '/images/lesson-bg.jpg'
@@ -1548,7 +1593,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-[3rem] md:rounded-[4rem] border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50vh] max-h-[calc(100vh-140px)] flex items-center justify-center relative overflow-y-auto overflow-x-hidden no-scrollbar`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50vh] max-h-[calc(100vh-140px)] flex items-center justify-center relative overflow-y-auto overflow-x-hidden no-scrollbar`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full">
@@ -1572,9 +1617,12 @@ export default function LessonDetailPage() {
                                         ) : currentSlide.gameType === "WhosNext" ? (
                                             <WhosNextGame onComplete={() => setGameState('completed')} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
-                                            <HeroOrOopsGame onComplete={() => setGameState('completed')} />
+                                            <HeroOrOopsGame onComplete={() => setGameState('completed')} invertChoices={currentSlide.invertChoices} />
                                         ) : currentSlide.gameType === "CleanupChallenge" ? (
-                                            <CleanupChallengeGame onComplete={() => setGameState('completed')} />
+                                            <CleanupChallengeGame
+                                                onComplete={() => setGameState('completed')}
+                                                background={currentSlide.background}
+                                            />
                                         ) : (
                                             <GermHunterGame onComplete={() => setGameState('completed')} />
                                         )
@@ -1587,7 +1635,10 @@ export default function LessonDetailPage() {
                                 )}
 
                                 {currentSlide.type === "comparison" && (
-                                    <ToiletComparisonSlide onComplete={() => setGameState('completed')} />
+                                    <ToiletComparisonSlide
+                                        onComplete={() => setGameState('completed')}
+                                        invertChoices={currentSlide.invertChoices}
+                                    />
                                 )}
 
                                 {/* Quiz Logic */}
@@ -1675,45 +1726,52 @@ export default function LessonDetailPage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     >
+                        {/* Final Celebration Background in Modal */}
+                        <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
+
+                        {currentSlide.background && (
+                            <div className="absolute inset-0 opacity-40">
+                                <img src={currentSlide.background} alt="Rays" className="w-full h-full object-cover" />
+                            </div>
+                        )}
+
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
-                            className="bg-white max-w-lg w-full rounded-[3.5rem] p-16 text-center shadow-2xl border border-slate-100 relative"
+                            className="bg-white/95 backdrop-blur max-w-lg w-full rounded-[3.5rem] p-12 md:p-16 text-center shadow-2xl border border-white/50 relative overflow-hidden"
                         >
-                            {/* Mascot Celebration */}
-                            <motion.div
-                                initial={{ y: 50, opacity: 0 }}
-                                animate={{ y: -60, opacity: 1 }}
-                                transition={{ delay: 0.2 }}
-                                className="absolute -top-24 left-1/2 -translate-x-1/2 pointer-events-none"
-                            >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="/mascots/mascot-winning.png" alt="Winner" className="w-48 drop-shadow-2xl" />
-                            </motion.div>
+                            {/* Decorative Shine */}
+                            <div className="absolute -top-24 -left-24 w-64 h-64 bg-yellow-200/30 rounded-full blur-3xl" />
 
-                            <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner rotate-3 relative z-10">
-                                <Trophy className="w-12 h-12" />
-                            </div>
-                            <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter relative z-10">Congratulations!</h2>
-                            <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed relative z-10">
-                                You've successfully mastered this module through games, quizzes, and study. Your progress is saved!
-                            </p>
-                            <div className="space-y-4 relative z-10">
-                                <PlayfulButton
-                                    onClick={() => router.push(`/modules/${moduleId}`)}
-                                    color="green"
-                                    className="w-full py-6"
-                                >
-                                    Return to Module
-                                </PlayfulButton>
-                                <button
-                                    onClick={() => router.push(`/dashboard`)}
-                                    className="block w-full py-4 text-slate-300 font-black text-[10px] uppercase tracking-[0.3em] hover:text-blue-600 transition-all"
-                                >
-                                    Go to Dashboard
-                                </button>
+
+                            <div className="relative z-10 space-y-6">
+                                <div className="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner rotate-3">
+                                    <Trophy className="w-10 h-10" />
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-black text-blue-900 tracking-tighter uppercase leading-none">
+                                    {currentSlide.title || "Module Complete!"}
+                                </h2>
+                                <p className="text-lg text-slate-500 font-bold leading-relaxed">
+                                    {currentSlide.content?.split('\n')[0] || "You've successfully mastered this module! Your progress is saved."}
+                                </p>
+
+                                <div className="pt-6 space-y-4">
+                                    <PlayfulButton
+                                        onClick={() => router.push(`/modules/${moduleId}`)}
+                                        color="green"
+                                        className="w-full py-6"
+                                    >
+                                        <span className="text-xl">Return to Module</span>
+                                    </PlayfulButton>
+                                    <button
+                                        onClick={() => router.push(`/dashboard`)}
+                                        className="block w-full py-4 text-slate-400 font-black text-xs uppercase tracking-[0.2em] hover:text-blue-600 transition-all"
+                                    >
+                                        Go to Dashboard
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </motion.div>

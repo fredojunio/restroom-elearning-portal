@@ -12,6 +12,7 @@ export interface Module2Slide {
     order: number;
     mascot?: string;
     background?: string;
+    invertChoices?: boolean;
 }
 
 export const moduleTwoSlides: Module2Slide[] = [
@@ -49,6 +50,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Section 2: Shared Spaces",
         content: "We take turns and share the clean toilet!",
         image: "clean_messy_comparison.png",
+        background: "/backgrounds/m2-sharing-bg.jpg",
+        invertChoices: true,
         order: 4
     },
     {
@@ -67,6 +70,7 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Section 3: Hero or Oops?",
         gameType: "HeroOrOops",
         content: "Hero or Oops?\nLook at the scenario and decide if it's a 'Toilet Hero' choice or an 'Oops' choice!",
+        invertChoices: true,
         order: 6
     },
     {
@@ -85,7 +89,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Game: Clean-Up Challenge",
         gameType: "CleanupChallenge",
         content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
-        order: 8
+        order: 8,
+        background: "/backgrounds/cleanup-challenge-bg.jpg"
     },
     {
         id: "m2-slide-9",
@@ -138,7 +143,9 @@ export const moduleTwoSlides: Module2Slide[] = [
         title: "Great Job!",
         subtitle: "You Are Now An Official Toilet Hero!",
         content: "Thank you for making Singapore's toilets clean and happy for everyone.\n\nYou have earned your Module B Certificate!",
-        mascot: "/mascots/mascot-winning.png",
+        mascot: "/mascots/m2-mascot-final.png",
+        image: "/mascots/m2-badge-final.png",
+        background: "/backgrounds/module-2-final-bg.png",
         order: 12
     }
 ];

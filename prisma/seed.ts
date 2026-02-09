@@ -5,13 +5,25 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log("🧹 Cleaning up database...");
+  // Delete in reverse order of dependencies
+  await prisma.completion.deleteMany({});
+  await prisma.studentModule.deleteMany({});
+  await prisma.certificate.deleteMany({});
+  await prisma.slide.deleteMany({});
+  await prisma.quiz.deleteMany({});
+  await prisma.activity.deleteMany({});
+  await prisma.lesson.deleteMany({});
+  await prisma.module.deleteMany({});
+  // We keep users to avoid session issues, but we can upsert them
+
   // ===== 2. Create Users (Teacher & Students) =====
   console.log("\n👥 Creating users...");
   const hashedPassword = await bcrypt.hash("password123", 10);
 
   const teacher = await prisma.user.upsert({
     where: { email: "teacher@school.edu" },
-    update: {},
+    update: { password: hashedPassword },
     create: {
       email: "teacher@school.edu",
       password: hashedPassword,
@@ -23,7 +35,7 @@ async function main() {
 
   const student1 = await prisma.user.upsert({
     where: { email: "alice@school.edu" },
-    update: {},
+    update: { password: hashedPassword },
     create: {
       email: "alice@school.edu",
       password: hashedPassword,
@@ -33,248 +45,255 @@ async function main() {
   });
   console.log(`✓ Student created: ${student1.name}`);
 
-  const student2 = await prisma.user.upsert({
-    where: { email: "bob@school.edu" },
-    update: {},
-    create: {
-      email: "bob@school.edu",
-      password: hashedPassword,
-      name: "Bob Williams",
-      role: "STUDENT",
-    },
-  });
-  console.log(`✓ Student created: ${student2.name}`);
-
-  // ===== 3. Create Modules =====
-  console.log("\n📚 Creating modules...");
-  // Create modules (let IDs auto-generate)
+  // ===== 3. Create Module 1 =====
+  console.log("\n📚 Creating Module 1...");
   const module1 = await prisma.module.create({
     data: {
       title: "Clean Toilets Keep Us Healthy",
       description: "Module A: Introduction to Hygiene",
       grade: 3,
-      subject: "Cleaner",
-      content: "Content...",
+      subject: "Hygiene",
+      content: "Learn the basics of restroom hygiene and why it matters.",
+      lessons: {
+        create: {
+          title: "Classroom Session",
+          order: 1,
+          slides: {
+            create: [
+              {
+                order: 1,
+                type: "title",
+                title: "Welcome to Toilet Heroes",
+                subtitle: "Clean Toilets Keep Us Healthy",
+                content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
+              },
+              {
+                order: 2,
+                type: "content",
+                title: "Hi there, Hero",
+                content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
+                mascot: "/mascots/mascot-greeting.png"
+              },
+              {
+                order: 3,
+                type: "content",
+                title: "Meet the Invisible Germs",
+                content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
+                mascot: "/mascots/mascot-pointing.png"
+              },
+              {
+                order: 4,
+                type: "game",
+                title: "Germ Hunter Game",
+                gameType: "Drag to Disinfect",
+                content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
+              },
+              {
+                order: 5,
+                type: "image",
+                title: "How Germs Travel",
+                image: "🦠",
+                content: "Germs often gather on door handles and light switches. Look closely!",
+                mascot: "/mascots/mascot-pointing.png"
+              },
+              {
+                order: 6,
+                type: "game",
+                title: "Tiny Germs, Big Impact",
+                gameType: "Story Interaction",
+                content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
+                mascot: "/mascots/mascot-scared.png"
+              },
+              {
+                order: 7,
+                type: "comparison",
+                title: "Clean Toilets, Happy Friends",
+              },
+              {
+                order: 8,
+                type: "quiz",
+                title: "Fun Quiz Time!",
+                content: "Prove you're a Toilet Hero by passing this quick check!",
+                questions: [
+                  {
+                    id: "q1",
+                    type: "DRAG_AND_DROP",
+                    question: "True or False?",
+                    description: "Germs are so small we cannot see them. Is this true?",
+                    options: ["TRUE!", "FALSE!"],
+                    correctAnswer: "TRUE!"
+                  },
+                  {
+                    id: "q2",
+                    type: "DRAG_AND_DROP",
+                    question: "The Best Cleaner",
+                    description: "What removes germs best from our soapy hands?",
+                    options: ["Soap + Water!", "Wiping on clothes!"],
+                    correctAnswer: "Soap + Water!"
+                  }
+                ]
+              },
+              {
+                order: 9,
+                type: "celebration",
+                title: "What a Toilet Hero!",
+                content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
+                mascot: "/mascots/mascot-hero.png",
+                background: "/images/celebration-bg.jpg",
+              }
+            ]
+          }
+        }
+      }
     },
   });
-  console.log(`✓ Module created: ${module1.title}`);
+  console.log(`✓ Module 1 created with ${9} slides`);
+
+  // ===== 4. Create Module 2 =====
+  console.log("\n📚 Creating Module 2...");
   const module2 = await prisma.module.create({
     data: {
       title: "Be a Toilet Hero Every Day",
       description: "Module B: Habits, Respect & Responsibility",
       grade: 3,
-      subject: "Cleaner",
-      content: "Content...",
+      subject: "Hygiene",
+      content: "Learn the habits that make you a true Toilet Hero.",
+      lessons: {
+        create: {
+          title: "Habit Session",
+          order: 1,
+          slides: {
+            create: [
+              {
+                order: 1,
+                type: "title",
+                title: "Be a Toilet Hero Every Day",
+                subtitle: "Module B: Habits, Respect & Responsibility",
+                content: "Format: Learn Through Play",
+                background: "/backgrounds/module-2-bg.jpg"
+              },
+              {
+                order: 2,
+                type: "content",
+                title: "Ready to Help?",
+                subtitle: "Section 1: Hello Again!",
+                content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!\n\n(Mascot welcomes the student back.)",
+                mascot: "/mascots/mascot-greeting.png",
+                background: "/backgrounds/module-2-bg.jpg"
+              },
+              {
+                order: 3,
+                type: "content",
+                title: "You are not the only one!",
+                subtitle: "Section 2: Shared Spaces",
+                content: "Toilets are for everyone. When we leave them clean, we are being kind to the next person.\n\n• Clean Choice: The next person (friend or teacher) smiles!\n• Messy Choice: The next person looks very unhappy.",
+              },
+              {
+                order: 4,
+                type: "comparison",
+                title: "Toilet Sharing",
+                subtitle: "Section 2: Shared Spaces",
+                content: "We take turns and share the clean toilet!",
+                image: "clean_messy_comparison.png",
+                background: "/backgrounds/m2-sharing-bg.jpg",
+                invertChoices: true,
+              },
+              {
+                order: 5,
+                type: "content",
+                title: "Hero or Oops?",
+                subtitle: "Section 3: Hero or Oops?",
+                content: "Toilet Hero Tutorial: Tap to Learn!\n\n• Flush: Always flush after use.\n• Bin: Put tissues in the bin.\n• Dry Floor: Keep the floor dry.\n• No Playing: The toilet is not a playground.",
+                mascot: "/mascots/mascot-pointing.png",
+              },
+              {
+                order: 6,
+                type: "game",
+                title: "Toilet Hero Behavior Game",
+                subtitle: "Section 3: Hero or Oops?",
+                gameType: "HeroOrOops",
+                content: "Hero or Oops?\nLook at the scenario and decide if it's a 'Toilet Hero' choice or an 'Oops' choice!",
+                invertChoices: true,
+              },
+              {
+                order: 7,
+                type: "content",
+                title: "Help our Heroes!",
+                subtitle: "Section 4: Our Cleaners",
+                content: "Cleaners work very hard every day to keep us safe. When we flush and keep things tidy, their job is much easier!\n\n'When we help, cleaners can do their work more easily!'",
+                mascot: "/mascots/mascot-happy.png",
+              },
+              {
+                order: 8,
+                type: "game",
+                title: "Clean-Up Challenge",
+                subtitle: "Game: Clean-Up Challenge",
+                gameType: "CleanupChallenge",
+                content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
+                background: "/backgrounds/cleanup-challenge-bg.jpg"
+              },
+              {
+                order: 9,
+                type: "celebration",
+                title: "The Toilet Hero Pledge",
+                subtitle: "I Promise To...",
+                content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
+              },
+              {
+                order: 10,
+                type: "quiz",
+                title: "Quick Hero Quiz!",
+                content: "Prove you're a Toilet Hero by passing this quick check!",
+                questions: [
+                  {
+                    id: "m2-q1",
+                    type: "MULTIPLE_CHOICE",
+                    question: "What should you do after using the toilet?",
+                    options: ["Flush properly!", "Leave it for later."],
+                    correctAnswer: "Flush properly!"
+                  },
+                  {
+                    id: "m2-q2",
+                    type: "MULTIPLE_CHOICE",
+                    question: "True or False: Toilets are shared spaces.",
+                    options: ["TRUE!", "FALSE!"],
+                    correctAnswer: "TRUE!"
+                  },
+                  {
+                    id: "m2-q3",
+                    type: "MULTIPLE_CHOICE",
+                    question: "Who helps keep toilets clean?",
+                    options: ["Everyone!", "Only the cleaners."],
+                    correctAnswer: "Everyone!"
+                  },
+                  {
+                    id: "m2-q4",
+                    type: "MULTIPLE_CHOICE",
+                    question: "Does a Toilet Hero help others?",
+                    options: ["Yes, of course!", "No, just themselves."],
+                    correctAnswer: "Yes, of course!"
+                  }
+                ],
+              },
+              {
+                order: 11,
+                type: "celebration",
+                title: "Great Job!",
+                subtitle: "You Are Now An Official Toilet Hero!",
+                content: "Thank you for making Singapore's toilets clean and happy for everyone.\n\nYou have earned your Module B Certificate!",
+                mascot: "/mascots/m2-mascot-final.png",
+                image: "/mascots/m2-badge-final.png",
+                background: "/backgrounds/module-2-final-bg.png",
+              }
+            ]
+          }
+        }
+      }
     },
   });
-  console.log(`✓ Module created: ${module2.title}`);
+  console.log(`✓ Module 2 created with ${11} slides`);
 
-  //   const scienceModule = await prisma.module.upsert({
-  //     where: { id: "science-101" },
-  //     update: {},
-  //     create: {
-  //       id: "science-101",
-  //       title: "The Water Cycle",
-  //       description: "Understand how water moves through Earth and atmosphere",
-  //       grade: 4,
-  //       subject: "Science",
-  //       content: "Exploration of evaporation, condensation, and precipitation.",
-  //     },
-  //   });
-  //   console.log(`✓ Module created: ${scienceModule.title}`);
-
-  // ===== 4. Create Lessons =====
-  console.log("\n📖 Creating lessons...");
-
-  // Lessons for Module 1
-  // const m1l1 = await prisma.lesson.upsert({
-  //   where: { id: "m1-l1" },
-  //   update: {},
-  //   create: {
-  //     id: "m1-l1",
-  //     moduleId: module1.id,
-  //     title: "Germs: The Invisible Enemy",
-  //     content: "Germs are tiny organisms that can cause disease. In a restroom, they often hide on frequently touched surfaces like door handles and faucets.",
-  //     order: 1,
-  //   },
-  // });
-
-  console.log(`✓ Lessons created for all modules`);
-
-  // ===== 4.1 Create Activities =====
-  console.log("\n🎮 Creating activities...");
-  const a1 = await prisma.activity.upsert({
-    where: { id: "m1-a1" },
-    update: {},
-    create: {
-      id: "m1-a1",
-      moduleId: module1.id,
-      title: "Germ Detection Mission",
-      type: "DRAG_AND_DROP",
-      content: "Identify and drag the germs into the sanitizer portal.",
-    }
-  });
-  console.log(`✓ Activity created: ${a1.title}`);
-
-  // ===== 5. Create Quizzes with Different Types =====
-  console.log("\n❓ Creating quizzes...");
-
-  //   console.log(`✓ Long Text Quiz created: ${longTextQuiz.title}`);
-
-  //   // ===== 6. Enroll Students =====
-  //   console.log("\n📝 Enrolling students in modules...");
-  //   const enrollment1 = await prisma.studentModule.upsert({
-  //     where: {
-  //       userId_moduleId: { userId: student1.id, moduleId: module1.id },
-  //     },
-  //     update: {},
-  //     create: {
-  //       userId: student1.id,
-  //       moduleId: module1.id,
-  //       isCompleted: false,
-  //     },
-  //   });
-  //   console.log(`✓ ${student1.name} enrolled in ${module1.title}`);
-
-  //   const enrollment2 = await prisma.studentModule.upsert({
-  //     where: {
-  //       userId_moduleId: { userId: student2.id, moduleId: module1.id },
-  //     },
-  //     update: {},
-  //     create: {
-  //       userId: student2.id,
-  //       moduleId: module1.id,
-  //       isCompleted: false,
-  //     },
-  //   });
-  //   console.log(`✓ ${student2.name} enrolled in ${module1.title}`);
-
-  //   // ===== 7. Create Progress Tracking =====
-  //   console.log("\n📊 Creating progress tracking...");
-  //   const progress1 = await prisma.progressTracking.upsert({
-  //     where: {
-  //       userId_moduleId: { userId: student1.id, moduleId: module1.id },
-  //     },
-  //     update: {},
-  //     create: {
-  //       userId: student1.id,
-  //       moduleId: module1.id,
-  //       lessonsCompleted: 1,
-  //       activitiesCompleted: 2,
-  //       quizzesPassed: 0,
-  //       overallProgress: 30,
-  //     },
-  //   });
-  //   console.log(`✓ Progress tracked for ${student1.name}`);
-
-  //   // ===== 8. Create Sample Quiz Submissions =====
-  //   console.log("\n✅ Creating sample quiz submissions...");
-
-  //   // Sample MC submission
-  //   const mcSubmission = await prisma.quizSubmission.upsert({
-  //     where: { id: "submission-mc-1" },
-  //     update: {},
-  //     create: {
-  //       id: "submission-mc-1",
-  //       userId: student1.id,
-  //       quizId: multipleChoiceQuiz.id,
-  //       answers: JSON.stringify([
-  //         { questionId: "mc-1", answer: 1, isCorrect: true, score: 10 },
-  //         { questionId: "mc-2", answer: 2, isCorrect: true, score: 10 },
-  //         { questionId: "mc-3", answer: 2, isCorrect: true, score: 10 },
-  //         { questionId: "mc-4", answer: 3, isCorrect: true, score: 10 },
-  //         { questionId: "mc-5", answer: 0, isCorrect: false, score: 0 },
-  //       ]),
-  //       score: 80,
-  //       passed: true,
-  //     },
-  //   });
-  //   console.log(`✓ MC Quiz submission created (Score: 80%)`);
-
-  //   // Sample TF submission
-  //   const tfSubmission = await prisma.quizSubmission.upsert({
-  //     where: { id: "submission-tf-1" },
-  //     update: {},
-  //     create: {
-  //       id: "submission-tf-1",
-  //       userId: student2.id,
-  //       quizId: trueFalseQuiz.id,
-  //       answers: JSON.stringify([
-  //         { questionId: "tf-1", answer: true, isCorrect: true, score: 5 },
-  //         { questionId: "tf-2", answer: true, isCorrect: true, score: 5 },
-  //         { questionId: "tf-3", answer: false, isCorrect: true, score: 5 },
-  //         { questionId: "tf-4", answer: true, isCorrect: true, score: 5 },
-  //         { questionId: "tf-5", answer: true, isCorrect: true, score: 5 },
-  //         { questionId: "tf-6", answer: true, isCorrect: false, score: 0 },
-  //         { questionId: "tf-7", answer: true, isCorrect: true, score: 5 },
-  //         { questionId: "tf-8", answer: true, isCorrect: true, score: 5 },
-  //       ]),
-  //       score: 87.5,
-  //       passed: true,
-  //     },
-  //   });
-  //   console.log(`✓ TF Quiz submission created (Score: 87.5%)`);
-
-  //   // Sample LT submission (pending grading)
-  //   const ltSubmission = await prisma.quizSubmission.upsert({
-  //     where: { id: "submission-lt-1" },
-  //     update: {},
-  //     create: {
-  //       id: "submission-lt-1",
-  //       userId: student1.id,
-  //       quizId: longTextQuiz.id,
-  //       answers: JSON.stringify([
-  //         {
-  //           questionId: "lt-1",
-  //           answer:
-  //             "The bakery makes 12 cookies in each batch. If they make 5 batches, they will make 12 × 5 = 60 cookies total. I used multiplication because we have 5 groups of 12 cookies, and multiplication is the quick way to add equal groups. Instead of adding 12 + 12 + 12 + 12 + 12, we can multiply 12 × 5.",
-  //           isCorrect: undefined,
-  //           score: 0,
-  //         },
-  //         {
-  //           questionId: "lt-2",
-  //           answer:
-  //             "A real-world situation where I use multiplication is when buying things at the store. For example, if apples cost $2 each and I want to buy 6 apples, I multiply 2 × 6 to find the total cost is $12. I multiply the price per apple by the number of apples to get the total price.",
-  //           isCorrect: undefined,
-  //           score: 0,
-  //         },
-  //       ]),
-  //       score: 0,
-  //       passed: false,
-  //     },
-  //   });
-  //   console.log(`✓ LT Quiz submission created (Pending grading)`);
-
-  //   // ===== 9. Create Sample Certificate =====
-  //   console.log("\n🏆 Creating sample certificate...");
-  //   const certificate = await prisma.certificate.upsert({
-  //     where: { id: "cert-1" },
-  //     update: {},
-  //     create: {
-  //       id: "cert-1",
-  //       userId: student2.id,
-  //       moduleId: module1.id,
-  //       moduleName: module1.title,
-  //       certificateNumber: `CERT-${Date.now()}-${student2.id}`,
-  //       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-  //     },
-  //   });
-  //   console.log(`✓ Certificate created for ${student2.name}`);
-
-  //   console.log("\n✨ Database seeding completed successfully!");
-  //   console.log("\n📋 Test Credentials:");
-  //   console.log("Teacher:");
-  //   console.log("  Email: teacher@school.edu");
-  //   console.log("  Password: password123");
-  //   console.log("  School Code: DPS001");
-  //   console.log("\nStudent 1:");
-  //   console.log("  Email: alice@school.edu");
-  //   console.log("  Password: password123");
-  //   console.log("  School Code: DPS001");
-  //   console.log("\nStudent 2:");
-  //   console.log("  Email: bob@school.edu");
-  //   console.log("  Password: password123");
-  //   console.log("  School Code: DPS001");
+  console.log("\n✨ Database seeding completed successfully!");
 }
 
 main()
