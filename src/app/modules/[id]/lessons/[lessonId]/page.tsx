@@ -17,7 +17,8 @@ import {
     Send,
     Target,
     ShieldCheck,
-    Star
+    Star,
+    XCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -1298,29 +1299,87 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
                         />
                     )}
 
-                    {q.type === "MULTIPLE_CHOICE" && q.options?.map((opt, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setAnswers({ ...answers, [q.id]: i })}
-                            className={`w-full p-6 text-left rounded-3xl border-2 font-bold text-lg transition-all ${answers[q.id] === i ? 'bg-purple-600 border-purple-600 text-white shadow-xl rotate-1' : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300'
-                                }`}
-                        >
-                            {opt}
-                        </button>
-                    ))}
+                    {q.type === "MULTIPLE_CHOICE" && q.options?.map((opt, i) => {
+                        const isSelected = answers[q.id] === opt;
+                        const isCorrect = opt === q.correctAnswer;
+                        const showCorrect = isAnswered && isCorrect;
+                        const showWrong = isAnswered && isSelected && !isCorrect;
+
+                        return (
+                            <button
+                                key={i}
+                                onClick={() => !isAnswered && setAnswers({ ...answers, [q.id]: opt })}
+                                className={`w-full p-6 text-left rounded-3xl border-2 font-bold text-lg transition-all flex items-center justify-between relative group ${isAnswered
+                                    ? isCorrect
+                                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg scale-[1.02] z-10'
+                                        : isSelected
+                                            ? 'bg-rose-500 border-rose-500 text-white'
+                                            : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
+                                    : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:scale-[1.01] active:scale-[0.98]'
+                                    }`}
+                            >
+                                <span className="flex-1">{opt}</span>
+                                <AnimatePresence>
+                                    {showCorrect && (
+                                        <motion.div
+                                            initial={{ scale: 0, rotate: -20 }}
+                                            animate={{ scale: 1, rotate: 0 }}
+                                            className="ml-4"
+                                        >
+                                            <CheckCircle className="w-6 h-6 md:w-8 md:h-8" />
+                                        </motion.div>
+                                    )}
+                                    {showWrong && (
+                                        <motion.div
+                                            initial={{ scale: 0, x: 10 }}
+                                            animate={{ scale: 1, x: 0 }}
+                                            className="ml-4"
+                                        >
+                                            <XCircle className="w-6 h-6 md:w-8 md:h-8" />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </button>
+                        );
+                    })}
 
                     {q.type === "TRUE_FALSE" && (
-                        <div className="grid grid-cols-2 gap-4">
-                            {["True", "False"].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => setAnswers({ ...answers, [q.id]: opt })}
-                                    className={`p-10 rounded-3xl border-2 font-black text-xl transition-all ${answers[q.id] === opt ? 'bg-purple-600 border-purple-600 text-white shadow-xl' : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300'
-                                        }`}
-                                >
-                                    {opt}
-                                </button>
-                            ))}
+                        <div className="grid grid-cols-2 gap-6">
+                            {["True", "False"].map((opt) => {
+                                const isSelected = answers[q.id] === opt;
+                                const isCorrect = opt.toUpperCase() === (q.correctAnswer as string)?.toUpperCase() || opt === q.correctAnswer;
+                                const showCorrect = isAnswered && isCorrect;
+                                const showWrong = isAnswered && isSelected && !isCorrect;
+
+                                return (
+                                    <button
+                                        key={opt}
+                                        onClick={() => !isAnswered && setAnswers({ ...answers, [q.id]: opt })}
+                                        className={`p-10 rounded-3xl border-2 font-black text-2xl transition-all flex flex-col items-center gap-4 relative ${isAnswered
+                                            ? isCorrect
+                                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg scale-[1.05] z-10'
+                                                : isSelected
+                                                    ? 'bg-rose-500 border-rose-500 text-white'
+                                                    : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
+                                            : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:shadow-md'
+                                            }`}
+                                    >
+                                        <span className="mb-2">{opt}</span>
+                                        <AnimatePresence>
+                                            {showCorrect && (
+                                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                                    <CheckCircle className="w-10 h-10" />
+                                                </motion.div>
+                                            )}
+                                            {showWrong && (
+                                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                                                    <XCircle className="w-10 h-10" />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
 
