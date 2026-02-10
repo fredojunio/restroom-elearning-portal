@@ -1602,7 +1602,7 @@ export default function LessonDetailPage() {
             </header>
 
             {/* 3. Main Slide Content Area */}
-            <main className="relative pt-16 pb-24 h-screen flex items-center justify-center overflow-hidden">
+            <main className="relative pt-16 pb-24 h-dvh flex items-center justify-center overflow-hidden">
                 {/* --- Background Image --- */}
                 <div
                     className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
@@ -1652,10 +1652,10 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50vh] max-h-[calc(100vh-140px)] flex items-center justify-center relative overflow-y-auto overflow-x-hidden no-scrollbar`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50dvh] max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar`}
                         >
                             {/* Dynamic Slide Switcher */}
-                            <div className="w-full">
+                            <div className="w-full m-auto">
                                 {currentSlide.type === "title" && <TitleSlide {...currentSlide} />}
                                 {currentSlide.type === "content" && <ContentSlide {...currentSlide} />}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
