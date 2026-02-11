@@ -25,6 +25,7 @@ export async function GET(
       prisma.lesson.findMany({
         where: { moduleId },
         orderBy: { order: "asc" },
+        include: { slides: { select: { id: true } } }
       }),
       prisma.activity.findMany({ where: { moduleId } }),
       prisma.quiz.findMany({ where: { moduleId } }),
@@ -46,7 +47,7 @@ export async function GET(
       completions = await prisma.completion.findMany({
         where: {
           userId,
-          completedAt: { not: null },
+          // Removed completedAt filter to include in-progress items
           OR: [
             ...(lessonIds.length > 0 ? [{ lessonId: { in: lessonIds } }] : []),
             ...(activityIds.length > 0 ? [{ activityId: { in: activityIds } }] : []),
@@ -58,61 +59,106 @@ export async function GET(
 
     console.log(`[API/Progress] Db queries took ${Date.now() - start}ms`);
 
-    // Map completions to items
-    const completedLessonIds = completions
-      .filter((c: any) => c.lessonId)
-      .map((c: any) => c.lessonId!);
-    const completedActivityIds = completions
-      .filter((c: any) => c.activityId)
-      .map((c: any) => c.activityId!);
-    const completedQuizIds = completions
-      .filter((c: any) => c.quizId)
-      .map((c: any) => c.quizId!);
+    // Map completions to items and find the first incomplete one for resume
+    let resumeItem: any = null;
 
     // Create lesson items with completion status
-    const lessonItems = lessons.map((lesson: any) => ({
-      id: lesson.id,
-      title: lesson.title,
-      order: lesson.order,
-      isCompleted: completedLessonIds.includes(lesson.id),
-    }));
+    const lessonItems = lessons.map((lesson: any) => {
+      const completion = completions.find((c: any) => c.lessonId === lesson.id);
+      const isCompleted = !!completion && !!completion.completedAt;
+
+      const item = {
+        id: lesson.id,
+        title: lesson.title,
+        order: lesson.order,
+        isCompleted,
+        currentSlide: completion?.currentSlide || 0,
+        totalSlides: lesson.slides?.length || 0,
+      };
+
+      if (!resumeItem && !isCompleted) {
+        resumeItem = {
+          ...item,
+          type: 'lesson'
+        };
+      }
+
+      return item;
+    });
 
     // Create activity items with completion status
-    const activityItems = activities.map((activity: any) => ({
-      id: activity.id,
-      title: activity.title,
-      type: activity.type,
-      isCompleted: completedActivityIds.includes(activity.id),
-    }));
+    const activityItems = activities.map((activity: any) => {
+      const completion = completions.find((c: any) => c.activityId === activity.id);
+      const isCompleted = !!completion && !!completion.completedAt;
+
+      const item = {
+        id: activity.id,
+        title: activity.title,
+        type: activity.type,
+        isCompleted,
+      };
+
+      if (!resumeItem && !isCompleted) {
+        resumeItem = {
+          ...item,
+          type: 'activity'
+        };
+      }
+
+      return item;
+    });
 
     // Create quiz items with completion status
-    const quizItems = quizzes.map((quiz: any) => ({
-      id: quiz.id,
-      title: quiz.title,
-      type: quiz.type,
-      isCompleted: completedQuizIds.includes(quiz.id),
-    }));
+    const quizItems = quizzes.map((quiz: any) => {
+      const completion = completions.find((c: any) => c.quizId === quiz.id);
+      const isCompleted = !!completion && !!completion.completedAt;
 
-    const lessonsCompleted = completedLessonIds.length;
-    const activitiesCompleted = completedActivityIds.length;
-    const quizzesCompleted = completedQuizIds.length;
+      const item = {
+        id: quiz.id,
+        title: quiz.title,
+        type: quiz.type,
+        isCompleted,
+      };
 
-    const totalItems = lessons.length + activities.length + quizzes.length;
-    const completedItems =
-      lessonsCompleted + activitiesCompleted + quizzesCompleted;
+      if (!resumeItem && !isCompleted) {
+        resumeItem = {
+          ...item,
+          type: 'quiz'
+        };
+      }
+
+      return item;
+    });
+
+    const lessonsCompleted = lessonItems.filter(l => l.isCompleted).length;
+    const activitiesCompleted = activityItems.filter(a => a.isCompleted).length;
+    const quizzesCompleted = quizItems.filter(q => q.isCompleted).length;
+
+    // Slide-based calculation
+    const totalLessonSlides = lessonItems.reduce((sum, l) => sum + l.totalSlides, 0);
+    const completedLessonSlides = lessonItems.reduce((sum, l) =>
+      sum + (l.isCompleted ? l.totalSlides : l.currentSlide), 0
+    );
+
+    const totalOverallPoints = totalLessonSlides + activities.length + quizzes.length;
+    const completedOverallPoints = completedLessonSlides + activitiesCompleted + quizzesCompleted;
 
     const overallPercentage =
-      totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+      totalOverallPoints > 0 ? Math.round((completedOverallPoints / totalOverallPoints) * 100) : 0;
 
     return NextResponse.json({
       lessons: {
-        completed: lessonsCompleted,
-        total: lessons.length,
+        completed: completedLessonSlides, // Changed to show slides
+        total: totalLessonSlides,       // Changed to show slides
         percentage:
-          lessons.length > 0
-            ? Math.round((lessonsCompleted / lessons.length) * 100)
+          totalLessonSlides > 0
+            ? Math.round((completedLessonSlides / totalLessonSlides) * 100)
             : 0,
         items: lessonItems,
+        taskCount: { // Keeping task count just in case
+          completed: lessonsCompleted,
+          total: lessons.length
+        }
       },
       activities: {
         completed: activitiesCompleted,
@@ -133,10 +179,11 @@ export async function GET(
         items: quizItems,
       },
       overall: {
-        completed: completedItems,
-        total: totalItems,
+        completed: completedOverallPoints,
+        total: totalOverallPoints,
         percentage: overallPercentage,
       },
+      resumeItem,
     });
   } catch (error: any) {
     console.error("Error fetching progress for module:", moduleId, error);

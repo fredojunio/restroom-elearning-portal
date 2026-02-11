@@ -243,7 +243,7 @@ export default function StudentDashboard() {
                             </div>
                             <div className="flex flex-col items-end">
                               <p className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">
-                                {(module.progress?.completed || 0)}/{(module.progress?.total || 0)} TASKS
+                                {(module.progress?.completed || 0)}/{(module.progress?.total || 0)} SLIDES
                               </p>
                             </div>
                           </div>
