@@ -143,7 +143,9 @@ model Completion {
   answer        String?  @db.LongText // For activity & quiz answers
   attemptCount  Int      @default(1)  // For quiz retakes
   
-  completedAt   DateTime @default(now())
+  currentSlide  Int      @default(0)  // To resume lessons
+  
+  completedAt   DateTime?             // Null means in-progress
   updatedAt     DateTime @updatedAt
 
   @@unique([userId, lessonId], name: "user_lesson")

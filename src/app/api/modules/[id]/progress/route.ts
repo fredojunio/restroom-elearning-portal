@@ -21,24 +21,40 @@ export async function GET(
     const start = Date.now();
 
     // Get all lessons, activities, quizzes in module and completions in parallel
-    const [lessons, activities, quizzes, completions] = await Promise.all([
+    const [lessons, activities, quizzes] = await Promise.all([
       prisma.lesson.findMany({
         where: { moduleId },
         orderBy: { order: "asc" },
       }),
       prisma.activity.findMany({ where: { moduleId } }),
       prisma.quiz.findMany({ where: { moduleId } }),
-      prisma.completion.findMany({
+    ]);
+
+    if (!userId) {
+      console.error("[API/Progress] No user ID found in session");
+      return NextResponse.json({ error: "User ID not found" }, { status: 401 });
+    }
+
+    const lessonIds = lessons.map(l => l.id);
+    const activityIds = activities.map(a => a.id);
+    const quizIds = quizzes.map(q => q.id);
+
+    let completions: any[] = [];
+
+    // Only fetch completions if there are items to check
+    if (lessonIds.length > 0 || activityIds.length > 0 || quizIds.length > 0) {
+      completions = await prisma.completion.findMany({
         where: {
           userId,
+          completedAt: { not: null },
           OR: [
-            { lesson: { moduleId } },
-            { activity: { moduleId } },
-            { quiz: { moduleId } },
+            ...(lessonIds.length > 0 ? [{ lessonId: { in: lessonIds } }] : []),
+            ...(activityIds.length > 0 ? [{ activityId: { in: activityIds } }] : []),
+            ...(quizIds.length > 0 ? [{ quizId: { in: quizIds } }] : []),
           ],
-        },
-      })
-    ]);
+        } as any,
+      });
+    }
 
     console.log(`[API/Progress] Db queries took ${Date.now() - start}ms`);
 

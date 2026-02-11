@@ -221,7 +221,7 @@ async function main() {
                 title: "Help our Heroes!",
                 subtitle: "Section 4: Our Cleaners",
                 content: "Cleaners work very hard every day to keep us safe. When we flush and keep things tidy, their job is much easier!\n\n'When we help, cleaners can do their work more easily!'",
-                mascot: "/mascots/mascot-happy.png",
+                mascot: "/mascots/mascot-pointing.png",
               },
               {
                 order: 8,

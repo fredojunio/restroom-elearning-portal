@@ -571,6 +571,16 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
             (messType === 'spill' && activeTool === 'wipe') ||
             (messType === 'unflushed' && activeTool === 'flush')
         ) {
+            // Play SFX
+            const sfxMap: Record<string, string> = {
+                'tissue': '/sfx/trash.mp3',
+                'spill': '/sfx/wipe.mp3',
+                'unflushed': '/sfx/flush.mp3'
+            };
+
+            const audio = new Audio(sfxMap[messType]);
+            audio.play().catch(e => console.warn("Audio play failed:", e));
+
             setMesses(prev => prev.map(m => m.id === messId ? { ...m, fixed: true } : m));
             setScore(s => s + 100);
             confetti({ particleCount: 20, spread: 30 });
@@ -1428,52 +1438,84 @@ export default function LessonDetailPage() {
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
     const [loading, setLoading] = useState(true);
+    const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
 
+    // Fetch lesson and progress
     useEffect(() => {
-        const fetchLesson = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch(`/api/lessons/${params.lessonId}`);
-                if (!response.ok) throw new Error("Failed to fetch lesson data");
-                const data = await response.json();
+                // Fetch Lesson
+                const lessonRes = await fetch(`/api/lessons/${params.lessonId}`);
+                if (!lessonRes.ok) throw new Error("Failed to fetch lesson data");
+                const lessonData = await lessonRes.json();
 
-                if (data.slides && data.slides.length > 0) {
-                    setSlides(data.slides);
-                } else if (data.module && data.module.title.includes("Be a Toilet Hero")) {
-                    // Use Module 2 dummy slides if no DB slides & module matches
-                    setSlides(moduleTwoSlides as unknown as Slide[]);
+                let currentSlides = dummySlides;
+                if (lessonData.slides && lessonData.slides.length > 0) {
+                    currentSlides = lessonData.slides;
+                } else if (lessonData.module && lessonData.module.title.includes("Be a Toilet Hero")) {
+                    currentSlides = moduleTwoSlides as unknown as Slide[];
+                }
+                setSlides(currentSlides);
+
+                // Fetch Progress
+                const progressRes = await fetch(`/api/completions?lessonId=${params.lessonId}`);
+                if (progressRes.ok) {
+                    const progressData = await progressRes.json();
+                    if (progressData.currentSlide > 0 && !progressData.isCompleted && !initialSlideLoaded) {
+                        setCurrentIdx(progressData.currentSlide);
+                        setInitialSlideLoaded(true);
+                    }
                 }
             } catch (err) {
-                console.error("Error fetching lesson:", err);
-                // Gracefully fallback to dummySlides
+                console.error("Error fetching data:", err);
             } finally {
                 setLoading(false);
             }
         };
 
         if (params.lessonId) {
-            fetchLesson();
+            fetchData();
         }
-    }, [params.lessonId]);
+    }, [params.lessonId, initialSlideLoaded]);
 
     const totalSlides = slides.length;
     const currentSlide = slides[currentIdx];
 
+    const saveProgress = async (idx: number, isComplete = false) => {
+        try {
+            await fetch('/api/completions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lessonId: params.lessonId,
+                    currentSlide: idx,
+                    isComplete
+                })
+            });
+        } catch (err) {
+            console.error("Failed to save progress:", err);
+        }
+    };
+
     const handleNext = () => {
         if (currentIdx < totalSlides - 1) {
+            const nextIdx = currentIdx + 1;
             setDirection(1);
-            setCurrentIdx(currentIdx + 1);
-            // Reset interaction states for next slide
+            setCurrentIdx(nextIdx);
             setGameState('idle');
             setQuizState('idle');
+            saveProgress(nextIdx);
         }
     };
 
     const handlePrev = () => {
         if (currentIdx > 0) {
+            const prevIdx = currentIdx - 1;
             setDirection(-1);
-            setCurrentIdx(currentIdx - 1);
+            setCurrentIdx(prevIdx);
             setGameState('idle');
             setQuizState('idle');
+            saveProgress(prevIdx);
         }
     };
 
@@ -1482,10 +1524,12 @@ export default function LessonDetailPage() {
         setCurrentIdx(idx);
         setGameState('idle');
         setQuizState('idle');
+        saveProgress(idx);
     };
 
     const handleComplete = async () => {
         setIsMarked(true);
+        saveProgress(currentIdx, true);
         confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
         setTimeout(() => setComplete(true), 1500);
     };

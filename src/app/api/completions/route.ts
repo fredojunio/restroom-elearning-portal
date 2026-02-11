@@ -28,11 +28,12 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({
-      isCompleted: !!completion,
+      isCompleted: !!completion && !!(completion as any).completedAt,
       score: completion?.score || null,
       passed: completion?.passed || null,
       attemptCount: completion?.attemptCount || 0,
-      completedAt: completion?.completedAt || null,
+      completedAt: (completion as any)?.completedAt || null,
+      currentSlide: (completion as any)?.currentSlide || 0,
     });
   } catch (error) {
     console.error("Error checking completion:", error);
@@ -43,14 +44,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST - Mark lesson/activity/quiz as completed
+// POST - Mark lesson/activity/quiz as completed or save progress
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { lessonId, activityId, quizId, score, passed, answer } =
+  const { lessonId, activityId, quizId, score, passed, answer, currentSlide, isComplete } =
     await req.json();
   const userId = (session.user as any).id;
 
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // For lessons: just mark complete
+    // For lessons: mark complete or save progress
     if (lessonId) {
       const completion = await prisma.completion.upsert({
         where: {
@@ -71,12 +72,20 @@ export async function POST(req: NextRequest) {
             lessonId,
           },
         },
-        update: {},
-        create: { userId, lessonId },
+        update: {
+          ...(currentSlide !== undefined && { currentSlide }),
+          ...(isComplete && { completedAt: new Date() }),
+        },
+        create: {
+          userId,
+          lessonId,
+          currentSlide: currentSlide || 0,
+          ...(isComplete && { completedAt: new Date() }),
+        },
       });
 
       return NextResponse.json({
-        message: "Lesson marked as complete",
+        message: isComplete ? "Lesson marked as complete" : "Progress saved",
         completion,
       });
     }
