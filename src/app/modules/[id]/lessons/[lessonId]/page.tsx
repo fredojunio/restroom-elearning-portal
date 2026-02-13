@@ -1029,6 +1029,19 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
             ? "/mascots/m2-mascot-final.png"
             : "/mascots/mascot-hero.png";
 
+    useEffect(() => {
+        const audio = new Audio('/sfx/celebration.mp3');
+        audio.play().catch(error => {
+            console.warn("Celebration audio auto-play was prevented by the browser:", error);
+        });
+
+        // Cleanup if necessary (though usually not needed for a one-shot SFX on mount)
+        return () => {
+            audio.pause();
+            audio.src = "";
+        };
+    }, []);
+
     console.log("CelebrationSlide render:", { id, title, mascot: effectiveMascot, image });
 
     return (
@@ -1429,7 +1442,13 @@ export default function LessonDetailPage() {
     const [currentIdx, setCurrentIdx] = useState(0);
     const [direction, setDirection] = useState(0);
     const [complete, setComplete] = useState(false); // Lesson final modal
+    const [loading, setLoading] = useState(true);
     const [isMarked, setIsMarked] = useState(false); // API call status
+
+    const playYay = () => {
+        const audio = new Audio('/sfx/yay.mp3');
+        audio.play().catch(e => console.warn("Yay audio play failed:", e));
+    };
 
     // Game states
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'completed'>('idle');
@@ -1437,7 +1456,6 @@ export default function LessonDetailPage() {
     const [quizState, setQuizState] = useState<'idle' | 'playing' | 'completed'>('idle');
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
-    const [loading, setLoading] = useState(true);
     const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
 
     // Fetch lesson and progress
@@ -1716,18 +1734,18 @@ export default function LessonDetailPage() {
                                 {currentSlide.type === "game" && (
                                     gameState === "playing" ? (
                                         currentSlide.gameType === "Story Interaction" ? (
-                                            <HandwashingGame onComplete={() => setGameState('completed')} />
+                                            <HandwashingGame onComplete={() => { setGameState('completed'); playYay(); }} />
                                         ) : currentSlide.gameType === "WhosNext" ? (
-                                            <WhosNextGame onComplete={() => setGameState('completed')} />
+                                            <WhosNextGame onComplete={() => { setGameState('completed'); playYay(); }} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
-                                            <HeroOrOopsGame onComplete={() => setGameState('completed')} invertChoices={currentSlide.invertChoices} />
+                                            <HeroOrOopsGame onComplete={() => { setGameState('completed'); playYay(); }} invertChoices={currentSlide.invertChoices} />
                                         ) : currentSlide.gameType === "CleanupChallenge" ? (
                                             <CleanupChallengeGame
-                                                onComplete={() => setGameState('completed')}
+                                                onComplete={() => { setGameState('completed'); playYay(); }}
                                                 background={currentSlide.background}
                                             />
                                         ) : (
-                                            <GermHunterGame onComplete={() => setGameState('completed')} />
+                                            <GermHunterGame onComplete={() => { setGameState('completed'); playYay(); }} />
                                         )
                                     ) : (
                                         <GameLauncherSlide
@@ -1739,7 +1757,7 @@ export default function LessonDetailPage() {
 
                                 {currentSlide.type === "comparison" && (
                                     <ToiletComparisonSlide
-                                        onComplete={() => setGameState('completed')}
+                                        onComplete={() => { setGameState('completed'); playYay(); }}
                                         invertChoices={currentSlide.invertChoices}
                                     />
                                 )}
@@ -1749,7 +1767,7 @@ export default function LessonDetailPage() {
                                     quizState === "playing" ? (
                                         <InlineQuizFlow
                                             questions={currentSlide.questions || []}
-                                            onComplete={() => setQuizState('completed')}
+                                            onComplete={() => { setQuizState('completed'); playYay(); }}
                                         />
                                     ) : (
                                         <QuizLauncherSlide
