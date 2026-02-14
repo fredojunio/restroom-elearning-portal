@@ -283,6 +283,7 @@ export default function StudentDashboard() {
         </div>
       </main>
 
+
       {/* Footer */}
       <footer className="py-24 border-t border-slate-100 bg-white/50 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">

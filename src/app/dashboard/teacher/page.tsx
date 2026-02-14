@@ -4,6 +4,17 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  RotateCcw,
+  AlertTriangle,
+  X,
+  Users,
+  Search,
+  BookOpen,
+  Layout,
+  FileText
+} from "lucide-react";
 
 interface Module {
   id: string;
@@ -18,6 +29,7 @@ interface Module {
 }
 
 interface StudentProgress {
+  id: string;
   name: string;
   email: string;
   modulesCompleted: number;
@@ -30,6 +42,9 @@ export default function TeacherDashboard() {
   const [modules, setModules] = useState<Module[]>([]);
   const [students, setStudents] = useState<StudentProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentProgress | null>(null);
   const [stats, setStats] = useState({
     totalModules: 0,
     totalStudents: 0,
@@ -86,6 +101,33 @@ export default function TeacherDashboard() {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetProgress = async () => {
+    if (!selectedStudent) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/user/reset-progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedStudent.id }),
+      });
+
+      if (res.ok) {
+        // Refresh student data
+        await fetchDashboardData();
+        setShowResetConfirm(false);
+        setSelectedStudent(null);
+      } else {
+        const error = await res.json();
+        alert(`Failed to reset progress: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error resetting progress:", error);
+      alert("An error occurred while resetting progress.");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -246,6 +288,9 @@ export default function TeacherDashboard() {
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                         Progress
                       </th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -281,6 +326,18 @@ export default function TeacherDashboard() {
                             </div>
                           </div>
                         </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => {
+                              setSelectedStudent(student);
+                              setShowResetConfirm(true);
+                            }}
+                            className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors group"
+                            title="Reset Progress"
+                          >
+                            <RotateCcw className="w-5 h-5 group-hover:-rotate-45 transition-transform" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -291,6 +348,70 @@ export default function TeacherDashboard() {
         )}
 
       </div>
+
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && selectedStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => !resetting && setShowResetConfirm(false)}
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
+          >
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                disabled={resetting}
+                className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="p-10 text-center">
+              <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className="w-8 h-8 text-rose-500" />
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Reset Student Progress?</h3>
+              <p className="text-gray-600 mb-8">
+                You are about to reset all progress for <span className="font-bold text-gray-900">{selectedStudent.name}</span>. This cannot be undone.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  disabled={resetting}
+                  onClick={handleResetProgress}
+                  className="w-full py-4 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {resetting ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                      />
+                      Resetting...
+                    </>
+                  ) : "Confirm Reset"}
+                </button>
+                <button
+                  disabled={resetting}
+                  onClick={() => setShowResetConfirm(false)}
+                  className="w-full py-4 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-all disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
