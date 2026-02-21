@@ -22,6 +22,10 @@ const nerkoOne = Nerko_One({
 export const metadata: Metadata = {
   title: "Toilet Hero",
   description: "by Restroom Association",
+  icons: {
+    icon: "/mascots/mascot-logo.png",
+    apple: "/mascots/mascot-logo.png",
+  },
 };
 
 export default function RootLayout({

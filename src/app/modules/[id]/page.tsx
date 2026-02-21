@@ -192,14 +192,6 @@ export default function ModuleDetailPage() {
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
             <div className="max-w-3xl">
-              <div className="flex gap-3 mb-6">
-                <span className="px-3 py-1 bg-sky-500/20 text-sky-400 rounded-full font-black text-[10px] uppercase tracking-widest border border-sky-500/20">
-                  Mission Grade {module.grade}
-                </span>
-                <span className="px-3 py-1 bg-white/5 text-slate-400 rounded-full font-black text-[10px] uppercase tracking-widest border border-white/5">
-                  {module.subject}
-                </span>
-              </div>
               <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-6 uppercase leading-none">{module.title}</h1>
               <p className="text-slate-400 text-xl font-medium leading-relaxed">{module.description}</p>
             </div>
