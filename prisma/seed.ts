@@ -62,34 +62,46 @@ async function main() {
             create: [
               {
                 order: 1,
+                type: "video",
+                title: "Mission Introduction",
+                videoUrl: "/videos/module-a/A1 video.mp4",
+              },
+              {
+                order: 2,
                 type: "title",
                 title: "Welcome to Toilet Heroes",
                 subtitle: "Clean Toilets Keep Us Healthy",
                 content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
               },
               {
-                order: 2,
+                order: 3,
                 type: "content",
                 title: "Hi there, Hero",
                 content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
                 mascot: "/mascots/mascot-greeting.png"
               },
               {
-                order: 3,
+                order: 4,
                 type: "content",
                 title: "Meet the Invisible Germs",
                 content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
                 mascot: "/mascots/mascot-pointing.png"
               },
               {
-                order: 4,
+                order: 5,
+                type: "video",
+                title: "Germ Secret Revealed",
+                videoUrl: "/videos/module-a/A2.mp4",
+              },
+              {
+                order: 6,
                 type: "game",
                 title: "Germ Hunter Game",
                 gameType: "Drag to Disinfect",
                 content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
               },
               {
-                order: 5,
+                order: 7,
                 type: "image",
                 title: "How Germs Travel",
                 image: "🦠",
@@ -97,7 +109,28 @@ async function main() {
                 mascot: "/mascots/mascot-pointing.png"
               },
               {
-                order: 6,
+                id: "slide-a4-video",
+                type: "video",
+                title: "Invisible Germs",
+                videoUrl: "/videos/module-a/A4.mp4",
+                order: 8
+              },
+              {
+                id: "slide-a5-video",
+                type: "video",
+                title: "Wash Your Hand!",
+                videoUrl: "/videos/module-a/A5.mp4",
+                order: 9
+              },
+              {
+                id: "slide-a6-video",
+                type: "video",
+                title: "Wash Your Hand!",
+                videoUrl: "/videos/module-a/A6.mp4",
+                order: 10
+              },
+              {
+                order: 11,
                 type: "game",
                 title: "Tiny Germs, Big Impact",
                 gameType: "Story Interaction",
@@ -105,12 +138,26 @@ async function main() {
                 mascot: "/mascots/mascot-scared.png"
               },
               {
-                order: 7,
+                order: 12,
                 type: "comparison",
                 title: "Clean Toilets, Happy Friends",
               },
               {
-                order: 8,
+                id: "slide-a8-video",
+                type: "video",
+                title: "Clean Toilets, Happy Friends",
+                videoUrl: "/videos/module-a/A8.mp4",
+                order: 13
+              },
+              {
+                id: "slide-a9-video",
+                type: "video",
+                title: "Fun Quiz Time!",
+                videoUrl: "/videos/module-a/A9.mp4",
+                order: 14
+              },
+              {
+                order: 15,
                 type: "quiz",
                 title: "Fun Quiz Time!",
                 content: "Prove you're a Toilet Hero by passing this quick check!",
@@ -132,9 +179,10 @@ async function main() {
                     correctAnswer: "Soap + Water!"
                   }
                 ]
-              },
+              }
+              ,
               {
-                order: 9,
+                order: 16,
                 type: "celebration",
                 title: "What a Toilet Hero!",
                 content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
@@ -165,7 +213,14 @@ async function main() {
           slides: {
             create: [
               {
-                order: 1,
+                id: "slide-b1-video",
+                type: "video",
+                title: "Be a Toilet Hero Every Day!",
+                videoUrl: "/videos/module-b/B1.mp4",
+                order: 1
+              },
+              {
+                order: 2,
                 type: "title",
                 title: "Be a Toilet Hero Every Day",
                 subtitle: "Module B: Habits, Respect & Responsibility",
@@ -173,7 +228,7 @@ async function main() {
                 background: "/backgrounds/module-2-bg.jpg"
               },
               {
-                order: 2,
+                order: 3,
                 type: "content",
                 title: "Ready to Help?",
                 subtitle: "Section 1: Hello Again!",
@@ -182,14 +237,35 @@ async function main() {
                 background: "/backgrounds/module-2-bg.jpg"
               },
               {
-                order: 3,
+                id: "slide-b2-video",
+                type: "video",
+                title: "Toilets are for everyone",
+                videoUrl: "/videos/module-b/B2.mp4",
+                order: 4
+              },
+              {
+                order: 5,
                 type: "content",
                 title: "You are not the only one!",
                 subtitle: "Section 2: Shared Spaces",
                 content: "Toilets are for everyone. When we leave them clean, we are being kind to the next person.\n\n• Clean Choice: The next person (friend or teacher) smiles!\n• Messy Choice: The next person looks very unhappy.",
               },
               {
-                order: 4,
+                id: "slide-b3-video",
+                type: "video",
+                title: "Toilets are for everyone",
+                videoUrl: "/videos/module-b/B3.mp4",
+                order: 6
+              },
+              {
+                id: "slide-b8-video",
+                type: "video",
+                title: "Hero or Oops?",
+                videoUrl: "/videos/module-b/B8.mp4",
+                order: 7
+              },
+              {
+                order: 8,
                 type: "comparison",
                 title: "Toilet Sharing",
                 subtitle: "Section 2: Shared Spaces",
@@ -199,7 +275,7 @@ async function main() {
                 invertChoices: true,
               },
               {
-                order: 5,
+                order: 9,
                 type: "content",
                 title: "Hero or Oops?",
                 subtitle: "Section 3: Hero or Oops?",
@@ -207,7 +283,14 @@ async function main() {
                 mascot: "/mascots/mascot-pointing.png",
               },
               {
-                order: 6,
+                id: "slide-b4-video",
+                type: "video",
+                title: "Hero or Oops?",
+                videoUrl: "/videos/module-b/B4.mp4",
+                order: 10
+              },
+              {
+                order: 11,
                 type: "game",
                 title: "Toilet Hero Behavior Game",
                 subtitle: "Section 3: Hero or Oops?",
@@ -216,7 +299,7 @@ async function main() {
                 invertChoices: true,
               },
               {
-                order: 7,
+                order: 12,
                 type: "content",
                 title: "Help our Heroes!",
                 subtitle: "Section 4: Our Cleaners",
@@ -224,7 +307,28 @@ async function main() {
                 mascot: "/mascots/mascot-pointing.png",
               },
               {
-                order: 8,
+                id: "slide-b14-video",
+                type: "video",
+                title: "Clean Up",
+                videoUrl: "/videos/module-b/B14.mp4",
+                order: 13
+              },
+              {
+                id: "slide-b15-video",
+                type: "video",
+                title: "Clean Up",
+                videoUrl: "/videos/module-b/B15.mp4",
+                order: 14
+              },
+              {
+                id: "slide-b16-video",
+                type: "video",
+                title: "Clean Up",
+                videoUrl: "/videos/module-b/B16.mp4",
+                order: 15
+              },
+              {
+                order: 16,
                 type: "game",
                 title: "Clean-Up Challenge",
                 subtitle: "Game: Clean-Up Challenge",
@@ -233,14 +337,28 @@ async function main() {
                 background: "/backgrounds/cleanup-challenge-bg.jpg"
               },
               {
-                order: 9,
+                id: "slide-b12-video",
+                type: "video",
+                title: "We Help The Cleaners!",
+                videoUrl: "/videos/module-b/B12.mp4",
+                order: 17
+              },
+              {
+                order: 18,
                 type: "celebration",
                 title: "The Toilet Hero Pledge",
                 subtitle: "I Promise To...",
                 content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
               },
               {
-                order: 10,
+                id: "slide-b17-video",
+                type: "video",
+                title: "Toilet Hero Pledge",
+                videoUrl: "/videos/module-b/B17.mp4",
+                order: 19
+              },
+              {
+                order: 20,
                 type: "quiz",
                 title: "Quick Hero Quiz!",
                 content: "Prove you're a Toilet Hero by passing this quick check!",
@@ -276,7 +394,7 @@ async function main() {
                 ],
               },
               {
-                order: 11,
+                order: 21,
                 type: "celebration",
                 title: "Great Job!",
                 subtitle: "You Are Now An Official Toilet Hero!",

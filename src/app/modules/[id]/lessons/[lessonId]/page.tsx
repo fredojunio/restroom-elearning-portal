@@ -56,19 +56,26 @@ interface Slide {
 
 const dummySlides: Slide[] = [
     {
+        id: "slide-0",
+        type: "video",
+        title: "Mission Introduction",
+        videoUrl: "/videos/module-a/A1 video.mp4",
+        order: 1
+    },
+    {
         id: "slide-1",
         type: "title",
         title: "Welcome to Toilet Heroes",
         subtitle: "Clean Toilets Keep Us Healthy",
         content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
-        order: 1
+        order: 2
     },
     {
         id: "slide-2",
         type: "content",
         title: "Hi there, Hero",
         content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
-        order: 2,
+        order: 3,
         mascot: "/mascots/mascot-greeting.png"
     },
     {
@@ -76,8 +83,15 @@ const dummySlides: Slide[] = [
         type: "content",
         title: "Meet the Invisible Germs",
         content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
-        order: 3,
+        order: 4,
         mascot: "/mascots/mascot-pointing.png"
+    },
+    {
+        id: "slide-a2-video",
+        type: "video",
+        title: "Germ Secret Revealed",
+        videoUrl: "/videos/module-a/A2.mp4",
+        order: 5
     },
     {
         id: "slide-4",
@@ -85,7 +99,7 @@ const dummySlides: Slide[] = [
         title: "Germ Hunter Game",
         gameType: "Drag to Disinfect",
         content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
-        order: 4
+        order: 6
     },
     {
         id: "slide-5",
@@ -93,8 +107,29 @@ const dummySlides: Slide[] = [
         title: "How Germs Travel",
         image: "🦠",
         content: "Germs often gather on door handles and light switches. Look closely!",
-        order: 5,
+        order: 7,
         mascot: "/mascots/mascot-pointing.png"
+    },
+    {
+        id: "slide-a4-video",
+        type: "video",
+        title: "Invisible Germs",
+        videoUrl: "/videos/module-a/A4.mp4",
+        order: 8
+    },
+    {
+        id: "slide-a5-video",
+        type: "video",
+        title: "Wash Your Hand!",
+        videoUrl: "/videos/module-a/A5.mp4",
+        order: 9
+    },
+    {
+        id: "slide-a6-video",
+        type: "video",
+        title: "Wash Your Hand!",
+        videoUrl: "/videos/module-a/A6.mp4",
+        order: 10
     },
     {
         id: "slide-germ-story",
@@ -102,14 +137,28 @@ const dummySlides: Slide[] = [
         title: "Tiny Germs, Big Impact",
         gameType: "Story Interaction",
         content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
-        order: 6,
+        order: 11,
         mascot: "/mascots/mascot-scared.png"
     },
     {
         id: "slide-toilet-choice",
         type: "comparison",
         title: "Clean Toilets, Happy Friends",
-        order: 7
+        order: 12
+    },
+    {
+        id: "slide-a8-video",
+        type: "video",
+        title: "Clean Toilets, Happy Friends",
+        videoUrl: "/videos/module-a/A8.mp4",
+        order: 13
+    },
+    {
+        id: "slide-a9-video",
+        type: "video",
+        title: "Fun Quiz Time!",
+        videoUrl: "/videos/module-a/A9.mp4",
+        order: 14
     },
     {
         id: "slide-6",
@@ -134,7 +183,7 @@ const dummySlides: Slide[] = [
                 correctAnswer: "Soap + Water!"
             }
         ],
-        order: 8
+        order: 15
     },
     {
         id: "slide-7",
@@ -143,7 +192,7 @@ const dummySlides: Slide[] = [
         content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
         mascot: "/mascots/mascot-hero.png",
         background: "/images/celebration-bg.jpg",
-        order: 9
+        order: 16
     }
 ];
 
@@ -975,19 +1024,23 @@ const ImageSlide = ({ title, image, content, mascot }: Partial<Slide>) => (
     </div>
 );
 
-const VideoSlide = ({ title, content }: Partial<Slide>) => (
-    <div className="flex flex-col h-full max-w-5xl mx-auto py-4 md:py-8 space-y-6 md:space-y-10 text-center p-4">
-        <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
-        <div className="aspect-video w-full bg-slate-900 rounded-3xl md:rounded-[4rem] overflow-hidden shadow-2xl shadow-sky-900/10 relative group flex items-center justify-center border-4 md:border-8 border-white">
-            <MonitorPlay className="w-20 h-20 md:w-32 md:h-32 text-white/5" />
-            <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-slate-900/10 transition-all" />
-            <button className="absolute inset-0 flex items-center justify-center group-hover:bg-black/10 transition-all">
-                <div className="p-6 md:p-10 bg-white rounded-full shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                    <PlayCircle className="w-12 h-12 md:w-16 md:h-16 text-sky-500" />
-                </div>
-            </button>
+const VideoSlide = ({ title, videoUrl }: Partial<Slide>) => (
+    <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-4 md:space-y-6 text-center p-2">
+        <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
+        <div className="aspect-video w-full max-h-[60vh] bg-slate-900 rounded-2xl md:rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white relative group">
+            <video
+                src={videoUrl}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+                onEnded={(e) => {
+                    const video = e.target as HTMLVideoElement;
+                    video.pause();
+                }}
+            />
+            {/* Overlay for aesthetic */}
+            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/20 rounded-[inherit]" />
         </div>
-        <p className="text-lg md:text-xl text-slate-400 font-bold uppercase tracking-[0.2em]">{content}</p>
     </div>
 );
 
@@ -1594,6 +1647,10 @@ export default function LessonDetailPage() {
 
     const handleNext = () => {
         if (currentIdx < totalSlides - 1) {
+            // Play SFX
+            const audio = new Audio('/sfx/next.mp3');
+            audio.play().catch(e => console.warn("Next sfx play failed:", e));
+
             const nextIdx = currentIdx + 1;
             setDirection(1);
             setCurrentIdx(nextIdx);
@@ -1791,7 +1848,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50dvh] max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50dvh] max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
