@@ -80,17 +80,15 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.8, type: "spring" }}
-              className="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-200"
-            >
-              <ShieldCheck className="text-white w-7 h-7" />
-            </motion.div>
-            <div className="flex flex-col">
-              <span className="font-black text-xl tracking-tighter text-slate-900 leading-none">TOILET HERO</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-500">Academy</span>
-            </div>
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-sky-100 group-hover:rotate-12 transition-transform overflow-hidden">
+                <img src="/mascots/mascot-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-black text-lg tracking-tighter text-slate-900 leading-none uppercase">Toilet Hero</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-sky-500">Academy Portal</span>
+              </div>
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">

@@ -136,18 +136,24 @@ export default function TeacherDashboard() {
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white shadow-sm sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">👨‍🏫</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white shadow-md rounded-lg flex items-center justify-center overflow-hidden p-1">
+                <img src="/mascots/mascot-logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="font-bold text-xl text-gray-900">Toilet Hero</span>
+              <span className="font-bold text-xl text-gray-900 tracking-tight">Toilet Hero</span>
             </div>
           </div>
         </nav>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading teacher dashboard...</p>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl overflow-hidden p-2"
+            >
+              <img src="/mascots/mascot-logo.png" alt="Loading" className="w-full h-full object-contain" />
+            </motion.div>
+            <p className="mt-4 text-gray-600 font-medium">Loading teacher dashboard...</p>
           </div>
         </div>
       </div>
@@ -159,13 +165,13 @@ export default function TeacherDashboard() {
       {/* Navigation Header */}
       <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">👨‍🏫</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white shadow-md rounded-lg flex items-center justify-center overflow-hidden p-1 group-hover:rotate-12 transition-transform">
+              <img src="/mascots/mascot-logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <span className="font-bold text-xl text-gray-900">Toilet Hero</span>
-              <p className="text-xs text-gray-600">Teacher Portal</p>
+              <span className="font-bold text-xl text-gray-900 tracking-tight">Toilet Hero</span>
+              <p className="text-[10px] font-black uppercase tracking-widest text-green-600 mt-0.5">Teacher Portal</p>
             </div>
           </div>
 

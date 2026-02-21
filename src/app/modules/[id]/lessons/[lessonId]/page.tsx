@@ -170,6 +170,9 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
             point.y > rect.top &&
             point.y < rect.bottom
         ) {
+            const audio = new Audio('/sfx/germ.mp3');
+            audio.play().catch(e => console.warn("Germ sfx play failed:", e));
+
             setGerms(prev => {
                 const remaining = prev.filter(g => g.id !== id);
                 if (remaining.length === 0) {
@@ -253,9 +256,19 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
     ]);
     const [isScrubbing, setIsScrubbing] = useState(false);
     const [scrubProgress, setScrubProgress] = useState(0);
+    const [hasPlayedSfx, setHasPlayedSfx] = useState(false);
 
     const handleScrub = (id: number) => {
         if (phase !== 2) return;
+
+        // Play scrubbing sound once per game
+        if (!hasPlayedSfx) {
+            const audio = new Audio('/sfx/washing.mp3');
+            audio.volume = 0.4;
+            audio.play().catch(e => console.warn("Washing sfx play failed:", e));
+            setHasPlayedSfx(true);
+        }
+
         setGerms(prev => prev.map(g => {
             if (g.id === id && g.opacity > 0) {
                 const newOpacity = Math.max(0, g.opacity - 0.2);
@@ -487,6 +500,8 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
     const handleChoice = (choice: boolean) => {
         if (choice === scenarios[currentStep].isHero) {
             setFeedback('correct');
+            const audio = new Audio('/sfx/correct.mp3');
+            audio.play().catch(e => console.warn("Correct sfx play failed:", e));
             confetti({ particleCount: 30, spread: 40 });
             setTimeout(() => {
                 if (currentStep < scenarios.length - 1) {
@@ -498,6 +513,8 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
             }, 1000);
         } else {
             setFeedback('wrong');
+            const audio = new Audio('/sfx/wrong.mp3');
+            audio.play().catch(e => console.warn("Wrong sfx play failed:", e));
             setTimeout(() => setFeedback('none'), 1000);
         }
     };
@@ -573,9 +590,9 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
         ) {
             // Play SFX
             const sfxMap: Record<string, string> = {
-                'tissue': '/sfx/trash.mp3',
-                'spill': '/sfx/wipe.mp3',
-                'unflushed': '/sfx/flush.mp3'
+                'tissue': '/sfx/correct.mp3',
+                'spill': '/sfx/correct.mp3',
+                'unflushed': '/sfx/correct.mp3'
             };
 
             const audio = new Audio(sfxMap[messType]);
@@ -605,6 +622,22 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
                 </div>
             </div>
 
+            {/* Mission Briefing */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full mb-6 px-6 py-4 bg-white rounded-4xl shadow-sm flex items-start gap-4"
+            >
+                <div className="p-3 bg-yellow-100 rounded-2xl text-2xl">📝</div>
+                <div className="space-y-1">
+                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">Mission Briefing:</h3>
+                    <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs font-bold text-slate-500">
+                        <div className="flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-slate-900 text-white rounded-full text-[10px]">1</span> Pick a tool below</div>
+                        <div className="flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-slate-900 text-white rounded-full text-[10px]">2</span> Clean the mess according the tool</div>
+                    </div>
+                </div>
+            </motion.div>
+
             <div className="relative w-full aspect-video bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8">
                 {/* Scenario background */}
                 {background ? (
@@ -623,8 +656,8 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
                         className="absolute text-6xl p-4 cursor-pointer hover:drop-shadow-xl transition-all"
                         style={{ left: mess.x, top: mess.y }}
                     >
-                        {mess.type === 'tissue' && '🧻'}
-                        {mess.type === 'spill' && '💧'}
+                        {mess.type === 'tissue' && <img src="/images/paper.png" alt="paper" className="w-20 h-auto drop-shadow-lg group-hover:scale-110 transition-transform" />}
+                        {mess.type === 'spill' && <img src="/images/spill.png" alt="spill" className="w-24 h-auto drop-shadow-lg group-hover:scale-110 transition-transform" />}
                         {mess.type === 'unflushed' && '💩'}
                     </motion.button>
                 ) || mess.fixed && mess.type === 'unflushed' && (
@@ -672,6 +705,8 @@ const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
             setCheckedItems(checkedItems.filter(i => i !== index));
         } else {
             setCheckedItems([...checkedItems, index]);
+            const audio = new Audio('/sfx/cring.mp3');
+            audio.play().catch(e => console.warn("Cring sfx play failed:", e));
             confetti({
                 particleCount: 15,
                 spread: 30,
@@ -753,7 +788,7 @@ const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
         <h1 className="font-nerko tracking-wide text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center max-w-4xl">
             {title}
         </h1>
-        <p className="text-lg md:text-2xl text-slate-400 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
+        <p className="text-lg md:text-2xl text-blue-900 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
             {subtitle}
         </p>
     </div>
@@ -1029,6 +1064,10 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
             ? "/mascots/m2-mascot-final.png"
             : "/mascots/mascot-hero.png";
 
+    const moduleLabel = (id?.includes("m2") || title?.includes("Module B") || title?.includes("Great Job"))
+        ? "Module B"
+        : "Module A";
+
     useEffect(() => {
         const audio = new Audio('/sfx/celebration.mp3');
         audio.play().catch(error => {
@@ -1045,7 +1084,7 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
     console.log("CelebrationSlide render:", { id, title, mascot: effectiveMascot, image });
 
     return (
-        <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full max-w-6xl mx-auto gap-8 lg:gap-20 relative p-4 lg:p-6 overflow-y-auto no-scrollbar">
+        <div className="flex flex-col lg:flex-row items-center justify-center h-full w-full max-w-6xl mx-auto gap-4 lg:gap-16 relative p-2 lg:p-4 overflow-y-auto no-scrollbar">
             {/* Mascot Side */}
             <motion.div
                 initial={{ x: -100, opacity: 0, rotate: -10 }}
@@ -1095,14 +1134,14 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
             </motion.div>
 
             {/* Content Side */}
-            <div className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left flex flex-col items-center lg:items-start max-w-xl">
+            <div className="flex-1 space-y-4 md:space-y-6 text-center lg:text-left flex flex-col items-center lg:items-start max-w-xl">
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="space-y-4"
+                    className="space-y-2"
                 >
-                    <h1 className="text-3xl md:text-6xl font-black text-blue-900 leading-none tracking-tighter uppercase drop-shadow-md">
+                    <h1 className="text-2xl md:text-5xl font-black text-blue-900 leading-none tracking-tighter uppercase drop-shadow-md">
                         {title}
                     </h1>
                     {subtitle && (
@@ -1117,9 +1156,9 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="space-y-4 md:space-y-6"
+                    className="space-y-2 md:space-y-4"
                 >
-                    <div className="text-lg md:text-xl text-blue-900/70 font-bold leading-relaxed whitespace-pre-line">
+                    <div className="text-base md:text-lg text-blue-900/70 font-bold leading-relaxed whitespace-pre-line">
                         {content}
                     </div>
                 </motion.div>
@@ -1128,19 +1167,23 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
                     initial={{ scale: 0, rotate: 20 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: "spring", bounce: 0.6, delay: 0.8 }}
-                    className="relative group pt-4"
+                    className="relative group pt-2 flex flex-col items-center"
                 >
                     <div className="absolute inset-0 bg-yellow-400/20 blur-3xl rounded-full scale-150 group-hover:bg-yellow-400/40 transition-all duration-500" />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={image || "/images/toilet-hero-badge.png"}
+                        // src={image || "/images/toilet-hero-badge.png"}
+                        src={"/images/toilet-hero-badge.png"}
                         alt="Hero Badge"
-                        className="w-40 md:w-56 relative z-10 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer"
+                        className="w-32 md:w-48 relative z-10 drop-shadow-2xl hover:scale-110 transition-transform cursor-pointer"
                     />
+                    <div className="relative z-10 px-6 py-2 bg-white rounded-2xl shadow-lg border-2 border-yellow-400 -rotate-2">
+                        <span className="font-nerko text-2xl md:text-3xl text-yellow-600 font-black uppercase tracking-widest">{moduleLabel}</span>
+                    </div>
                     <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-                        className="absolute inset-0 border-4 border-dashed border-white/40 rounded-full scale-110 opacity-50"
+                        className="absolute top-2 w-36 h-36 md:w-52 md:h-52 border-4 border-dashed border-white/40 rounded-full scale-110 opacity-50"
                     />
                 </motion.div>
             </div>
@@ -1168,18 +1211,25 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
             dropPoint.y <= targetRect.bottom
         );
 
-        if (isWithinTarget && option === question.correctAnswer) {
-            setIsDropped(true);
-            setTimeout(onCorrect, 1500);
-            confetti({
-                particleCount: 40,
-                spread: 60,
-                origin: {
-                    x: (targetRect.left + targetRect.width / 2) / window.innerWidth,
-                    y: (targetRect.top + targetRect.height / 2) / window.innerHeight
-                },
-                colors: ['#4f46e5', '#818cf8', '#ffffff']
-            });
+        if (isWithinTarget) {
+            if (option === question.correctAnswer) {
+                setIsDropped(true);
+                const audio = new Audio('/sfx/correct.mp3');
+                audio.play().catch(e => console.warn("Correct sfx play failed:", e));
+                setTimeout(onCorrect, 1500);
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: {
+                        x: (targetRect.left + targetRect.width / 2) / window.innerWidth,
+                        y: (targetRect.top + targetRect.height / 2) / window.innerHeight
+                    },
+                    colors: ['#4f46e5', '#818cf8', '#ffffff']
+                });
+            } else {
+                const audio = new Audio('/sfx/wrong.mp3');
+                audio.play().catch(e => console.warn("Wrong sfx play failed:", e));
+            }
         }
     };
 
@@ -1285,6 +1335,10 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
         }
     };
 
+    const isCorrectlyAnswered = q.type === 'TEXT_INPUT'
+        ? answers[q.id] !== undefined && answers[q.id] !== ""
+        : answers[q.id] === q.correctAnswer || (q.type === 'TRUE_FALSE' && (answers[q.id]?.toUpperCase() === (q.correctAnswer as string)?.toUpperCase()));
+
     const isAnswered = answers[q.id] !== undefined && answers[q.id] !== "";
 
     return (
@@ -1325,20 +1379,30 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
                     {q.type === "MULTIPLE_CHOICE" && q.options?.map((opt, i) => {
                         const isSelected = answers[q.id] === opt;
                         const isCorrect = opt === q.correctAnswer;
-                        const showCorrect = isAnswered && isCorrect;
-                        const showWrong = isAnswered && isSelected && !isCorrect;
+                        const isCorrectlyPicked = answers[q.id] === q.correctAnswer;
+                        const showCorrect = isSelected && isCorrect;
+                        const showWrong = isSelected && !isCorrect;
 
                         return (
                             <button
                                 key={i}
-                                onClick={() => !isAnswered && setAnswers({ ...answers, [q.id]: opt })}
-                                className={`w-full p-6 text-left rounded-3xl border-2 font-bold text-lg transition-all flex items-center justify-between relative group ${isAnswered
+                                onClick={() => {
+                                    // Allow guessing until correct
+                                    const alreadyCorrect = answers[q.id] === q.correctAnswer;
+                                    if (!alreadyCorrect) {
+                                        setAnswers({ ...answers, [q.id]: opt });
+                                        const isCorrectChoice = opt === q.correctAnswer;
+                                        const audio = new Audio(`/sfx/${isCorrectChoice ? 'correct' : 'wrong'}.mp3`);
+                                        audio.play().catch(e => console.warn("Quiz sfx play failed:", e));
+                                    }
+                                }}
+                                className={`w-full p-6 text-left rounded-3xl border-2 font-bold text-lg transition-all flex items-center justify-between relative group ${isCorrectlyPicked
                                     ? isCorrect
                                         ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg scale-[1.02] z-10'
-                                        : isSelected
-                                            ? 'bg-rose-500 border-rose-500 text-white'
-                                            : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
-                                    : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:scale-[1.01] active:scale-[0.98]'
+                                        : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
+                                    : isSelected && !isCorrect
+                                        ? 'bg-rose-500 border-rose-500 text-white'
+                                        : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:scale-[1.01] active:scale-[0.98]'
                                     }`}
                             >
                                 <span className="flex-1">{opt}</span>
@@ -1371,20 +1435,33 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
                             {["True", "False"].map((opt) => {
                                 const isSelected = answers[q.id] === opt;
                                 const isCorrect = opt.toUpperCase() === (q.correctAnswer as string)?.toUpperCase() || opt === q.correctAnswer;
-                                const showCorrect = isAnswered && isCorrect;
-                                const showWrong = isAnswered && isSelected && !isCorrect;
+                                const currentAnswer = answers[q.id];
+                                const alreadyCorrect = currentAnswer?.toUpperCase() === (q.correctAnswer as string)?.toUpperCase() || currentAnswer === q.correctAnswer;
+                                const showCorrect = isSelected && isCorrect;
+                                const showWrong = isSelected && !isCorrect;
 
                                 return (
                                     <button
                                         key={opt}
-                                        onClick={() => !isAnswered && setAnswers({ ...answers, [q.id]: opt })}
-                                        className={`p-10 rounded-3xl border-2 font-black text-2xl transition-all flex flex-col items-center gap-4 relative ${isAnswered
+                                        onClick={() => {
+                                            // Allow guessing until correct
+                                            const isCorrectChoice = opt.toUpperCase() === (q.correctAnswer as string)?.toUpperCase() || opt === q.correctAnswer;
+                                            const currentAnswer = answers[q.id];
+                                            const alreadyCorrect = currentAnswer?.toUpperCase() === (q.correctAnswer as string)?.toUpperCase() || currentAnswer === q.correctAnswer;
+
+                                            if (!alreadyCorrect) {
+                                                setAnswers({ ...answers, [q.id]: opt });
+                                                const audio = new Audio(`/sfx/${isCorrectChoice ? 'correct' : 'wrong'}.mp3`);
+                                                audio.play().catch(e => console.warn("Quiz sfx play failed:", e));
+                                            }
+                                        }}
+                                        className={`p-10 rounded-3xl border-2 font-black text-2xl transition-all flex flex-col items-center gap-4 relative ${alreadyCorrect
                                             ? isCorrect
                                                 ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg scale-[1.05] z-10'
-                                                : isSelected
-                                                    ? 'bg-rose-500 border-rose-500 text-white'
-                                                    : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
-                                            : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:shadow-md'
+                                                : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60'
+                                            : isSelected && !isCorrect
+                                                ? 'bg-rose-500 border-rose-500 text-white'
+                                                : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:bg-white hover:shadow-md'
                                             }`}
                                     >
                                         <span className="mb-2">{opt}</span>
@@ -1419,7 +1496,7 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
                 {q.type !== 'DRAG_AND_DROP' && (
                     <div className="pt-8 flex justify-end">
                         <button
-                            disabled={!isAnswered}
+                            disabled={!isCorrectlyAnswered}
                             onClick={handleNext}
                             className="px-10 py-5 bg-slate-900 text-white rounded-3xl font-black text-sm uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100"
                         >
@@ -1734,18 +1811,38 @@ export default function LessonDetailPage() {
                                 {currentSlide.type === "game" && (
                                     gameState === "playing" ? (
                                         currentSlide.gameType === "Story Interaction" ? (
-                                            <HandwashingGame onComplete={() => { setGameState('completed'); playYay(); }} />
+                                            <HandwashingGame onComplete={() => {
+                                                setGameState('completed');
+                                                playYay();
+                                                setTimeout(handleNext, 500);
+                                            }} />
                                         ) : currentSlide.gameType === "WhosNext" ? (
-                                            <WhosNextGame onComplete={() => { setGameState('completed'); playYay(); }} />
+                                            <WhosNextGame onComplete={() => {
+                                                setGameState('completed');
+                                                playYay();
+                                                setTimeout(handleNext, 500);
+                                            }} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
-                                            <HeroOrOopsGame onComplete={() => { setGameState('completed'); playYay(); }} invertChoices={currentSlide.invertChoices} />
+                                            <HeroOrOopsGame onComplete={() => {
+                                                setGameState('completed');
+                                                playYay();
+                                                setTimeout(handleNext, 500);
+                                            }} invertChoices={currentSlide.invertChoices} />
                                         ) : currentSlide.gameType === "CleanupChallenge" ? (
                                             <CleanupChallengeGame
-                                                onComplete={() => { setGameState('completed'); playYay(); }}
+                                                onComplete={() => {
+                                                    setGameState('completed');
+                                                    playYay();
+                                                    setTimeout(handleNext, 500);
+                                                }}
                                                 background={currentSlide.background}
                                             />
                                         ) : (
-                                            <GermHunterGame onComplete={() => { setGameState('completed'); playYay(); }} />
+                                            <GermHunterGame onComplete={() => {
+                                                setGameState('completed');
+                                                playYay();
+                                                setTimeout(handleNext, 500);
+                                            }} />
                                         )
                                     ) : (
                                         <GameLauncherSlide
@@ -1757,7 +1854,11 @@ export default function LessonDetailPage() {
 
                                 {currentSlide.type === "comparison" && (
                                     <ToiletComparisonSlide
-                                        onComplete={() => { setGameState('completed'); playYay(); }}
+                                        onComplete={() => {
+                                            setGameState('completed');
+                                            playYay();
+                                            setTimeout(handleNext, 500);
+                                        }}
                                         invertChoices={currentSlide.invertChoices}
                                     />
                                 )}
@@ -1767,7 +1868,11 @@ export default function LessonDetailPage() {
                                     quizState === "playing" ? (
                                         <InlineQuizFlow
                                             questions={currentSlide.questions || []}
-                                            onComplete={() => { setQuizState('completed'); playYay(); }}
+                                            onComplete={() => {
+                                                setQuizState('completed');
+                                                playYay();
+                                                setTimeout(handleNext, 500);
+                                            }}
                                         />
                                     ) : (
                                         <QuizLauncherSlide
@@ -1880,18 +1985,12 @@ export default function LessonDetailPage() {
 
                                 <div className="pt-6 space-y-4">
                                     <PlayfulButton
-                                        onClick={() => router.push(`/modules/${moduleId}`)}
+                                        onClick={() => router.push(`/dashboard`)}
                                         color="green"
                                         className="w-full py-6"
                                     >
-                                        <span className="text-xl">Return to Module</span>
+                                        <span className="text-xl">Return to Dashboard</span>
                                     </PlayfulButton>
-                                    <button
-                                        onClick={() => router.push(`/dashboard`)}
-                                        className="block w-full py-4 text-slate-400 font-black text-xs uppercase tracking-[0.2em] hover:text-blue-600 transition-all"
-                                    >
-                                        Go to Dashboard
-                                    </button>
                                 </div>
                             </div>
                         </motion.div>

@@ -88,8 +88,8 @@ export function Navbar({ role = "STUDENT" }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
         {/* Left Side - Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-sky-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-sky-200 group-hover:rotate-12 transition-transform">
-            <ShieldCheck className="text-white w-6 h-6" />
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-sky-100 group-hover:rotate-12 transition-transform overflow-hidden">
+            <img src="/mascots/mascot-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="font-black text-lg tracking-tighter text-slate-900 leading-none uppercase">Toilet Hero</span>

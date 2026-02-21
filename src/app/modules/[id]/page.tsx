@@ -263,7 +263,7 @@ export default function ModuleDetailPage() {
                     className="group relative w-full px-12 py-6 bg-slate-900 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all overflow-hidden inline-flex items-center justify-center gap-3"
                   >
                     <div className="absolute inset-0 bg-sky-500 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <span className="relative z-10">Resume Mission</span>
+                    <span className="relative z-10">{(progress?.overall.percentage || 0) === 0 ? "Start Mission" : "Resume Mission"}</span>
                     <ChevronRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <p className="mt-6 text-slate-400 font-bold text-[11px] uppercase tracking-widest bg-slate-50 py-3 rounded-2xl border border-slate-100 italic">

@@ -76,14 +76,8 @@ export default function LoginPage() {
           className="bg-white/70 backdrop-blur-2xl rounded-[3rem] shadow-2xl shadow-sky-100 border border-white p-10 md:p-12"
         >
           <div className="flex flex-col items-center mb-10">
-            <Link href="/" className="group mb-6">
-              <motion.div
-                whileHover={{ rotate: 360, scale: 1.1 }}
-                transition={{ duration: 0.8, type: "spring" }}
-                className="w-16 h-16 bg-gradient-to-br from-sky-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-200"
-              >
-                <ShieldCheck className="text-white w-9 h-9" />
-              </motion.div>
+            <Link href="/" className="group mb-3">
+              <img src="/mascots/mascot-logo.png" alt="Logo" className="w-16 h-16 object-contain group-hover:rotate-12 transition-transform" />
             </Link>
             <div className="text-center">
               <h1 className="text-3xl font-black tracking-tighter text-slate-900 leading-none mb-2">

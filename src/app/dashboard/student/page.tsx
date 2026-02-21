@@ -111,10 +111,10 @@ export default function StudentDashboard() {
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 bg-sky-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-sky-100/50 overflow-hidden p-2"
           >
-            <ShieldCheck className="text-sky-500 w-6 h-6" />
+            <img src="/mascots/mascot-logo.png" alt="Loading" className="w-full h-full object-contain" />
           </motion.div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Loading Academy Portal...</p>
         </div>
@@ -268,7 +268,7 @@ export default function StudentDashboard() {
                             </div>
                           ) : (
                             <div className="w-full py-5 bg-slate-900 text-white rounded-3xl flex items-center justify-center gap-3 font-black text-[10px] uppercase tracking-widest group-hover:bg-sky-500 transition-all shadow-xl shadow-slate-200">
-                              Resume Training
+                              {(module.progress?.percentage || 0) === 0 ? "Start Training" : "Resume Training"}
                               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </div>
                           )}
