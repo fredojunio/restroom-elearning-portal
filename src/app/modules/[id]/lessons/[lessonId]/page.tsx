@@ -200,12 +200,12 @@ const dummySlides: Slide[] = [
 
 const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     const [germs, setGerms] = useState([
-        { id: 1, x: 50, y: 100 },
-        { id: 2, x: 250, y: 50 },
-        { id: 3, x: 450, y: 150 },
-        { id: 4, x: 100, y: 300 },
-        { id: 5, x: 350, y: 350 },
-        { id: 6, x: 550, y: 250 },
+        { id: 1, x: 15, y: 20 },
+        { id: 2, x: 75, y: 15 },
+        { id: 3, x: 80, y: 45 },
+        { id: 4, x: 20, y: 70 },
+        { id: 5, x: 50, y: 80 },
+        { id: 6, x: 80, y: 75 },
     ]);
     const [isWon, setIsWon] = useState(false);
     const portalRef = useRef<HTMLDivElement>(null);
@@ -235,11 +235,11 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     };
 
     return (
-        <div className="relative w-full h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
+        <div className="relative w-full h-[400px] md:h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
             {/* Background Info */}
-            <div className="absolute top-8 left-8 text-left">
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Restroom Area</h4>
-                <p className="text-xs text-slate-300 font-bold">Germs Detected: {germs.length}</p>
+            <div className="absolute top-6 left-6 md:top-8 md:left-8 text-left z-10">
+                <h4 className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Restroom Area</h4>
+                <p className="text-[10px] md:text-xs text-slate-300 font-bold">Germs Detected: {germs.length}</p>
             </div>
 
             {/* The Sanitizer Portal */}
@@ -264,8 +264,8 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
                         dragSnapToOrigin
                         onDragEnd={(e, info) => checkCollision(germ.id, info.point)}
                         whileDrag={{ scale: 1.2, rotate: 180 }}
-                        className="absolute cursor-grab active:cursor-grabbing w-16 h-16 bg-orange-100 border-2 border-orange-300 rounded-2xl flex items-center justify-center text-3xl shadow-lg ring-4 ring-orange-100/50"
-                        style={{ left: germ.x, top: germ.y }}
+                        className="absolute cursor-grab active:cursor-grabbing w-12 h-12 md:w-16 md:h-16 bg-orange-100 border-2 border-orange-300 rounded-2xl flex items-center justify-center text-2xl md:text-3xl shadow-lg ring-4 ring-orange-100/50 -ml-6 -mt-6 md:-ml-8 md:-mt-8"
+                        style={{ left: `${germ.x}%`, top: `${germ.y}%` }}
                     >
                         🦠
                     </motion.div>
@@ -1798,7 +1798,7 @@ export default function LessonDetailPage() {
             </header>
 
             {/* 3. Main Slide Content Area */}
-            <main className="relative pt-16 pb-24 h-dvh flex items-center justify-center overflow-hidden">
+            <main className="relative pt-16 pb-40 md:pb-24 h-dvh flex items-center justify-center overflow-hidden">
                 {/* --- Background Image --- */}
                 <div
                     className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
@@ -1848,7 +1848,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-6 md:p-12 w-full max-w-[95vw] h-auto min-h-[50dvh] max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
@@ -1945,45 +1945,51 @@ export default function LessonDetailPage() {
             </main>
 
             {/* 4. Navigation Footer */}
-            <footer className="fixed bottom-0 left-0 right-0 z-30 p-5">
-                <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <footer className="fixed bottom-0 left-0 right-0 z-30 h-20 md:h-24 p-2 md:p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+                <div className="max-w-5xl mx-auto h-full flex flex-row flex-nowrap items-center justify-between gap-2 md:gap-8">
 
                     <button
                         onClick={handlePrev}
                         disabled={currentIdx === 0 || gameState === "playing" || quizState === "playing"}
-                        className="group flex items-center gap-3 px-8 py-4 bg-white border border-slate-100 text-slate-400 rounded-3xl font-black text-xs uppercase tracking-widest hover:text-slate-900 hover:border-slate-300 transition-all disabled:opacity-0 disabled:pointer-events-none shadow-sm shadow-slate-200/50"
+                        className="group flex items-center justify-center gap-1.5 px-3 py-2 md:px-8 md:py-4 bg-white border border-slate-100 text-slate-400 rounded-xl md:rounded-3xl font-black text-[9px] md:text-xs uppercase tracking-widest hover:text-slate-900 hover:border-slate-300 transition-all disabled:opacity-0 disabled:pointer-events-none shadow-sm shadow-slate-200/50 min-w-fit"
                     >
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        Previous
+                        <ChevronLeft className="w-3.5 h-3.5 md:w-5 md:h-5 md:group-hover:-translate-x-1 transition-transform" />
+                        <span className="sm:inline">Prev</span>
                     </button>
 
-                    {/* Dot Navigation */}
-                    <div className="flex items-center gap-3 bg-slate-50/50 p-3 rounded-full border border-slate-100">
+                    {/* Dot Navigation - hidden on mobile/tablet to prevent overlap */}
+                    <div className="hidden lg:flex items-center gap-2 md:gap-3 bg-slate-50/50 p-2 md:p-3 rounded-full border border-slate-100 overflow-x-auto no-scrollbar max-w-[50%]">
                         {slides.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => !isSlideLocked && jumpToSlide(i)}
                                 disabled={isSlideLocked}
-                                className={`transition-all duration-700 rounded-full ${currentIdx === i
-                                    ? "w-10 h-3 bg-[#2196F3] shadow-[0_0_15px_rgba(15,23,42,0.2)]"
-                                    : "w-3 h-3 bg-slate-200 hover:bg-slate-300"
+                                className={`transition-all duration-700 rounded-full flex-shrink-0 ${currentIdx === i
+                                    ? "w-8 md:w-10 h-2 md:h-3 bg-[#2196F3] shadow-[0_0_15px_rgba(15,23,42,0.2)]"
+                                    : "w-2 md:w-3 h-2 md:h-3 bg-slate-200 hover:bg-slate-300"
                                     } ${isSlideLocked && 'cursor-not-allowed opacity-50'}`}
                                 aria-label={`Go to slide ${i + 1}`}
                             />
                         ))}
                     </div>
 
-                    <div className="min-w-[200px] flex justify-end">
+                    {/* Mobile/Tablet Numeric Indicator */}
+                    <div className="lg:hidden flex flex-col items-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Slide</span>
+                        <span className="text-xs font-black text-[#2196F3]">{currentIdx + 1} / {totalSlides}</span>
+                    </div>
+
+                    <div className="flex justify-end min-w-fit">
                         {currentIdx === totalSlides - 1 ? (
                             <PlayfulButton
                                 onClick={handleComplete}
                                 disabled={isMarked}
                                 color={isMarked ? "green" : "blue"}
-                                className="w-full px-10 py-5"
+                                className="px-5 py-3 md:px-10 md:py-5"
                             >
-                                <div className="flex items-center justify-center gap-3">
-                                    <span>{isMarked ? 'Completed' : 'Mark Complete'}</span>
-                                    {!isMarked && <CheckCircle className="w-5 h-5" />}
+                                <div className="flex items-center justify-center gap-2 md:gap-3">
+                                    <span className="text-xs md:text-base">{isMarked ? 'Done' : 'Complete'}</span>
+                                    {!isMarked && <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />}
                                 </div>
                             </PlayfulButton>
                         ) : (
@@ -1991,11 +1997,11 @@ export default function LessonDetailPage() {
                                 onClick={handleNext}
                                 disabled={isSlideLocked}
                                 color={isSlideLocked ? "blue" : "blue"}
-                                className={`w-full px-10 py-5 ${isSlideLocked ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                                className={`px-5 py-3 md:px-10 md:py-5 ${isSlideLocked ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                             >
-                                <div className="flex items-center justify-center gap-4">
-                                    <span>{isSlideLocked ? 'Locked Slide' : 'Next'}</span>
-                                    {!isSlideLocked && <ChevronRight className="w-5 h-5" />}
+                                <div className="flex items-center justify-center gap-2 md:gap-4">
+                                    <span className="text-xs md:text-base">{isSlideLocked ? 'Locked' : 'Next'}</span>
+                                    {!isSlideLocked && <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />}
                                 </div>
                             </PlayfulButton>
                         )}

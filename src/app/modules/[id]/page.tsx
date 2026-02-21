@@ -131,10 +131,10 @@ export default function ModuleDetailPage() {
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl overflow-hidden p-2"
           >
-            <ShieldCheck className="text-sky-500 w-6 h-6" />
+            <img src="/mascots/mascot-logo.png" alt="Loading" className="w-full h-full object-contain" />
           </motion.div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Accessing Mission Data...</p>
         </div>
