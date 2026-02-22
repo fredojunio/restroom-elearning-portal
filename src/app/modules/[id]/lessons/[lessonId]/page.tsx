@@ -745,7 +745,7 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
     );
 };
 
-const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
+const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & { onComplete: () => void }) => {
     const pledgeItems = content?.split('\n').map(item => item.replace('• ', '').trim()) || [];
     const [checkedItems, setCheckedItems] = useState<number[]>([]);
 
@@ -811,6 +811,7 @@ const PledgeSlide = ({ title, subtitle, content }: Partial<Slide>) => {
                             spread: 100,
                             origin: { y: 0.6 }
                         });
+                        onComplete();
                     }}
                 >
                     {checkedItems.length === pledgeItems.length ? "I am a Toilet Hero!" : "Complete the Pledge First!"}
@@ -1584,6 +1585,8 @@ export default function LessonDetailPage() {
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'completed'>('idle');
     // Quiz states
     const [quizState, setQuizState] = useState<'idle' | 'playing' | 'completed'>('idle');
+    // Track completed slide indices
+    const [completedSlides, setCompletedSlides] = useState<Record<number, boolean>>({});
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
     const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
@@ -1612,6 +1615,12 @@ export default function LessonDetailPage() {
                     if (progressData.currentSlide > 0 && !progressData.isCompleted && !initialSlideLoaded) {
                         setCurrentIdx(progressData.currentSlide);
                         setInitialSlideLoaded(true);
+                        // Assume all previous slides are completed
+                        const prevCompleted: Record<number, boolean> = {};
+                        for (let i = 0; i < progressData.currentSlide; i++) {
+                            prevCompleted[i] = true;
+                        }
+                        setCompletedSlides(prevCompleted);
                     }
                 }
             } catch (err) {
@@ -1687,10 +1696,12 @@ export default function LessonDetailPage() {
     };
 
     // Logic to lock navigation
-    const isSlideLocked =
+    const isSlideLocked = !completedSlides[currentIdx] && (
         (currentSlide.type === "game" && gameState !== "completed") ||
         (currentSlide.type === "comparison" && gameState !== "completed") ||
-        (currentSlide.type === "quiz" && quizState !== "completed");
+        (currentSlide.type === "quiz" && quizState !== "completed") ||
+        (currentSlide.type === "celebration" && currentSlide.title.includes("Pledge") && gameState !== "completed")
+    );
 
     const bubbleVariants: Variants = {
         animate: {
@@ -1858,7 +1869,10 @@ export default function LessonDetailPage() {
                                 {currentSlide.type === "video" && <VideoSlide {...currentSlide} />}
                                 {currentSlide.type === "celebration" && (
                                     currentSlide.title.includes("Pledge") ? (
-                                        <PledgeSlide {...currentSlide} />
+                                        <PledgeSlide {...currentSlide} onComplete={() => {
+                                            setGameState('completed');
+                                            setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
+                                        }} />
                                     ) : (
                                         <CelebrationSlide {...currentSlide} />
                                     )
@@ -1870,18 +1884,21 @@ export default function LessonDetailPage() {
                                         currentSlide.gameType === "Story Interaction" ? (
                                             <HandwashingGame onComplete={() => {
                                                 setGameState('completed');
+                                                setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
                                                 setTimeout(handleNext, 500);
                                             }} />
                                         ) : currentSlide.gameType === "WhosNext" ? (
                                             <WhosNextGame onComplete={() => {
                                                 setGameState('completed');
+                                                setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
                                                 setTimeout(handleNext, 500);
                                             }} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
                                             <HeroOrOopsGame onComplete={() => {
                                                 setGameState('completed');
+                                                setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
                                                 setTimeout(handleNext, 500);
                                             }} invertChoices={currentSlide.invertChoices} />
@@ -1889,6 +1906,7 @@ export default function LessonDetailPage() {
                                             <CleanupChallengeGame
                                                 onComplete={() => {
                                                     setGameState('completed');
+                                                    setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                     playYay();
                                                     setTimeout(handleNext, 500);
                                                 }}
@@ -1897,6 +1915,7 @@ export default function LessonDetailPage() {
                                         ) : (
                                             <GermHunterGame onComplete={() => {
                                                 setGameState('completed');
+                                                setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
                                                 setTimeout(handleNext, 500);
                                             }} />
@@ -1913,6 +1932,7 @@ export default function LessonDetailPage() {
                                     <ToiletComparisonSlide
                                         onComplete={() => {
                                             setGameState('completed');
+                                            setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                             playYay();
                                             setTimeout(handleNext, 500);
                                         }}
@@ -1927,6 +1947,7 @@ export default function LessonDetailPage() {
                                             questions={currentSlide.questions || []}
                                             onComplete={() => {
                                                 setQuizState('completed');
+                                                setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
                                                 setTimeout(handleNext, 500);
                                             }}
