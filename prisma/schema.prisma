@@ -82,6 +82,7 @@ model Slide {
   mascot    String?
   background String?
   invertChoices Boolean? @default(false)
+  waitSeconds   Int?      @default(0)
   
   // For quiz slides, we can store questions as JSON
   questions Json?    // Array of Question objects as defined in frontend

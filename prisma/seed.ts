@@ -65,6 +65,7 @@ async function main() {
                 type: "video",
                 title: "Mission Introduction",
                 videoUrl: "/videos/module-a/A1 video.mp4",
+                waitSeconds: 3
               },
               {
                 order: 2,
@@ -72,13 +73,15 @@ async function main() {
                 title: "Welcome to Toilet Heroes",
                 subtitle: "Clean Toilets Keep Us Healthy",
                 content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
+                waitSeconds: 5
               },
               {
                 order: 3,
                 type: "content",
                 title: "Hi there, Hero",
                 content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
-                mascot: "/mascots/mascot-greeting.png"
+                mascot: "/mascots/mascot-greeting.png",
+                waitSeconds: 4
               },
               {
                 order: 4,
@@ -92,6 +95,7 @@ async function main() {
                 type: "video",
                 title: "Germ Secret Revealed",
                 videoUrl: "/videos/module-a/A2.mp4",
+                waitSeconds: 3
               },
               {
                 order: 6,
@@ -99,6 +103,7 @@ async function main() {
                 title: "Germ Hunter Game",
                 gameType: "Drag to Disinfect",
                 content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
+                waitSeconds: 3
               },
               {
                 order: 7,
@@ -113,21 +118,24 @@ async function main() {
                 type: "video",
                 title: "Invisible Germs",
                 videoUrl: "/videos/module-a/A4.mp4",
-                order: 8
+                order: 8,
+                waitSeconds: 3
               },
               {
                 id: "slide-a5-video",
                 type: "video",
                 title: "Wash Your Hand!",
                 videoUrl: "/videos/module-a/A5.mp4",
-                order: 9
+                order: 9,
+                waitSeconds: 3
               },
               {
                 id: "slide-a6-video",
                 type: "video",
                 title: "Wash Your Hand!",
                 videoUrl: "/videos/module-a/A6.mp4",
-                order: 10
+                order: 10,
+                waitSeconds: 3
               },
               {
                 order: 11,
@@ -135,32 +143,36 @@ async function main() {
                 title: "Tiny Germs, Big Impact",
                 gameType: "Story Interaction",
                 content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
-                mascot: "/mascots/mascot-scared.png"
+                mascot: "/mascots/mascot-scared.png",
+                waitSeconds: 3
               },
               {
                 order: 12,
                 type: "comparison",
                 title: "Clean Toilets, Happy Friends",
+                waitSeconds: 3
               },
               {
                 id: "slide-a8-video",
                 type: "video",
                 title: "Clean Toilets, Happy Friends",
                 videoUrl: "/videos/module-a/A8.mp4",
-                order: 13
+                order: 13,
+                waitSeconds: 3
               },
               {
                 id: "slide-a9-video",
                 type: "video",
                 title: "Fun Quiz Time!",
                 videoUrl: "/videos/module-a/A9.mp4",
-                order: 14
+                order: 14,
+                waitSeconds: 3
               },
               {
                 order: 15,
                 type: "quiz",
                 title: "Fun Quiz Time!",
-                content: "Prove you're a Toilet Hero by passing this quick check!",
+                content: "Drag and drop the correct answers into the boxes to complete the quiz!",
                 questions: [
                   {
                     id: "q1",
@@ -178,7 +190,8 @@ async function main() {
                     options: ["Soap + Water!", "Wiping on clothes!"],
                     correctAnswer: "Soap + Water!"
                   }
-                ]
+                ],
+                waitSeconds: 3
               }
               ,
               {
@@ -188,6 +201,7 @@ async function main() {
                 content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
                 mascot: "/mascots/mascot-hero.png",
                 background: "/images/celebration-bg.jpg",
+                waitSeconds: 5
               }
             ]
           }
@@ -217,7 +231,8 @@ async function main() {
                 type: "video",
                 title: "Be a Toilet Hero Every Day!",
                 videoUrl: "/videos/module-b/B1.mp4",
-                order: 1
+                order: 1,
+                waitSeconds: 2
               },
               {
                 order: 2,
@@ -225,23 +240,26 @@ async function main() {
                 title: "Be a Toilet Hero Every Day",
                 subtitle: "Module B: Habits, Respect & Responsibility",
                 content: "Format: Learn Through Play",
-                background: "/backgrounds/module-2-bg.jpg"
+                background: "/backgrounds/module-2-bg.jpg",
+                waitSeconds: 5
               },
               {
                 order: 3,
                 type: "content",
                 title: "Ready to Help?",
                 subtitle: "Section 1: Hello Again!",
-                content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!\n\n(Mascot welcomes the student back.)",
+                content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!",
                 mascot: "/mascots/mascot-greeting.png",
-                background: "/backgrounds/module-2-bg.jpg"
+                background: "/backgrounds/module-2-bg.jpg",
+                waitSeconds: 4
               },
               {
                 id: "slide-b2-video",
                 type: "video",
                 title: "Toilets are for everyone",
                 videoUrl: "/videos/module-b/B2.mp4",
-                order: 4
+                order: 4,
+                waitSeconds: 3
               },
               {
                 order: 5,
@@ -249,20 +267,23 @@ async function main() {
                 title: "You are not the only one!",
                 subtitle: "Section 2: Shared Spaces",
                 content: "Toilets are for everyone. When we leave them clean, we are being kind to the next person.\n\n• Clean Choice: The next person (friend or teacher) smiles!\n• Messy Choice: The next person looks very unhappy.",
+                waitSeconds: 5
               },
               {
                 id: "slide-b3-video",
                 type: "video",
                 title: "Toilets are for everyone",
                 videoUrl: "/videos/module-b/B3.mp4",
-                order: 6
+                order: 6,
+                waitSeconds: 3
               },
               {
                 id: "slide-b8-video",
                 type: "video",
                 title: "Hero or Oops?",
                 videoUrl: "/videos/module-b/B8.mp4",
-                order: 7
+                order: 7,
+                waitSeconds: 3
               },
               {
                 order: 8,
@@ -273,6 +294,7 @@ async function main() {
                 image: "clean_messy_comparison.png",
                 background: "/backgrounds/m2-sharing-bg.jpg",
                 invertChoices: true,
+                waitSeconds: 4
               },
               {
                 order: 9,
@@ -281,13 +303,15 @@ async function main() {
                 subtitle: "Section 3: Hero or Oops?",
                 content: "Toilet Hero Tutorial: Tap to Learn!\n\n• Flush: Always flush after use.\n• Bin: Put tissues in the bin.\n• Dry Floor: Keep the floor dry.\n• No Playing: The toilet is not a playground.",
                 mascot: "/mascots/mascot-pointing.png",
+                waitSeconds: 5
               },
               {
                 id: "slide-b4-video",
                 type: "video",
                 title: "Hero or Oops?",
                 videoUrl: "/videos/module-b/B4.mp4",
-                order: 10
+                order: 10,
+                waitSeconds: 3
               },
               {
                 order: 11,
@@ -297,6 +321,7 @@ async function main() {
                 gameType: "HeroOrOops",
                 content: "Hero or Oops?\nLook at the scenario and decide if it's a 'Toilet Hero' choice or an 'Oops' choice!",
                 invertChoices: true,
+                waitSeconds: 3
               },
               {
                 order: 12,
@@ -305,27 +330,31 @@ async function main() {
                 subtitle: "Section 4: Our Cleaners",
                 content: "Cleaners work very hard every day to keep us safe. When we flush and keep things tidy, their job is much easier!\n\n'When we help, cleaners can do their work more easily!'",
                 mascot: "/mascots/mascot-pointing.png",
+                waitSeconds: 5
               },
               {
                 id: "slide-b14-video",
                 type: "video",
                 title: "Clean Up",
                 videoUrl: "/videos/module-b/B14.mp4",
-                order: 13
+                order: 13,
+                waitSeconds: 3
               },
               {
                 id: "slide-b15-video",
                 type: "video",
                 title: "Clean Up",
                 videoUrl: "/videos/module-b/B15.mp4",
-                order: 14
+                order: 14,
+                waitSeconds: 3
               },
               {
                 id: "slide-b16-video",
                 type: "video",
                 title: "Clean Up",
                 videoUrl: "/videos/module-b/B16.mp4",
-                order: 15
+                order: 15,
+                waitSeconds: 3
               },
               {
                 order: 16,
@@ -334,14 +363,16 @@ async function main() {
                 subtitle: "Game: Clean-Up Challenge",
                 gameType: "CleanupChallenge",
                 content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
-                background: "/backgrounds/cleanup-challenge-bg.jpg"
+                background: "/backgrounds/cleanup-challenge-bg.jpg",
+                waitSeconds: 3
               },
               {
                 id: "slide-b12-video",
                 type: "video",
                 title: "We Help The Cleaners!",
                 videoUrl: "/videos/module-b/B12.mp4",
-                order: 17
+                order: 17,
+                waitSeconds: 3
               },
               {
                 order: 18,
@@ -349,49 +380,52 @@ async function main() {
                 title: "The Toilet Hero Pledge",
                 subtitle: "I Promise To...",
                 content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
+                waitSeconds: 5
               },
               {
                 id: "slide-b17-video",
                 type: "video",
                 title: "Toilet Hero Pledge",
                 videoUrl: "/videos/module-b/B17.mp4",
-                order: 19
+                order: 19,
+                waitSeconds: 3
               },
               {
                 order: 20,
                 type: "quiz",
                 title: "Quick Hero Quiz!",
-                content: "Prove you're a Toilet Hero by passing this quick check!",
+                content: "Drag and drop the correct answers into the boxes to complete the quiz!",
                 questions: [
                   {
                     id: "m2-q1",
-                    type: "MULTIPLE_CHOICE",
+                    type: "DRAG_AND_DROP",
                     question: "What should you do after using the toilet?",
                     options: ["Flush properly!", "Leave it for later."],
                     correctAnswer: "Flush properly!"
                   },
                   {
                     id: "m2-q2",
-                    type: "MULTIPLE_CHOICE",
+                    type: "DRAG_AND_DROP",
                     question: "True or False: Toilets are shared spaces.",
                     options: ["TRUE!", "FALSE!"],
                     correctAnswer: "TRUE!"
                   },
                   {
                     id: "m2-q3",
-                    type: "MULTIPLE_CHOICE",
+                    type: "DRAG_AND_DROP",
                     question: "Who helps keep toilets clean?",
                     options: ["Everyone!", "Only the cleaners."],
                     correctAnswer: "Everyone!"
                   },
                   {
                     id: "m2-q4",
-                    type: "MULTIPLE_CHOICE",
+                    type: "DRAG_AND_DROP",
                     question: "Does a Toilet Hero help others?",
                     options: ["Yes, of course!", "No, just themselves."],
                     correctAnswer: "Yes, of course!"
                   }
                 ],
+                waitSeconds: 3
               },
               {
                 order: 21,
@@ -402,6 +436,7 @@ async function main() {
                 mascot: "/mascots/m2-mascot-final.png",
                 image: "/mascots/m2-badge-final.png",
                 background: "/backgrounds/module-2-final-bg.png",
+                waitSeconds: 5
               }
             ]
           }

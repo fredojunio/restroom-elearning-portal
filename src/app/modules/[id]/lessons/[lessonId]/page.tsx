@@ -52,6 +52,7 @@ interface Slide {
     mascot?: string;
     background?: string;
     invertChoices?: boolean;
+    waitSeconds?: number;
 }
 
 const dummySlides: Slide[] = [
@@ -60,7 +61,8 @@ const dummySlides: Slide[] = [
         type: "video",
         title: "Mission Introduction",
         videoUrl: "/videos/module-a/A1 video.mp4",
-        order: 1
+        order: 1,
+        waitSeconds: 3
     },
     {
         id: "slide-1",
@@ -68,7 +70,8 @@ const dummySlides: Slide[] = [
         title: "Welcome to Toilet Heroes",
         subtitle: "Clean Toilets Keep Us Healthy",
         content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
-        order: 2
+        order: 2,
+        waitSeconds: 3
     },
     {
         id: "slide-2",
@@ -76,7 +79,8 @@ const dummySlides: Slide[] = [
         title: "Hi there, Hero",
         content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
         order: 3,
-        mascot: "/mascots/mascot-greeting.png"
+        mascot: "/mascots/mascot-greeting.png",
+        waitSeconds: 4
     },
     {
         id: "slide-3",
@@ -84,14 +88,16 @@ const dummySlides: Slide[] = [
         title: "Meet the Invisible Germs",
         content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
         order: 4,
-        mascot: "/mascots/mascot-pointing.png"
+        mascot: "/mascots/mascot-pointing.png",
+        waitSeconds: 5
     },
     {
         id: "slide-a2-video",
         type: "video",
         title: "Germ Secret Revealed",
         videoUrl: "/videos/module-a/A2.mp4",
-        order: 5
+        order: 5,
+        waitSeconds: 3
     },
     {
         id: "slide-4",
@@ -99,7 +105,8 @@ const dummySlides: Slide[] = [
         title: "Germ Hunter Game",
         gameType: "Drag to Disinfect",
         content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
-        order: 6
+        order: 6,
+        waitSeconds: 3
     },
     {
         id: "slide-5",
@@ -108,28 +115,32 @@ const dummySlides: Slide[] = [
         image: "🦠",
         content: "Germs often gather on door handles and light switches. Look closely!",
         order: 7,
-        mascot: "/mascots/mascot-pointing.png"
+        mascot: "/mascots/mascot-pointing.png",
+        waitSeconds: 4
     },
     {
         id: "slide-a4-video",
         type: "video",
         title: "Invisible Germs",
         videoUrl: "/videos/module-a/A4.mp4",
-        order: 8
+        order: 8,
+        waitSeconds: 3
     },
     {
         id: "slide-a5-video",
         type: "video",
         title: "Wash Your Hand!",
         videoUrl: "/videos/module-a/A5.mp4",
-        order: 9
+        order: 9,
+        waitSeconds: 3
     },
     {
         id: "slide-a6-video",
         type: "video",
         title: "Wash Your Hand!",
         videoUrl: "/videos/module-a/A6.mp4",
-        order: 10
+        order: 10,
+        waitSeconds: 3
     },
     {
         id: "slide-germ-story",
@@ -138,33 +149,37 @@ const dummySlides: Slide[] = [
         gameType: "Story Interaction",
         content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
         order: 11,
-        mascot: "/mascots/mascot-scared.png"
+        mascot: "/mascots/mascot-scared.png",
+        waitSeconds: 3
     },
     {
         id: "slide-toilet-choice",
         type: "comparison",
         title: "Clean Toilets, Happy Friends",
-        order: 12
+        order: 12,
+        waitSeconds: 3
     },
     {
         id: "slide-a8-video",
         type: "video",
         title: "Clean Toilets, Happy Friends",
         videoUrl: "/videos/module-a/A8.mp4",
-        order: 13
+        order: 13,
+        waitSeconds: 3
     },
     {
         id: "slide-a9-video",
         type: "video",
         title: "Fun Quiz Time!",
         videoUrl: "/videos/module-a/A9.mp4",
-        order: 14
+        order: 14,
+        waitSeconds: 3
     },
     {
         id: "slide-6",
         type: "quiz",
         title: "Fun Quiz Time!",
-        content: "Prove you're a Toilet Hero by passing this quick check!",
+        content: "Drag and drop the correct answers into the boxes to complete the quiz!",
         questions: [
             {
                 id: "q1",
@@ -183,7 +198,8 @@ const dummySlides: Slide[] = [
                 correctAnswer: "Soap + Water!"
             }
         ],
-        order: 15
+        order: 15,
+        waitSeconds: 3
     },
     {
         id: "slide-7",
@@ -192,7 +208,8 @@ const dummySlides: Slide[] = [
         content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
         mascot: "/mascots/mascot-hero.png",
         background: "/images/celebration-bg.jpg",
-        order: 16
+        order: 16,
+        waitSeconds: 5
     }
 ];
 
@@ -206,6 +223,8 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
         { id: 4, x: 20, y: 70 },
         { id: 5, x: 50, y: 80 },
         { id: 6, x: 80, y: 75 },
+        { id: 7, x: 50, y: 20 },
+        { id: 8, x: 70, y: 65 },
     ]);
     const [isWon, setIsWon] = useState(false);
     const portalRef = useRef<HTMLDivElement>(null);
@@ -1587,6 +1606,9 @@ export default function LessonDetailPage() {
     const [quizState, setQuizState] = useState<'idle' | 'playing' | 'completed'>('idle');
     // Track completed slide indices
     const [completedSlides, setCompletedSlides] = useState<Record<number, boolean>>({});
+    // Countdown timer state
+    const [countdown, setCountdown] = useState(0);
+    const [isTimerLocked, setIsTimerLocked] = useState(false);
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
     const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
@@ -1635,6 +1657,32 @@ export default function LessonDetailPage() {
         }
     }, [params.lessonId, initialSlideLoaded]);
 
+    // Timer Logic
+    useEffect(() => {
+        if (slides[currentIdx]?.waitSeconds && slides[currentIdx].waitSeconds > 0 && !completedSlides[currentIdx]) {
+            setIsTimerLocked(true);
+            setCountdown(slides[currentIdx].waitSeconds);
+
+            const timer = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setIsTimerLocked(false);
+                        // Mark as completed once timer ends so it doesn't re-lock
+                        setCompletedSlides(prevComp => ({ ...prevComp, [currentIdx]: true }));
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            return () => clearInterval(timer);
+        } else {
+            setIsTimerLocked(false);
+            setCountdown(0);
+        }
+    }, [currentIdx, slides, completedSlides[currentIdx]]);
+
     const totalSlides = slides.length;
     const currentSlide = slides[currentIdx];
 
@@ -1656,6 +1704,9 @@ export default function LessonDetailPage() {
 
     const handleNext = () => {
         if (currentIdx < totalSlides - 1) {
+            // Mark current slide as completed when moving forward
+            setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
+
             // Play SFX
             const audio = new Audio('/sfx/next.mp3');
             audio.play().catch(e => console.warn("Next sfx play failed:", e));
@@ -1697,6 +1748,7 @@ export default function LessonDetailPage() {
 
     // Logic to lock navigation
     const isSlideLocked = !completedSlides[currentIdx] && (
+        isTimerLocked ||
         (currentSlide.type === "game" && gameState !== "completed") ||
         (currentSlide.type === "comparison" && gameState !== "completed") ||
         (currentSlide.type === "quiz" && quizState !== "completed") ||
@@ -1886,21 +1938,22 @@ export default function LessonDetailPage() {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                setTimeout(handleNext, 500);
+                                                handleNext();
+                                                // setTimeout(handleNext, 500);
                                             }} />
                                         ) : currentSlide.gameType === "WhosNext" ? (
                                             <WhosNextGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                setTimeout(handleNext, 500);
+                                                handleNext();
                                             }} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
                                             <HeroOrOopsGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                setTimeout(handleNext, 500);
+                                                handleNext();
                                             }} invertChoices={currentSlide.invertChoices} />
                                         ) : currentSlide.gameType === "CleanupChallenge" ? (
                                             <CleanupChallengeGame
@@ -1908,7 +1961,7 @@ export default function LessonDetailPage() {
                                                     setGameState('completed');
                                                     setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                     playYay();
-                                                    setTimeout(handleNext, 500);
+                                                    handleNext();
                                                 }}
                                                 background={currentSlide.background}
                                             />
@@ -1917,7 +1970,7 @@ export default function LessonDetailPage() {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                setTimeout(handleNext, 500);
+                                                handleNext();
                                             }} />
                                         )
                                     ) : (
@@ -1934,7 +1987,7 @@ export default function LessonDetailPage() {
                                             setGameState('completed');
                                             setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                             playYay();
-                                            setTimeout(handleNext, 500);
+                                            handleNext();
                                         }}
                                         invertChoices={currentSlide.invertChoices}
                                     />
@@ -1949,7 +2002,7 @@ export default function LessonDetailPage() {
                                                 setQuizState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                setTimeout(handleNext, 500);
+                                                handleNext();
                                             }}
                                         />
                                     ) : (
@@ -2021,7 +2074,9 @@ export default function LessonDetailPage() {
                                 className={`px-5 py-3 md:px-10 md:py-5 ${isSlideLocked ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                             >
                                 <div className="flex items-center justify-center gap-2 md:gap-4">
-                                    <span className="text-xs md:text-base">{isSlideLocked ? 'Locked' : 'Next'}</span>
+                                    <span className="text-xs md:text-base">
+                                        {isTimerLocked ? `Wait ${countdown}s` : isSlideLocked ? 'Locked' : 'Next'}
+                                    </span>
                                     {!isSlideLocked && <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />}
                                 </div>
                             </PlayfulButton>

@@ -13,6 +13,7 @@ export interface Module2Slide {
     mascot?: string;
     background?: string;
     invertChoices?: boolean;
+    waitSeconds?: number;
 }
 
 export const moduleTwoSlides: Module2Slide[] = [
@@ -23,17 +24,19 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Module B: Habits, Respect & Responsibility",
         content: "Format: Learn Through Play",
         order: 1,
-        background: "/backgrounds/module-2-bg.jpg"
+        background: "/backgrounds/module-2-bg.jpg",
+        waitSeconds: 3
     },
     {
         id: "m2-slide-2",
         type: "content",
         title: "Ready to Help?",
         subtitle: "Section 1: Hello Again!",
-        content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!\n\n(Mascot welcomes the student back.)",
+        content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!)",
         mascot: "/mascots/mascot-greeting.png",
         order: 2,
-        background: "/backgrounds/module-2-bg.jpg"
+        background: "/backgrounds/module-2-bg.jpg",
+        waitSeconds: 5
     },
     {
         id: "m2-slide-3",
@@ -41,7 +44,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         title: "You are not the only one!",
         subtitle: "Section 2: Shared Spaces",
         content: "Toilets are for everyone. When we leave them clean, we are being kind to the next person.\n\n• Clean Choice: The next person (friend or teacher) smiles!\n• Messy Choice: The next person looks very unhappy.",
-        order: 3
+        order: 3,
+        waitSeconds: 4
     },
     {
         id: "m2-slide-4",
@@ -52,7 +56,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         image: "clean_messy_comparison.png",
         background: "/backgrounds/m2-sharing-bg.jpg",
         invertChoices: true,
-        order: 4
+        order: 4,
+        waitSeconds: 4
     },
     {
         id: "m2-slide-5",
@@ -61,7 +66,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Section 3: Hero or Oops?",
         content: "Toilet Hero Tutorial: Tap to Learn!\n\n• Flush: Always flush after use.\n• Bin: Put tissues in the bin.\n• Dry Floor: Keep the floor dry.\n• No Playing: The toilet is not a playground.",
         mascot: "/mascots/mascot-pointing.png",
-        order: 5
+        order: 5,
+        waitSeconds: 6
     },
     {
         id: "m2-slide-6",
@@ -71,7 +77,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         gameType: "HeroOrOops",
         content: "Hero or Oops?\nLook at the scenario and decide if it's a 'Toilet Hero' choice or an 'Oops' choice!",
         invertChoices: true,
-        order: 6
+        order: 6,
+        waitSeconds: 3
     },
     {
         id: "m2-slide-7",
@@ -80,7 +87,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         subtitle: "Section 4: Our Cleaners",
         content: "Cleaners work very hard every day to keep us safe. When we flush and keep things tidy, their job is much easier!\n\n'When we help, cleaners can do their work more easily!'",
         mascot: "/mascots/mascot-pointing.png",
-        order: 7
+        order: 7,
+        waitSeconds: 5
     },
     {
         id: "m2-slide-8",
@@ -90,7 +98,8 @@ export const moduleTwoSlides: Module2Slide[] = [
         gameType: "CleanupChallenge",
         content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
         order: 8,
-        background: "/backgrounds/cleanup-challenge-bg.jpg"
+        background: "/backgrounds/cleanup-challenge-bg.jpg",
+        waitSeconds: 3
     },
     {
         id: "m2-slide-9",
@@ -98,13 +107,14 @@ export const moduleTwoSlides: Module2Slide[] = [
         title: "The Toilet Hero Pledge",
         subtitle: "I Promise To...",
         content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
-        order: 10
+        order: 10,
+        waitSeconds: 5
     },
     {
         id: "m2-quiz-1",
         type: "quiz",
         title: "Quick Hero Quiz!",
-        content: "Prove you're a Toilet Hero by passing this quick check!",
+        content: "Drag and drop the correct answers into the boxes to complete the quiz!",
         questions: [
             {
                 id: "m2-q1",
@@ -135,7 +145,8 @@ export const moduleTwoSlides: Module2Slide[] = [
                 correctAnswer: "Yes, of course!"
             }
         ],
-        order: 11
+        order: 11,
+        waitSeconds: 3
     },
     {
         id: "m2-celebration-final",
