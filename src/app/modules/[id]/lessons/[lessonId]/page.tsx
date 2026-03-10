@@ -324,7 +324,9 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
     ]);
     const [isScrubbing, setIsScrubbing] = useState(false);
     const [scrubProgress, setScrubProgress] = useState(0);
+    const [rinseProgress, setRinseProgress] = useState(0); // 0 to 100
     const [hasPlayedSfx, setHasPlayedSfx] = useState(false);
+    const completedRef = useRef(false);
 
     const handleScrub = (id: number) => {
         if (phase !== 2) return;
@@ -373,7 +375,7 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                     <h4 className="text-xs md:text-sm font-black text-blue-900/40 uppercase tracking-widest mb-1">Soap & Water Superheroes</h4>
                     <p className="text-[10px] md:text-xs text-blue-900/30 font-bold italic">
                         {phase === 1 && "Start by wetting your hands!"}
-                        {phase === 2 && "Apply soap and scrub those germs!"}
+                        {phase === 2 && "Swipe over the germs to remove them!"}
                         {phase === 3 && "Almost done! Rinse away the bubbles."}
                     </p>
                 </div>
@@ -465,13 +467,46 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                 {/* Rinse Effect (Phase 3) */}
                 <AnimatePresence>
                     {phase === 3 && (
-                        <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: "100%" }}
-                            className="absolute top-0 left-1/2 -translate-x-1/2 w-16 md:w-24 bg-sky-200/40 backdrop-blur-[2px] z-10"
-                        >
-                            <div className="absolute bottom-0 w-full h-12 bg-sky-400/20 animate-pulse" />
-                        </motion.div>
+                        <>
+                            {/* Water Stream */}
+                            <motion.div
+                                initial={{ height: 0 }}
+                                animate={{ height: `${rinseProgress}%` }}
+                                className="absolute top-0 left-1/2 -translate-x-1/2 w-16 md:w-24 bg-sky-200/40 backdrop-blur-[2px] z-10"
+                            >
+                                <div className="absolute bottom-0 w-full h-12 bg-sky-400/20 animate-pulse" />
+                            </motion.div>
+
+                            {/* Swipe Handle/Visual Cue */}
+                            {rinseProgress < 100 && (
+                                <motion.div
+                                    drag="y"
+                                    dragConstraints={{ top: 0, bottom: 300 }}
+                                    dragElastic={0}
+                                    dragMomentum={false}
+                                    onDrag={(e, info) => {
+                                        if (completedRef.current) return;
+                                        const newProgress = Math.min(100, Math.max(0, (info.point.y / 300) * 100));
+                                        setRinseProgress(newProgress);
+                                        if (newProgress >= 100) {
+                                            completedRef.current = true;
+                                            const audio = new Audio('/sfx/correct.mp3');
+                                            audio.play().catch(e => console.warn("Correct sfx play failed:", e));
+                                            setTimeout(handleComplete, 500);
+                                        }
+                                    }}
+                                    className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white/80 rounded-full border-4 border-sky-400 flex items-center justify-center cursor-grab active:cursor-grabbing z-40 shadow-xl"
+                                    style={{ y: (rinseProgress / 100) * 300 }}
+                                >
+                                    <motion.div
+                                        animate={{ y: [0, 5, 0] }}
+                                        transition={{ repeat: Infinity, duration: 1.5 }}
+                                    >
+                                        <ArrowRight className="w-8 h-8 text-sky-500 rotate-90" />
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </>
                     )}
                 </AnimatePresence>
             </div>
@@ -522,17 +557,12 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                             key="rinse"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col items-center gap-2"
                         >
-                            <PlayfulButton
-                                onClick={handleComplete}
-                                color="green"
-                                className="px-8 py-3 md:px-12 md:py-5"
-                            >
-                                <div className="flex items-center gap-3 md:gap-4">
-                                    <span className="text-xl md:text-2xl">✨</span>
-                                    RINSE & FINISH!
-                                </div>
-                            </PlayfulButton>
+                            <div className="px-6 py-2 bg-sky-500 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-lg animate-bounce">
+                                ↓ Swipe Down to Rinse! ↓
+                            </div>
+                            <p className="text-blue-900/40 font-bold text-xs md:text-sm">Wash away the soap with the water!</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -1051,12 +1081,13 @@ const VideoSlide = ({ title, videoUrl }: Partial<Slide>) => (
             <video
                 src={videoUrl}
                 autoPlay
+                loop
                 playsInline
                 className="w-full h-full object-cover"
-                onEnded={(e) => {
-                    const video = e.target as HTMLVideoElement;
-                    video.pause();
-                }}
+            // onEnded={(e) => {
+            //     const video = e.target as HTMLVideoElement;
+            //     video.pause();
+            // }}
             />
             {/* Overlay for aesthetic */}
             <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/20 rounded-[inherit]" />
