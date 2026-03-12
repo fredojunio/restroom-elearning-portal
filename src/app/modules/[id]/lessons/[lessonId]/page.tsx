@@ -216,6 +216,61 @@ const dummySlides: Slide[] = [
     }
 ];
 
+// --- Success Popup Component ---
+
+const GameSuccessModal = ({ title, description, onContinue }: { title: string, description: string, onContinue: () => void }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-50 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 md:p-12"
+        >
+            <motion.div
+                initial={{ scale: 0.5, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                className="w-24 h-24 md:w-32 md:h-32 bg-linear-to-b from-yellow-300 to-yellow-500 rounded-[2.5rem] flex items-center justify-center mb-8 shadow-2xl"
+            >
+                <Trophy className="w-12 h-12 md:w-16 md:h-16 text-white drop-shadow-lg" />
+            </motion.div>
+
+            <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl md:text-5xl font-black text-slate-900 mb-4 uppercase tracking-tighter"
+            >
+                {title}
+            </motion.h3>
+
+            <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-lg md:text-xl text-slate-500 font-bold mb-10 max-w-md"
+            >
+                {description}
+            </motion.p>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+            >
+                <PlayfulButton
+                    onClick={onContinue}
+                    color="green"
+                    className="px-10 py-4 md:px-14 md:py-6"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="text-xl md:text-2xl font-black uppercase tracking-widest">Continue</span>
+                        <ArrowRight className="w-6 h-6" />
+                    </div>
+                </PlayfulButton>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 // --- Specialized Game Component ---
 
 const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
@@ -248,7 +303,6 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
                 const remaining = prev.filter(g => g.id !== id);
                 if (remaining.length === 0) {
                     setIsWon(true);
-                    onComplete();
                     confetti({ particleCount: 100, spread: 50 });
                 }
                 return remaining;
@@ -301,18 +355,11 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
 
             {/* Success Modal */}
             {isWon && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8"
-                >
-                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-3xl flex items-center justify-center mb-6 shadow-xl">
-                        <CheckCircle className="w-10 h-10" />
-                    </div>
-                    <h3 className="text-3xl font-black text-slate-900 mb-2">Restroom Disinfected!</h3>
-                    <p className="text-slate-500 font-medium mb-8">You found every germ. You may now proceed.</p>
-                    <span className="px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">Slide Unlocked</span>
-                </motion.div>
+                <GameSuccessModal
+                    title="Restroom Disinfected!"
+                    description="You found every germ. You may now proceed."
+                    onContinue={onComplete}
+                />
             )}
         </div>
     );
@@ -323,17 +370,18 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
 const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
     const [phase, setPhase] = useState<1 | 2 | 3>(1); // 1: Wet, 2: Soap/Scrub, 3: Rinse
     const [germs, setGerms] = useState([
-        { id: 1, x: "90%", y: "40%", opacity: 1 },
-        { id: 2, x: "30%", y: "50%", opacity: 1 },
-        { id: 3, x: "50%", y: "30%", opacity: 1 },
-        { id: 4, x: "20%", y: "45%", opacity: 1 },
-        { id: 5, x: "65%", y: "45%", opacity: 1 },
-        { id: 6, x: "40%", y: "60%", opacity: 1 },
+        { id: 1, x: "90%", y: "40%", opacity: 1, image: '/images/germs/germ-green.png' },
+        { id: 2, x: "30%", y: "50%", opacity: 1, image: '/images/germs/germ-purple.png' },
+        { id: 3, x: "50%", y: "30%", opacity: 1, image: '/images/germs/germ-blue.png' },
+        { id: 4, x: "20%", y: "45%", opacity: 1, image: '/images/germs/germ-green.png' },
+        { id: 5, x: "65%", y: "45%", opacity: 1, image: '/images/germs/germ-purple.png' },
+        { id: 6, x: "40%", y: "60%", opacity: 1, image: '/images/germs/germ-blue.png' },
     ]);
     const [isScrubbing, setIsScrubbing] = useState(false);
     const [scrubProgress, setScrubProgress] = useState(0);
     const [rinseProgress, setRinseProgress] = useState(0); // 0 to 100
     const [hasPlayedSfx, setHasPlayedSfx] = useState(false);
+    const [isWon, setIsWon] = useState(false);
     const completedRef = useRef(false);
 
     const handleScrub = (id: number) => {
@@ -366,7 +414,7 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
     }, [scrubProgress, phase, germs.length]);
 
     const handleComplete = () => {
-        onComplete();
+        setIsWon(true);
         confetti({
             particleCount: 150,
             spread: 70,
@@ -467,7 +515,7 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                                 }}
                             >
                                 <img
-                                    src="/images/germs/germ-purple.png"
+                                    src={germ.image}
                                     className="w-full h-full object-contain pointer-events-none"
                                     alt="Germ"
                                     draggable="false"
@@ -580,26 +628,48 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Success Modal */}
+            {isWon && (
+                <GameSuccessModal
+                    title="Super Scrubbed!"
+                    description="You've washed away all the germs. Great job hero!"
+                    onContinue={onComplete}
+                />
+            )}
         </div>
     );
 };
 
 
 const WhosNextGame = ({ onComplete }: { onComplete: () => void }) => {
+    const [isWon, setIsWon] = useState(false);
     return (
-        <div className="flex flex-col items-center justify-center p-10 bg-purple-50 rounded-[3rem] border-4 border-purple-200">
+        <div className="relative flex flex-col items-center justify-center p-10 bg-purple-50 rounded-[3rem] border-4 border-purple-200 overflow-hidden">
             <h3 className="text-2xl font-black text-purple-900 mb-4">Who's Next?</h3>
             <p className="text-purple-700 mb-8 text-center max-w-md">
                 Game logic coming soon! Imagine a line of people waiting...
             </p>
-            <PlayfulButton onClick={onComplete} color="purple">
+            <PlayfulButton onClick={() => {
+                setIsWon(true);
+                confetti({ particleCount: 100, spread: 50 });
+            }} color="purple">
                 Finish Game
             </PlayfulButton>
+
+            {isWon && (
+                <GameSuccessModal
+                    title="Mission Accomplished!"
+                    description="You've completed this challenge."
+                    onContinue={onComplete}
+                />
+            )}
         </div>
     );
 };
 
 const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void, invertChoices?: boolean }) => {
+    const [isWon, setIsWon] = useState(false);
     const [scenarios] = useState([
         { id: 1, title: "Flushing after use", isHero: true, image: "🚽" },
         { id: 2, title: "Leaving tissues on the floor", isHero: false, image: "🧻" },
@@ -619,7 +689,8 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
                     setCurrentStep(currentStep + 1);
                     setFeedback('none');
                 } else {
-                    onComplete();
+                    setIsWon(true);
+                    confetti({ particleCount: 100, spread: 70 });
                 }
             }, 1000);
         } else {
@@ -680,11 +751,20 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {isWon && (
+                <GameSuccessModal
+                    title="Hero Logic Master!"
+                    description="You know exactly how a Toilet Hero behaves."
+                    onContinue={onComplete}
+                />
+            )}
         </div>
     );
 };
 
 const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => void, background?: string }) => {
+    const [isWon, setIsWon] = useState(false);
     const [messes, setMesses] = useState([
         { id: 1, type: 'tissue', x: '25%', y: '65%', fixed: false },
         { id: 2, type: 'spill', x: '75%', y: '75%', fixed: false },
@@ -717,9 +797,12 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
 
     useEffect(() => {
         if (messes.every(m => m.fixed)) {
-            setTimeout(onComplete, 1500);
+            setTimeout(() => {
+                setIsWon(true);
+                confetti({ particleCount: 150, spread: 70 });
+            }, 500);
         }
-    }, [messes, onComplete]);
+    }, [messes]);
 
     return (
         <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
@@ -820,6 +903,14 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
                     </motion.button>
                 ))}
             </div>
+
+            {isWon && (
+                <GameSuccessModal
+                    title="Mission Secured!"
+                    description="The restroom is sparkling clean thanks to you!"
+                    onContinue={onComplete}
+                />
+            )}
         </div>
     );
 };

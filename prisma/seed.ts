@@ -115,12 +115,14 @@ async function main() {
                 title: "How Germs Travel",
                 image: "🦠",
                 content: "Germs often gather on door handles and light switches. Look closely!",
-                mascot: "/mascots/mascot-pointing.png"
+                mascot: "/mascots/mascot-pointing.png",
+                audio: "/audio/how-germs-travel.mp3",
+                background: "/videos/module-a/A4-1.mov"
               },
               {
                 id: "slide-a4-video",
                 type: "video",
-                title: "Invisible Germs",
+                title: "How Germs Travel",
                 videoUrl: "/videos/module-a/A4.mp4",
                 order: 8,
                 waitSeconds: 3
@@ -148,6 +150,7 @@ async function main() {
                 gameType: "Story Interaction",
                 content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
                 mascot: "/mascots/mascot-scared.png",
+                background: "/videos/module-a/A11.mov"
               },
               {
                 order: 12,
