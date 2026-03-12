@@ -83,6 +83,7 @@ model Slide {
   background String?
   invertChoices Boolean? @default(false)
   waitSeconds   Int?      @default(0)
+  audio    String?
   
   // For quiz slides, we can store questions as JSON
   questions Json?    // Array of Question objects as defined in frontend

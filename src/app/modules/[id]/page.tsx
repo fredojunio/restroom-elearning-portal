@@ -71,7 +71,7 @@ interface Progress {
 export default function ModuleDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const moduleId = params.id as string;
 
   const [module, setModule] = useState<Module | null>(null);
@@ -79,12 +79,14 @@ export default function ModuleDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session) {
+    if (status === "unauthenticated") {
       router.push("/auth/login");
       return;
     }
-    fetchModuleData();
-  }, [moduleId, session, router]);
+    if (status === "authenticated" && moduleId) {
+      fetchModuleData();
+    }
+  }, [moduleId, status, router]);
 
   const fetchModuleData = async () => {
     try {

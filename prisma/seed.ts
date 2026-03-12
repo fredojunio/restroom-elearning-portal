@@ -65,7 +65,8 @@ async function main() {
                 type: "video",
                 title: "Mission Introduction",
                 videoUrl: "/videos/module-a/A1 video.mp4",
-                waitSeconds: 3
+                waitSeconds: 3,
+                audio: "/audio/intro-speech.mp3"
               },
               {
                 order: 2,
@@ -73,22 +74,25 @@ async function main() {
                 title: "Welcome to Toilet Heroes",
                 subtitle: "Clean Toilets Keep Us Healthy",
                 content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 order: 3,
                 type: "content",
                 title: "Hi there, Hero",
-                content: "Meet our friendly mascot guide who explains that toilets are shared spaces. To keep everyone healthy, we all have a part to play!",
+                content: "Welcome back heroes! I'm so glad you're here for our next lesson. Today we're going to talk about something very important—our school toilets. You see, our toilets are shared spaces. That means many of our friends use them every single day. To keep everyone healthy and happy, we all have a special part to play. It's like a team mission. By the end of this class, you'll know exactly how to be a toilet hygiene hero for your school. Are you ready? Let's jump into our mission!",
                 mascot: "/mascots/mascot-greeting.png",
-                waitSeconds: 4
+                waitSeconds: 3,
+                audio: "/audio/hi-there-hero.mp3"
               },
               {
                 order: 4,
                 type: "content",
                 title: "Meet the Invisible Germs",
-                content: "• Germs are invisible but real\n• They love wet surfaces\n• They can live on faucet handles for hours\n• But we have a secret weapon: Hygiene!",
-                mascot: "/mascots/mascot-pointing.png"
+                content: "• Invisible\n• Love wet spots\n• Live on faucets\n• Use hygiene",
+                mascot: "/mascots/mascot-pointing.png",
+                background: "/images/meet-invisible-germs.png",
+                audio: "/audio/meet-invisible-germs.mp3"
               },
               {
                 order: 5,
@@ -102,8 +106,8 @@ async function main() {
                 type: "game",
                 title: "Germ Hunter Game",
                 gameType: "Drag to Disinfect",
-                content: "Drag all 6 invisible germs into the 'Sanitizer' portal to clear the restroom!",
-                waitSeconds: 3
+                content: "Drag all invisible germs into the 'Sanitizer' portal to clear the restroom!",
+                background: "/videos/module-a/A7.mov",
               },
               {
                 order: 7,
@@ -144,7 +148,6 @@ async function main() {
                 gameType: "Story Interaction",
                 content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
                 mascot: "/mascots/mascot-scared.png",
-                waitSeconds: 3
               },
               {
                 order: 12,
@@ -191,7 +194,6 @@ async function main() {
                     correctAnswer: "Soap + Water!"
                   }
                 ],
-                waitSeconds: 3
               }
               ,
               {
@@ -201,7 +203,7 @@ async function main() {
                 content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
                 mascot: "/mascots/mascot-hero.png",
                 background: "/images/celebration-bg.jpg",
-                waitSeconds: 5
+                waitSeconds: 3
               }
             ]
           }
@@ -241,7 +243,7 @@ async function main() {
                 subtitle: "Module B: Habits, Respect & Responsibility",
                 content: "Format: Learn Through Play",
                 background: "/backgrounds/module-2-bg.jpg",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 order: 3,
@@ -251,7 +253,7 @@ async function main() {
                 content: "You learned how clean toilets keep us healthy. Now let's learn how YOU can help keep them clean!",
                 mascot: "/mascots/mascot-greeting.png",
                 background: "/backgrounds/module-2-bg.jpg",
-                waitSeconds: 4
+                waitSeconds: 3
               },
               {
                 id: "slide-b2-video",
@@ -267,7 +269,7 @@ async function main() {
                 title: "You are not the only one!",
                 subtitle: "Section 2: Shared Spaces",
                 content: "Toilets are for everyone. When we leave them clean, we are being kind to the next person.\n\n• Clean Choice: The next person (friend or teacher) smiles!\n• Messy Choice: The next person looks very unhappy.",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 id: "slide-b3-video",
@@ -294,7 +296,7 @@ async function main() {
                 image: "clean_messy_comparison.png",
                 background: "/backgrounds/m2-sharing-bg.jpg",
                 invertChoices: true,
-                waitSeconds: 4
+                waitSeconds: 3
               },
               {
                 order: 9,
@@ -303,7 +305,7 @@ async function main() {
                 subtitle: "Section 3: Hero or Oops?",
                 content: "Toilet Hero Tutorial: Tap to Learn!\n\n• Flush: Always flush after use.\n• Bin: Put tissues in the bin.\n• Dry Floor: Keep the floor dry.\n• No Playing: The toilet is not a playground.",
                 mascot: "/mascots/mascot-pointing.png",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 id: "slide-b4-video",
@@ -321,7 +323,6 @@ async function main() {
                 gameType: "HeroOrOops",
                 content: "Hero or Oops?\nLook at the scenario and decide if it's a 'Toilet Hero' choice or an 'Oops' choice!",
                 invertChoices: true,
-                waitSeconds: 3
               },
               {
                 order: 12,
@@ -330,7 +331,7 @@ async function main() {
                 subtitle: "Section 4: Our Cleaners",
                 content: "Cleaners work very hard every day to keep us safe. When we flush and keep things tidy, their job is much easier!\n\n'When we help, cleaners can do their work more easily!'",
                 mascot: "/mascots/mascot-pointing.png",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 id: "slide-b14-video",
@@ -364,7 +365,6 @@ async function main() {
                 gameType: "CleanupChallenge",
                 content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
                 background: "/backgrounds/cleanup-challenge-bg.jpg",
-                waitSeconds: 3
               },
               {
                 id: "slide-b12-video",
@@ -380,7 +380,7 @@ async function main() {
                 title: "The Toilet Hero Pledge",
                 subtitle: "I Promise To...",
                 content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
-                waitSeconds: 5
+                waitSeconds: 3
               },
               {
                 id: "slide-b17-video",
@@ -425,7 +425,6 @@ async function main() {
                     correctAnswer: "Yes, of course!"
                   }
                 ],
-                waitSeconds: 3
               },
               {
                 order: 21,
@@ -436,7 +435,7 @@ async function main() {
                 mascot: "/mascots/m2-mascot-final.png",
                 image: "/mascots/m2-badge-final.png",
                 background: "/backgrounds/module-2-final-bg.png",
-                waitSeconds: 5
+                waitSeconds: 3
               }
             ]
           }

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import PlayfulButton from "@/components/PlayfulButton";
@@ -53,6 +54,7 @@ interface Slide {
     background?: string;
     invertChoices?: boolean;
     waitSeconds?: number;
+    audio?: string;
 }
 
 const dummySlides: Slide[] = [
@@ -62,7 +64,8 @@ const dummySlides: Slide[] = [
         title: "Mission Introduction",
         videoUrl: "/videos/module-a/A1 video.mp4",
         order: 1,
-        waitSeconds: 3
+        waitSeconds: 3,
+        audio: "/audio/intro-speech.mp3"
     },
     {
         id: "slide-1",
@@ -217,14 +220,14 @@ const dummySlides: Slide[] = [
 
 const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     const [germs, setGerms] = useState([
-        { id: 1, x: 15, y: 20 },
-        { id: 2, x: 75, y: 15 },
-        { id: 3, x: 80, y: 45 },
-        { id: 4, x: 20, y: 70 },
-        { id: 5, x: 50, y: 80 },
-        { id: 6, x: 80, y: 75 },
-        { id: 7, x: 50, y: 20 },
-        { id: 8, x: 70, y: 65 },
+        { id: 1, x: 15, y: 20, image: '/images/germs/germ-green.png' },
+        { id: 2, x: 75, y: 15, image: '/images/germs/germ-purple.png' },
+        { id: 3, x: 80, y: 45, image: '/images/germs/germ-blue.png' },
+        { id: 4, x: 20, y: 70, image: '/images/germs/germ-green.png' },
+        { id: 5, x: 50, y: 80, image: '/images/germs/germ-purple.png' },
+        { id: 6, x: 80, y: 75, image: '/images/germs/germ-blue.png' },
+        { id: 7, x: 50, y: 20, image: '/images/germs/germ-green.png' },
+        { id: 8, x: 70, y: 65, image: '/images/germs/germ-purple.png' },
     ]);
     const [isWon, setIsWon] = useState(false);
     const portalRef = useRef<HTMLDivElement>(null);
@@ -254,7 +257,7 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
     };
 
     return (
-        <div className="relative w-full h-[400px] md:h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
+        <div className="bg-gray-50/50 relative w-full h-[400px] md:h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
             {/* Background Info */}
             <div className="absolute top-6 left-6 md:top-8 md:left-8 text-left z-10">
                 <h4 className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Restroom Area</h4>
@@ -283,10 +286,15 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
                         dragSnapToOrigin
                         onDragEnd={(e, info) => checkCollision(germ.id, info.point)}
                         whileDrag={{ scale: 1.2, rotate: 180 }}
-                        className="absolute cursor-grab active:cursor-grabbing w-12 h-12 md:w-16 md:h-16 bg-orange-100 border-2 border-orange-300 rounded-2xl flex items-center justify-center text-2xl md:text-3xl shadow-lg ring-4 ring-orange-100/50 -ml-6 -mt-6 md:-ml-8 md:-mt-8"
+                        className="absolute cursor-grab active:cursor-grabbing w-12 h-12 md:w-16 md:h-16 flex items-center justify-center -ml-6 -mt-6 md:-ml-8 md:-mt-8 z-20"
                         style={{ left: `${germ.x}%`, top: `${germ.y}%` }}
                     >
-                        🦠
+                        <img
+                            src={germ.image}
+                            className="w-full h-full object-contain pointer-events-none"
+                            alt="Germ"
+                            draggable="false"
+                        />
                     </motion.div>
                 ))}
             </AnimatePresence>
@@ -451,14 +459,19 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                                 exit={{ scale: 0, opacity: 0 }}
                                 onMouseEnter={() => handleScrub(germ.id)}
                                 onTouchStart={() => handleScrub(germ.id)}
-                                className={`absolute text-3xl md:text-4xl cursor-pointer pointer-events-auto filter transition-all duration-300 z-30 ${phase === 1 ? 'grayscale opacity-50' : 'drop-shadow-lg'}`}
+                                className={`absolute w-12 h-12 md:w-16 md:h-16 flex items-center justify-center cursor-pointer pointer-events-auto filter transition-all duration-300 z-30 ${phase === 1 ? 'grayscale opacity-50' : 'drop-shadow-lg'}`}
                                 style={{
                                     left: germ.x,
                                     top: germ.y,
-                                    margin: '-20px' // Center the 4xl text
+                                    margin: '-24px' // Center the image (size/2)
                                 }}
                             >
-                                🦠
+                                <img
+                                    src="/images/germs/germ-purple.png"
+                                    className="w-full h-full object-contain pointer-events-none"
+                                    alt="Germ"
+                                    draggable="false"
+                                />
                             </motion.div>
                         ))}
                     </AnimatePresence>
@@ -738,11 +751,28 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
 
             <div className="relative w-full aspect-video bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8">
                 {/* Scenario background */}
-                {background ? (
-                    <img src={background} alt="Cleanup Challenge" className="absolute inset-0 w-full h-full object-cover opacity-80" />
-                ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>
-                )}
+                {(() => {
+                    if (!background) {
+                        return <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>;
+                    }
+
+                    const isVideo = background.toLowerCase().endsWith('.mov') || background.toLowerCase().endsWith('.mp4');
+
+                    if (isVideo) {
+                        return (
+                            <video
+                                src={background}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="absolute inset-0 w-full h-full object-cover opacity-80"
+                            />
+                        );
+                    }
+
+                    return <img src={background} alt="Cleanup Challenge" className="absolute inset-0 w-full h-full object-cover opacity-80" />;
+                })()}
 
                 {messes.map(mess => !mess.fixed && (
                     <motion.button
@@ -893,38 +923,106 @@ const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
     </div>
 );
 
-const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => (
-    <div className="flex flex-col h-full max-w-5xl mx-auto py-6 relative">
-        <div className="flex items-center gap-4 mb-10 relative z-10">
-            <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center shadow-xl rotate-3">
-                <BookOpen className="w-8 h-8" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
-                {title}
-            </h2>
-        </div>
+const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => {
+    const isList = content?.includes('•');
+    const points = content?.split('\n').filter(p => p.trim() !== '') || [];
 
-        <div className="flex flex-col lg:flex-row gap-12 lg:items-start lg:items-center lg:justify-center relative z-10">
-            <div className="flex-1 text-xl md:text-2xl leading-relaxed text-slate-500 space-y-6 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8">
-                {content}
+    const germAssets = [
+        '/images/points/germ-green01.png',
+        '/images/points/germ-purple02.png',
+        '/images/points/germ-purple03.png',
+        '/images/points/germ-blue04.png',
+    ];
+
+    // Predefined positions for germ points to create a scattered horizontal look
+    const positions = [
+        { top: '0%', left: '0%' },
+        { top: '15%', left: '45%' },
+        { top: '45%', left: '5%' },
+        { top: '65%', left: '40%' },
+    ];
+
+    return (
+        <div className="flex flex-col h-full max-w-6xl mx-auto py-4 relative">
+            <div className="flex items-center gap-4 mb-4 relative z-10">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-900 text-white rounded-[1.2rem] md:rounded-3xl flex items-center justify-center shadow-xl rotate-3">
+                    <BookOpen className="w-6 h-6 md:w-8 md:h-8" />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
+                    {title}
+                </h2>
             </div>
 
-            {mascot && (
-                <div className="hidden lg:block flex-shrink-0">
+            <div className={`flex flex-col lg:flex-row gap-8 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
+                <div className={`relative flex-1 ${isList ? 'h-[450px] md:h-[500px] w-full' : 'text-xl md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8'}`}>
+                    {isList ? (
+                        points.map((point, idx) => {
+                            const pos = positions[idx % positions.length];
+                            return (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: idx * 0.2 }}
+                                    className="absolute"
+                                    style={{
+                                        top: pos.top,
+                                        left: pos.left,
+                                        width: '320px',
+                                        height: '200px'
+                                    }}
+                                >
+                                    <motion.div
+                                        animate={{
+                                            scale: [1, 1.05, 1],
+                                            rotate: [0, 1, -1, 0]
+                                        }}
+                                        transition={{
+                                            duration: 5,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                            delay: idx * 0.7
+                                        }}
+                                        className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden group"
+                                    >
+                                        {/* Germ background image - using object-contain to prevent stretching */}
+                                        <div className="absolute inset-0 z-0">
+                                            <img
+                                                src={germAssets[idx % germAssets.length]}
+                                                alt="Germ Frame"
+                                                className="w-full h-full object-contain filter drop-shadow-xl group-hover:brightness-105 transition-all duration-500"
+                                            />
+                                        </div>
+
+                                        <span className="relative z-10 text-center text-sm md:text-base font-black text-white leading-tight px-6 drop-shadow-sm pointer-events-none">
+                                            {point.replace('•', '').trim()}
+                                        </span>
+                                    </motion.div>
+                                </motion.div>
+                            );
+                        })
+                    ) : (
+                        content
+                    )}
+                </div>
+
+                {mascot && (
+                    <div className="hidden lg:block shrink-0 relative z-20">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={mascot} alt="Mascot" className="w-[350px] h-auto drop-shadow-2xl" />
+                    </div>
+                )}
+            </div>
+
+            {!mascot && (
+                <div className="absolute -right-16 bottom-0 hidden lg:block pointer-events-none opacity-20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={mascot} alt="Mascot" className="w-80 h-auto drop-shadow-2xl" />
+                    <img src="/mascots/mascot-sitting.png" alt="Studying Hero" className="w-64" />
                 </div>
             )}
         </div>
-
-        {!mascot && (
-            <div className="absolute -right-16 bottom-0 hidden lg:block pointer-events-none opacity-20">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/mascots/mascot-sitting.png" alt="Studying Hero" className="w-64" />
-            </div>
-        )}
-    </div>
-);
+    );
+};
 
 // --- Toilet Comparison Component ---
 
@@ -1618,6 +1716,7 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
 export default function LessonDetailPage() {
     const params = useParams();
     const router = useRouter();
+    const { data: session, status } = useSession();
     const moduleId = params.id as string;
 
     const [currentIdx, setCurrentIdx] = useState(0);
@@ -1643,6 +1742,13 @@ export default function LessonDetailPage() {
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
     const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
+    const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/login");
+        }
+    }, [status, router]);
 
     // Fetch lesson and progress
     useEffect(() => {
@@ -1713,6 +1819,36 @@ export default function LessonDetailPage() {
             setCountdown(0);
         }
     }, [currentIdx, slides, completedSlides[currentIdx]]);
+
+    // Handle Slide Audio Playback
+    useEffect(() => {
+        // Stop currently playing audio
+        if (currentAudioRef.current) {
+            currentAudioRef.current.pause();
+            currentAudioRef.current.currentTime = 0;
+            currentAudioRef.current = null;
+        }
+
+        const audioPath = slides[currentIdx]?.audio;
+        if (audioPath) {
+            const audio = new Audio(audioPath);
+            currentAudioRef.current = audio;
+
+            // Note: Autoplay might be blocked by browser. 
+            // Most browsers allow it after some interaction.
+            // Since the user has to log in/interact to get here, it might work.
+            audio.play().catch(err => {
+                console.warn("Audio autoplay blocked or failed:", err);
+            });
+        }
+
+        return () => {
+            if (currentAudioRef.current) {
+                currentAudioRef.current.pause();
+                currentAudioRef.current.currentTime = 0;
+            }
+        };
+    }, [currentIdx, slides]);
 
     const totalSlides = slides.length;
     const currentSlide = slides[currentIdx];
@@ -1893,24 +2029,44 @@ export default function LessonDetailPage() {
 
             {/* 3. Main Slide Content Area */}
             <main className="relative pt-16 pb-40 md:pb-24 h-dvh flex items-center justify-center overflow-hidden">
-                {/* --- Background Image --- */}
-                <div
-                    className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
-                    style={{
-                        backgroundImage: `url('${currentSlide.background
-                            ? currentSlide.background
-                            : currentSlide.type === 'celebration'
-                                ? (currentSlide.mascot?.includes('m2-mascot-final')
-                                    ? '/backgrounds/module-2-final-bg.png'
-                                    : '/images/celebration-bg.jpg')
-                                : currentSlide.type === 'comparison'
-                                    ? '/images/toilet-comparison-bg.jpg'
-                                    : (currentIdx >= 2 && currentIdx <= 5)
-                                        ? '/images/lesson-bg-germs.jpg'
-                                        : '/images/lesson-bg.jpg'
-                            }')`
-                    }}
-                />
+                {/* --- Background Image or Video --- */}
+                {(() => {
+                    const bgPath = currentSlide.background
+                        ? currentSlide.background
+                        : currentSlide.type === 'celebration'
+                            ? (currentSlide.mascot?.includes('m2-mascot-final')
+                                ? '/backgrounds/module-2-final-bg.png'
+                                : '/images/celebration-bg.jpg')
+                            : currentSlide.type === 'comparison'
+                                ? '/images/toilet-comparison-bg.jpg'
+                                : (currentIdx >= 2 && currentIdx <= 5)
+                                    ? '/images/lesson-bg-germs.jpg'
+                                    : '/images/lesson-bg.jpg';
+
+                    const isVideo = bgPath.toLowerCase().endsWith('.mov') || bgPath.toLowerCase().endsWith('.mp4');
+
+                    if (isVideo) {
+                        return (
+                            <div className="fixed inset-0 z-0">
+                                <video
+                                    src={bgPath}
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                    className="w-full h-full object-cover transition-opacity duration-700"
+                                />
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div
+                            className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
+                            style={{ backgroundImage: `url('${bgPath}')` }}
+                        />
+                    );
+                })()}
                 <div className="fixed inset-0 z-0 bg-white/5 backdrop-blur-[1px]" />
 
                 {/* --- Floating Background Decorations --- */}
@@ -2088,13 +2244,15 @@ export default function LessonDetailPage() {
                         {currentIdx === totalSlides - 1 ? (
                             <PlayfulButton
                                 onClick={handleComplete}
-                                disabled={isMarked}
-                                color={isMarked ? "green" : "blue"}
-                                className="px-5 py-3 md:px-10 md:py-5"
+                                disabled={isMarked || isTimerLocked}
+                                color={isMarked ? "green" : isTimerLocked ? "blue" : "blue"}
+                                className={`px-5 py-3 md:px-10 md:py-5 ${isTimerLocked ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                             >
                                 <div className="flex items-center justify-center gap-2 md:gap-3">
-                                    <span className="text-xs md:text-base">{isMarked ? 'Done' : 'Complete'}</span>
-                                    {!isMarked && <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />}
+                                    <span className="text-xs md:text-base">
+                                        {isMarked ? 'Done' : isTimerLocked ? `Wait ${countdown}s` : 'Complete'}
+                                    </span>
+                                    {!isMarked && !isTimerLocked && <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />}
                                 </div>
                             </PlayfulButton>
                         ) : (
