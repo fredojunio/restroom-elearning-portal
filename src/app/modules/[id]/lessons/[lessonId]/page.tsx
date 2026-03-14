@@ -23,7 +23,7 @@ import {
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import confetti from "canvas-confetti";
 import PlayfulButton from "@/components/PlayfulButton";
 import { moduleTwoSlides, Module2Slide } from "@/data/module-2";
@@ -223,7 +223,7 @@ const GameSuccessModal = ({ title, description, onContinue }: { title: string, d
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 z-50 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 md:p-12"
+            className="absolute inset-0 z-50 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 md:p-12 rounded-[3rem] overflow-hidden"
         >
             <motion.div
                 initial={{ scale: 0.5, y: 20 }}
@@ -321,13 +321,18 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
             {/* The Sanitizer Portal */}
             <div
                 ref={portalRef}
-                className={`w-40 h-40 rounded-full border-8 transition-all flex flex-col items-center justify-center gap-2 ${isWon ? 'bg-green-500 border-green-200 scale-110' : 'bg-blue-600 border-blue-400 animate-pulse'
-                    }`}
+                className={`w-40 h-40 md:w-48 md:h-48 rounded-full transition-transform duration-500 flex flex-col items-center justify-center relative ${isWon ? 'scale-125' : 'animate-pulse'}`}
             >
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-white">
-                    <RotateCcw className={`w-8 h-8 ${!isWon && 'animate-spin-slow'}`} />
-                </div>
-                <span className="text-[10px] font-black text-white uppercase tracking-tighter">Sanitizer</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="/images/sanitizer.png"
+                    alt="Sanitizer Portal"
+                    className={`absolute inset-0 w-full h-full object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] scale-[1.5] ${!isWon && 'animate-spin-slow'}`}
+                    draggable="false"
+                />
+                <span className="relative z-10 text-[10px] md:text-xs font-black text-indigo-800 uppercase tracking-widest drop-shadow-md select-none pointer-events-none">
+                    Sanitizer
+                </span>
             </div>
 
             {/* The Germs */}
@@ -368,265 +373,207 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
 // --- Handwashing Game Component ---
 
 const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
-    const [phase, setPhase] = useState<1 | 2 | 3>(1); // 1: Wet, 2: Soap/Scrub, 3: Rinse
-    const [germs, setGerms] = useState([
-        { id: 1, x: "90%", y: "40%", opacity: 1, image: '/images/germs/germ-green.png' },
-        { id: 2, x: "30%", y: "50%", opacity: 1, image: '/images/germs/germ-purple.png' },
-        { id: 3, x: "50%", y: "30%", opacity: 1, image: '/images/germs/germ-blue.png' },
-        { id: 4, x: "20%", y: "45%", opacity: 1, image: '/images/germs/germ-green.png' },
-        { id: 5, x: "65%", y: "45%", opacity: 1, image: '/images/germs/germ-purple.png' },
-        { id: 6, x: "40%", y: "60%", opacity: 1, image: '/images/germs/germ-blue.png' },
-    ]);
-    const [isScrubbing, setIsScrubbing] = useState(false);
+    // 0: Waiting for water, 1: Scrubbing (water added), 2: Ready to Rinse (scrubbed), 3: Rinsing
+    const [waterPhase, setWaterPhase] = useState<0 | 1 | 2 | 3>(0);
+    const [isPouring, setIsPouring] = useState(false);
     const [scrubProgress, setScrubProgress] = useState(0);
-    const [rinseProgress, setRinseProgress] = useState(0); // 0 to 100
-    const [hasPlayedSfx, setHasPlayedSfx] = useState(false);
     const [isWon, setIsWon] = useState(false);
-    const completedRef = useRef(false);
 
-    const handleScrub = (id: number) => {
-        if (phase !== 2) return;
+    const [bubbles, setBubbles] = useState<{ id: number, x: string, y: string, type: string, scale: number }[]>([]);
 
-        // Play scrubbing sound once per game
-        if (!hasPlayedSfx) {
-            const audio = new Audio('/sfx/washing.mp3');
-            audio.volume = 0.4;
-            audio.play().catch(e => console.warn("Washing sfx play failed:", e));
-            setHasPlayedSfx(true);
+    // Static germ positions, fade opacity based on scrubProgress
+    const germs = useMemo(() => [
+        { id: 1, x: "30%", y: "30%", image: '/images/germs/germ-green.png', threshold: 10 },
+        { id: 2, x: "70%", y: "25%", image: '/images/germs/germ-purple.png', threshold: 25 },
+        { id: 3, x: "50%", y: "50%", image: '/images/germs/germ-blue.png', threshold: 40 },
+        { id: 4, x: "20%", y: "45%", image: '/images/germs/germ-green.png', threshold: 55 },
+        { id: 5, x: "65%", y: "60%", image: '/images/germs/germ-purple.png', threshold: 70 },
+        { id: 6, x: "40%", y: "75%", image: '/images/germs/germ-blue.png', threshold: 85 },
+    ], []);
+
+    const handRef = useRef<HTMLDivElement>(null);
+
+    const handleFaucetClick = () => {
+        if (waterPhase === 0) {
+            // Turn on water to start scrubbing
+            const audio = new Audio('/sfx/correct.mp3');
+            audio.play().catch(e => console.warn("Sfx play failed:", e));
+            setWaterPhase(1);
+            setIsPouring(true);
+            setTimeout(() => setIsPouring(false), 2000); // 2s pour duration
+        } else if (waterPhase === 2) {
+            // Turn on water to rinse and complete
+            const audio = new Audio('/sfx/correct.mp3');
+            audio.play().catch(e => console.warn("Sfx play failed:", e));
+            setWaterPhase(3);
+            setIsPouring(true);
+            setTimeout(() => {
+                setIsWon(true);
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }, 2000); // 2s rinse animation then win
         }
-
-        setGerms(prev => prev.map(g => {
-            if (g.id === id && g.opacity > 0) {
-                const newOpacity = Math.max(0, g.opacity - 0.2);
-                if (newOpacity === 0 && g.opacity > 0) {
-                    setScrubProgress(curr => curr + 1);
-                }
-                return { ...g, opacity: newOpacity };
-            }
-            return g;
-        }));
     };
 
-    useEffect(() => {
-        if (phase === 2 && scrubProgress === germs.length) {
-            setTimeout(() => setPhase(3), 1000);
-        }
-    }, [scrubProgress, phase, germs.length]);
+    const handleScrub = (e: React.PointerEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        if (waterPhase !== 1) return; // Only scrub if water has been opened once and we haven't finished
 
-    const handleComplete = () => {
-        setIsWon(true);
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#0ea5e9', '#ffffff', '#fbbf24']
+        // Increase scrub progress
+        setScrubProgress(prev => {
+            const next = Math.min(100, prev + 2); // 2% per move
+            if (next === 100 && prev < 100) {
+                setWaterPhase(2); // Ready to rinse
+                const audio = new Audio('/sfx/correct.mp3');
+                audio.play().catch(console.warn);
+            }
+            return next;
         });
+
+        // Add a random bubble occasionally based on pointer position roughly
+        if (Math.random() < 0.2 && handRef.current) {
+            const rect = handRef.current.getBoundingClientRect();
+            let clientX, clientY;
+            if ('touches' in e) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const xPos = ((clientX - rect.left) / rect.width) * 100;
+            const yPos = ((clientY - rect.top) / rect.height) * 100;
+
+            const bubbleType = `bubble${Math.floor(Math.random() * 3) + 1}.png`; // bubble1, 2, or 3
+            const scale = 0.5 + Math.random();
+
+            setBubbles(prev => [...prev, {
+                id: Date.now() + Math.random(),
+                x: `${xPos}%`,
+                y: `${yPos}%`,
+                type: bubbleType,
+                scale
+            }].slice(-30)); // Keep max 30 bubbles on screen
+        }
     };
 
     return (
-        <div className="relative w-full max-w-4xl h-auto bg-sky-50/50 backdrop-blur-sm border-4 border-white rounded-3xl md:rounded-[4rem] overflow-hidden flex flex-col items-center justify-center p-4 md:p-8">
+        <div className="relative w-full max-w-4xl h-auto bg-sky-50/50 backdrop-blur-sm border-4 border-white rounded-3xl md:rounded-[4rem] flex flex-col items-center justify-center p-4 md:p-8">
+
             {/* Phase Indicator */}
             <div className="w-full flex justify-between items-center mb-6">
                 <div>
                     <h4 className="text-xs md:text-sm font-black text-blue-900/40 uppercase tracking-widest mb-1">Soap & Water Superheroes</h4>
                     <p className="text-[10px] md:text-xs text-blue-900/30 font-bold italic">
-                        {phase === 1 && "Start by wetting your hands!"}
-                        {phase === 2 && "Swipe over the germs to remove them!"}
-                        {phase === 3 && "Almost done! Rinse away the bubbles."}
+                        {waterPhase === 0 && "Click the faucet to wet your hands!"}
+                        {waterPhase === 1 && "Rub your hands together to make bubbles!"}
+                        {waterPhase === 2 && "Click the faucet again to rinse!"}
+                        {waterPhase === 3 && "Squeaky clean!"}
                     </p>
                 </div>
                 <div className="flex gap-1.5 md:gap-2">
                     {[1, 2, 3].map((p) => (
                         <div
                             key={p}
-                            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors ${phase >= p ? 'bg-sky-500' : 'bg-sky-200'}`}
+                            className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors ${waterPhase >= p ? 'bg-sky-500' : 'bg-sky-200'}`}
                         />
                     ))}
                 </div>
             </div>
 
             {/* Game Canvas */}
-            <div className="relative w-full aspect-square md:aspect-video max-w-2xl bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border-4 border-sky-100 flex items-center justify-center overflow-hidden">
-                {/* Background (Sink/Water effect) */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 md:w-32 h-16 md:h-20 bg-slate-200 rounded-b-3xl border-x-4 border-b-4 border-slate-300" />
-                </div>
+            <div className="relative w-full aspect-[3/4] sm:aspect-square md:aspect-[4/3] max-w-2xl bg-[#E8F8FA] rounded-2xl md:rounded-[3rem] shadow-2xl border-4 border-sky-100 flex flex-col items-center justify-end overflow-hidden pb-4 md:pb-8">
 
-                {/* The Hands */}
-                <motion.div
-                    animate={phase === 2 ? { x: [0, 5, -5, 5, 0], y: [0, -2, 2, -1, 0] } : {}}
-                    transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
-                    className="relative text-[8rem] md:text-[12rem] select-none flex items-center justify-center pt-4 md:pt-8"
-                >
-                    🤲
-                    {/* Water/Bubble Overlay */}
-                    <AnimatePresence>
-                        {phase === 1 && (
+                {/* Score/Progress HUD */}
+                {waterPhase === 1 && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-50 pointer-events-none">
+                        <div className="px-4 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-sky-100 text-blue-900/60 font-black text-[10px] uppercase tracking-widest shadow-sm">
+                            Scrub Progress: {Math.floor(scrubProgress)}%
+                        </div>
+                        <div className="w-32 md:w-48 h-2 bg-sky-200/50 rounded-full overflow-hidden backdrop-blur-sm">
                             <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.4 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-sky-300 rounded-full blur-xl mix-blend-overlay"
+                                className="h-full bg-sky-500"
+                                animate={{ width: `${scrubProgress}%` }}
                             />
-                        )}
-                        {phase >= 2 && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 0.6, scale: 1 }}
-                                className="absolute inset-0 flex flex-wrap justify-center gap-1 p-8 pointer-events-none z-20"
-                            >
-                                {[...Array(12)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        animate={{
-                                            y: [0, -10, 0],
-                                            scale: [1, 1.1, 1]
-                                        }}
-                                        transition={{
-                                            repeat: Infinity,
-                                            duration: 2 + Math.random(),
-                                            delay: Math.random()
-                                        }}
-                                        className="w-4 h-4 bg-white rounded-full opacity-60 blur-[1px]"
-                                    />
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                        </div>
+                    </div>
+                )}
 
-                    {/* The Germs (Inside hand container to stay centered) */}
-                    <AnimatePresence>
-                        {phase < 3 && germs.map((germ) => (
-                            <motion.div
-                                key={germ.id}
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{
-                                    opacity: germ.opacity,
-                                    scale: 1,
-                                }}
-                                exit={{ scale: 0, opacity: 0 }}
-                                onMouseEnter={() => handleScrub(germ.id)}
-                                onTouchStart={() => handleScrub(germ.id)}
-                                className={`absolute w-12 h-12 md:w-16 md:h-16 flex items-center justify-center cursor-pointer pointer-events-auto filter transition-all duration-300 z-30 ${phase === 1 ? 'grayscale opacity-50' : 'drop-shadow-lg'}`}
-                                style={{
-                                    left: germ.x,
-                                    top: germ.y,
-                                    margin: '-24px' // Center the image (size/2)
-                                }}
-                            >
-                                <img
-                                    src={germ.image}
-                                    className="w-full h-full object-contain pointer-events-none"
-                                    alt="Germ"
-                                    draggable="false"
-                                />
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                {/* Faucet Element */}
+                <motion.div
+                    className="absolute top-4 md:top-8 left-1/3 -translate-x-1/2 z-40 cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleFaucetClick}
+                >
+                    <img src="/images/handwash/faucet.png" alt="Faucet" className="w-32 md:w-56 drop-shadow-xl translate-y-2 md:translate-y-4" draggable={false} />
+
+                    {/* Glowing highlight when needs click */}
+                    {(waterPhase === 0 || waterPhase === 2) && (
+                        <motion.div
+                            className="absolute inset-0 bg-yellow-400/30 rounded-full blur-xl mix-blend-overlay"
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.7, 0.3] }}
+                            transition={{ repeat: Infinity, duration: 2 }}
+                        />
+                    )}
                 </motion.div>
 
-                {/* Rinse Effect (Phase 3) */}
-                <AnimatePresence>
-                    {phase === 3 && (
-                        <>
-                            {/* Water Stream */}
-                            <motion.div
-                                initial={{ height: 0 }}
-                                animate={{ height: `${rinseProgress}%` }}
-                                className="absolute top-0 left-1/2 -translate-x-1/2 w-16 md:w-24 bg-sky-200/40 backdrop-blur-[2px] z-10"
-                            >
-                                <div className="absolute bottom-0 w-full h-12 bg-sky-400/20 animate-pulse" />
-                            </motion.div>
+                {/* Hand Container Element */}
+                <div
+                    ref={handRef}
+                    className="absolute bottom-0 right-20 w-[70%] md:w-[60%] aspect-square z-20 touch-none flex items-center justify-center cursor-pointer -translate-x-4 md:-translate-x-8 -translate-y-8 md:-translate-y-12"
+                    onPointerMove={handleScrub}
+                    onTouchMove={handleScrub}
+                >
+                    <img src="/images/handwash/hand.png" alt="Hand" className="w-full h-full object-contain drop-shadow-2xl pointer-events-none origin-bottom" draggable={false} />
 
-                            {/* Swipe Handle/Visual Cue */}
-                            {rinseProgress < 100 && (
-                                <motion.div
-                                    drag="y"
-                                    dragConstraints={{ top: 0, bottom: 300 }}
-                                    dragElastic={0}
-                                    dragMomentum={false}
-                                    onDrag={(e, info) => {
-                                        if (completedRef.current) return;
-                                        const newProgress = Math.min(100, Math.max(0, (info.point.y / 300) * 100));
-                                        setRinseProgress(newProgress);
-                                        if (newProgress >= 100) {
-                                            completedRef.current = true;
-                                            const audio = new Audio('/sfx/correct.mp3');
-                                            audio.play().catch(e => console.warn("Correct sfx play failed:", e));
-                                            setTimeout(handleComplete, 500);
-                                        }
-                                    }}
-                                    className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white/80 rounded-full border-4 border-sky-400 flex items-center justify-center cursor-grab active:cursor-grabbing z-40 shadow-xl"
-                                    style={{ y: (rinseProgress / 100) * 300 }}
-                                >
-                                    <motion.div
-                                        animate={{ y: [0, 5, 0] }}
-                                        transition={{ repeat: Infinity, duration: 1.5 }}
-                                    >
-                                        <ArrowRight className="w-8 h-8 text-sky-500 rotate-90" />
-                                    </motion.div>
-                                </motion.div>
-                            )}
-                        </>
-                    )}
-                </AnimatePresence>
-            </div>
+                    {/* Germs Overlay */}
+                    {germs.map((germ: { id: number; x: string; y: string; image: string; threshold: number }) => {
+                        const opacity = waterPhase === 3 ? 0 : Math.max(0, 1 - (scrubProgress / germ.threshold));
+                        return (
+                            <motion.img
+                                key={germ.id}
+                                src={germ.image}
+                                alt="Germ"
+                                className="absolute w-8 h-8 md:w-12 md:h-12 object-contain pointer-events-none z-30"
+                                style={{ left: germ.x, top: germ.y }}
+                                animate={{ opacity, scale: opacity > 0 ? 1 : 0 }}
+                                transition={{ duration: 0.3 }}
+                                draggable={false}
+                            />
+                        );
+                    })}
 
-            {/* Interaction Button */}
-            <div className="mt-6 md:mt-10">
-                <AnimatePresence mode="wait">
-                    {phase === 1 && (
-                        <motion.div
-                            key="wet"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                        >
-                            <PlayfulButton
-                                onClick={() => setPhase(2)}
-                                color="blue"
-                                className="px-8 py-3 md:px-12 md:py-5"
-                            >
-                                <div className="flex items-center gap-3 md:gap-4">
-                                    <span className="text-xl md:text-2xl">💧</span>
-                                    WET HANDS
-                                </div>
-                            </PlayfulButton>
-                        </motion.div>
-                    )}
-                    {phase === 2 && (
-                        <motion.div
-                            key="soap"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex flex-col items-center gap-2"
-                        >
-                            <div className="px-4 py-1.5 md:px-6 md:py-2 bg-white/50 rounded-full border border-white text-blue-900/60 font-black text-[10px] uppercase tracking-widest">
-                                Scrub Progress: {Math.round((scrubProgress / germs.length) * 100)}%
-                            </div>
-                            <div className="w-48 md:w-64 h-2 bg-sky-200 rounded-full overflow-hidden">
-                                <motion.div
-                                    className="h-full bg-sky-500"
-                                    animate={{ width: `${(scrubProgress / germs.length) * 100}%` }}
-                                />
-                            </div>
-                            <p className="mt-2 text-blue-900/40 font-bold text-xs md:text-sm">Move your mouse/tap on the germs!</p>
-                        </motion.div>
-                    )}
-                    {phase === 3 && (
-                        <motion.div
-                            key="rinse"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex flex-col items-center gap-2"
-                        >
-                            <div className="px-6 py-2 bg-sky-500 text-white rounded-full font-black text-xs uppercase tracking-widest shadow-lg animate-bounce">
-                                ↓ Swipe Down to Rinse! ↓
-                            </div>
-                            <p className="text-blue-900/40 font-bold text-xs md:text-sm">Wash away the soap with the water!</p>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                    {/* Bubbles Overlay */}
+                    <AnimatePresence>
+                        {waterPhase >= 1 && waterPhase < 3 && bubbles.map((bubble) => (
+                            <motion.img
+                                key={bubble.id}
+                                src={`/images/handwash/${bubble.type}`}
+                                alt="Bubble"
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: bubble.scale }}
+                                exit={{ opacity: 0, scale: 0 }}
+                                className="absolute w-12 h-12 md:w-16 md:h-16 object-contain pointer-events-none z-30"
+                                style={{ left: bubble.x, top: bubble.y, transform: 'translate(-50%, -50%)' }}
+                            />
+                        ))}
+                    </AnimatePresence>
+
+                    {/* Water Lap Overlay (Pouring Water) */}
+                    <AnimatePresence>
+                        {isPouring && (
+                            <motion.img
+                                initial={{ opacity: 0, y: -50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                src="/images/handwash/waterlap.png"
+                                alt="Water Lap"
+                                className="absolute z-40 w-[80%] md:w-[30%] object-contain top-[33%] left-1/3 -translate-x-1/2 mix-blend-hard-light pointer-events-none drop-shadow-lg"
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
+
             </div>
 
             {/* Success Modal */}
@@ -671,9 +618,9 @@ const WhosNextGame = ({ onComplete }: { onComplete: () => void }) => {
 const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void, invertChoices?: boolean }) => {
     const [isWon, setIsWon] = useState(false);
     const [scenarios] = useState([
-        { id: 1, title: "Flushing after use", isHero: true, image: "🚽" },
-        { id: 2, title: "Leaving tissues on the floor", isHero: false, image: "🧻" },
-        { id: 3, title: "Washing hands with soap", isHero: true, image: "🧼" },
+        { id: 1, title: "Flushing after use", isHero: true, image: "/images/toilet-behavior/flushing.png" },
+        { id: 2, title: "Leaving tissues on the floor", isHero: false, image: "/images/toilet-behavior/leaving-tissues.png" },
+        { id: 3, title: "Washing hands with soap", isHero: true, image: "/images/toilet-behavior/washing-hand.png" },
     ]);
     const [currentStep, setCurrentStep] = useState(0);
     const [feedback, setFeedback] = useState<'none' | 'correct' | 'wrong'>('none');
@@ -702,20 +649,25 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
     };
 
     return (
-        <div className="flex flex-col items-center justify-center p-8 bg-sky-50 rounded-[3rem] border-4 border-sky-200 w-full max-w-md mx-auto relative">
-            <div className="mb-4 flex flex-col items-center">
-                <span className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-2">Progress: {currentStep + 1}/{scenarios.length}</span>
-                <div className="w-48 h-2 bg-sky-100 rounded-full overflow-hidden">
-                    <motion.div className="h-full bg-sky-500" animate={{ width: `${((currentStep + 1) / scenarios.length) * 100}%` }} />
+        <div className="flex flex-col items-center justify-center p-6 md:p-12 bg-sky-50/80 rounded-[3rem] border-4 border-sky-200 w-full max-w-2xl mx-auto relative">
+            <div className="mb-4 flex flex-col items-center w-full">
+                <span className="text-[12px] md:text-[14px] font-black text-sky-400 uppercase tracking-widest mb-3">Progress: {currentStep + 1}/{scenarios.length}</span>
+                <div className="w-full max-w-xs h-3 bg-sky-100 rounded-full overflow-hidden shadow-inner">
+                    <motion.div className="h-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)]" animate={{ width: `${((currentStep + 1) / scenarios.length) * 100}%` }} />
                 </div>
             </div>
 
-            <div className="w-40 h-40 bg-white rounded-3xl flex items-center justify-center text-8xl shadow-xl mb-8">
-                {scenarios[currentStep].image}
+            <div className="w-full aspect-video md:h-72 flex items-center justify-center mb-4 relative group overflow-hidden rounded-3xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={scenarios[currentStep].image}
+                    alt={scenarios[currentStep].title}
+                    className="w-full h-full object-contain drop-shadow-2xl scale-110"
+                />
             </div>
 
             <h3 className="text-2xl font-black text-slate-800 mb-2 text-center">{scenarios[currentStep].title}</h3>
-            <p className="text-slate-500 font-bold mb-8 text-center">Is this a Toilet Hero choice?</p>
+            <p className="text-slate-500 font-bold mb-4 text-center">Is this a Toilet Hero choice?</p>
 
             <div className={`flex gap-4 w-full ${invertChoices ? 'flex-row' : 'flex-row-reverse'}`}>
                 {/* 
@@ -765,56 +717,63 @@ const HeroOrOopsGame = ({ onComplete, invertChoices }: { onComplete: () => void,
 
 const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => void, background?: string }) => {
     const [isWon, setIsWon] = useState(false);
-    const [messes, setMesses] = useState([
-        { id: 1, type: 'tissue', x: '25%', y: '65%', fixed: false },
-        { id: 2, type: 'spill', x: '75%', y: '75%', fixed: false },
-        { id: 3, type: 'unflushed', x: '60%', y: '45%', fixed: false },
-    ]);
-    const [activeTool, setActiveTool] = useState<'none' | 'bin' | 'wipe' | 'flush'>('none');
-    const [score, setScore] = useState(0);
+    const [wetFloorCleaned, setWetFloorCleaned] = useState(false);
+    const [poopCleaned, setPoopCleaned] = useState(false);
+    const [paperCleaned, setPaperCleaned] = useState(false);
 
-    const handleMessClick = (messId: number, messType: string) => {
-        if (
-            (messType === 'tissue' && activeTool === 'bin') ||
-            (messType === 'spill' && activeTool === 'wipe') ||
-            (messType === 'unflushed' && activeTool === 'flush')
-        ) {
-            // Play SFX
-            const sfxMap: Record<string, string> = {
-                'tissue': '/sfx/correct.mp3',
-                'spill': '/sfx/correct.mp3',
-                'unflushed': '/sfx/correct.mp3'
-            };
+    const trashRef = useRef<HTMLImageElement>(null);
+    const wetFloorRef = useRef<HTMLImageElement>(null);
 
-            const audio = new Audio(sfxMap[messType]);
-            audio.play().catch(e => console.warn("Audio play failed:", e));
+    const playCorrectSfx = () => {
+        const audio = new Audio('/sfx/correct.mp3');
+        audio.play().catch(e => console.warn("Audio play failed:", e));
+        confetti({ particleCount: 20, spread: 30 });
+    };
 
-            setMesses(prev => prev.map(m => m.id === messId ? { ...m, fixed: true } : m));
-            setScore(s => s + 100);
-            confetti({ particleCount: 20, spread: 30 });
+    const checkIntersection = (point: { x: number, y: number }, ref: React.RefObject<HTMLImageElement | null>) => {
+        if (!ref.current) return false;
+        const rect = ref.current.getBoundingClientRect();
+        // A generous bounding box check for mobile ease
+        const padding = 20;
+        return point.x >= rect.left - padding && point.x <= rect.right + padding &&
+            point.y >= rect.top - padding && point.y <= rect.bottom + padding;
+    };
+
+    const handleDragEnd = (type: 'paper' | 'mop', info: any) => {
+        if (type === 'paper') {
+            if (checkIntersection(info.point, trashRef)) {
+                setPaperCleaned(true);
+                playCorrectSfx();
+            }
+        } else if (type === 'mop') {
+            if (checkIntersection(info.point, wetFloorRef)) {
+                setWetFloorCleaned(true);
+                playCorrectSfx();
+            }
         }
     };
 
+    const handleFlush = () => {
+        if (!poopCleaned) {
+            setPoopCleaned(true);
+            playCorrectSfx();
+        }
+    };
+
+    const progressCount = [wetFloorCleaned, poopCleaned, paperCleaned].filter(Boolean).length;
+    const score = progressCount * 100;
+
     useEffect(() => {
-        if (messes.every(m => m.fixed)) {
+        if (progressCount === 3) {
             setTimeout(() => {
                 setIsWon(true);
                 confetti({ particleCount: 150, spread: 70 });
             }, 500);
         }
-    }, [messes]);
+    }, [progressCount]);
 
     return (
-        <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
-            <div className="w-full flex justify-between items-center mb-6 px-4">
-                <div className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-sm">SCORE: {score}</div>
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
-                    <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div className="h-full bg-green-500" animate={{ width: `${(messes.filter(m => m.fixed).length / messes.length) * 100}%` }} />
-                    </div>
-                </div>
-            </div>
+        <div className="relative flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
 
             {/* Mission Briefing */}
             <motion.div
@@ -826,82 +785,75 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
                 <div className="space-y-1">
                     <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">Mission Briefing:</h3>
                     <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs font-bold text-slate-500">
-                        <div className="flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-slate-900 text-white rounded-full text-[10px]">1</span> Pick a tool below</div>
-                        <div className="flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-slate-900 text-white rounded-full text-[10px]">2</span> Clean the mess according the tool</div>
+                        <div className="flex items-center gap-2">🔄 Drag Mop to Wet Floor</div>
+                        <div className="flex items-center gap-2">🗑️ Drag Paper to Trash</div>
+                        <div className="flex items-center gap-2">🚽 Click Flush for Poop</div>
                     </div>
                 </div>
             </motion.div>
 
-            <div className="relative w-full aspect-video bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8">
+            <div className="relative w-full aspect-video md:aspect-[16/9] md:h-auto bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8 select-none touch-none">
                 {/* Scenario background */}
-                {(() => {
-                    if (!background) {
-                        return <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 select-none">🚽</div>;
-                    }
+                {background ? (
+                    <img src={background} alt="Background" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 pointer-events-none">🚽</div>
+                )}
 
-                    const isVideo = background.toLowerCase().endsWith('.mov') || background.toLowerCase().endsWith('.mp4');
+                {/* Trash Can (Target for Paper) */}
+                <img ref={trashRef as React.RefObject<HTMLImageElement>} src="/images/cleanup/trash.png" alt="Trash" className="absolute bottom-[22%] left-[42%] h-[22%] object-contain pointer-events-none drop-shadow-md" />
 
-                    if (isVideo) {
-                        return (
-                            <video
-                                src={background}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="absolute inset-0 w-full h-full object-cover opacity-80"
-                            />
-                        );
-                    }
+                {/* Wet Floor (Target for Mop) */}
+                {!wetFloorCleaned && (
+                    <img ref={wetFloorRef as React.RefObject<HTMLImageElement>} src="/images/cleanup/wet-floor.png" alt="Wet Floor" className="absolute bottom-[1%] right-[20%] w-[20%] object-contain pointer-events-none drop-shadow-md" />
+                )}
 
-                    return <img src={background} alt="Cleanup Challenge" className="absolute inset-0 w-full h-full object-cover opacity-80" />;
-                })()}
+                {/* Poop (Click target is Flush) */}
+                {!poopCleaned && (
+                    <img src="/images/cleanup/poop.png" alt="Poop" className="absolute bottom-[35%] left-[62%] -translate-x-1/2 w-[8%] max-w-[50px] object-contain pointer-events-none drop-shadow-xl" />
+                )}
 
-                {messes.map(mess => !mess.fixed && (
-                    <motion.button
-                        key={mess.id}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
+                {/* Flush Button (Click Interaction) */}
+                <motion.button
+                    onClick={handleFlush}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute top-[41%] left-[68%] w-[8%] max-w-[50px] z-50 cursor-pointer pointer-events-auto"
+                >
+                    <img src="/images/cleanup/flush.png" alt="Flush" className="w-full object-contain drop-shadow-md" />
+                </motion.button>
+
+                {/* Paper (Draggable) */}
+                {!paperCleaned && (
+                    <motion.div
+                        drag
+                        dragMomentum={false}
+                        dragSnapToOrigin={true}
+                        onDragEnd={(e, info) => handleDragEnd('paper', info)}
                         whileHover={{ scale: 1.1 }}
-                        onClick={() => handleMessClick(mess.id, mess.type)}
-                        className="absolute text-6xl p-4 cursor-pointer hover:drop-shadow-xl transition-all"
-                        style={{ left: mess.x, top: mess.y }}
+                        whileDrag={{ scale: 1.2, zIndex: 100 }}
+                        className="absolute bottom-[10%] left-[38%] w-[12%] max-w-[80px] z-20 cursor-grab active:cursor-grabbing pointer-events-auto"
                     >
-                        {mess.type === 'tissue' && <img src="/images/paper.png" alt="paper" className="w-20 h-auto drop-shadow-lg group-hover:scale-110 transition-transform" />}
-                        {mess.type === 'spill' && <img src="/images/spill.png" alt="spill" className="w-24 h-auto drop-shadow-lg group-hover:scale-110 transition-transform" />}
-                        {mess.type === 'unflushed' && '💩'}
-                    </motion.button>
-                ) || mess.fixed && mess.type === 'unflushed' && (
-                    <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-40 animate-pulse pointer-events-none">✨</div>
-                ))}
-            </div>
+                        <img src="/images/cleanup/paper.png" alt="Paper" className="w-full object-contain drop-shadow-lg pointer-events-none" />
+                    </motion.div>
+                )}
 
-            <div className="flex gap-6">
-                {[
-                    { id: 'bin' as const, label: 'Pick Up', icon: '🗑️', color: 'yellow' },
-                    { id: 'wipe' as const, label: 'Wipe', icon: '🧽', color: 'orange' },
-                    { id: 'flush' as const, label: 'Flush', icon: '🔘', color: 'yellow' }
-                ].map((tool) => (
-                    <motion.button
-                        key={tool.id}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setActiveTool(tool.id)}
-                        className={`relative w-28 md:w-32 aspect-square flex flex-col items-center justify-center gap-2 rounded-4xl border-[6px] border-white transition-all 
-                            ${activeTool === tool.id
-                                ? 'bg-linear-to-b from-yellow-300 to-yellow-500 scale-110 shadow-[0_12px_0_#ca8a04]'
-                                : 'bg-linear-to-b from-yellow-400 to-orange-400 shadow-[0_8px_0_#b45309] opacity-90'
-                            }`}
-                    >
-                        <span className="text-3xl md:text-4xl filter drop-shadow-sm">{tool.icon}</span>
-                        <span className="font-black text-white text-[10px] md:text-xs uppercase tracking-widest drop-shadow-[0_2px_1px_rgba(0,0,0,0.5)]">
-                            {tool.label}
-                        </span>
+                {/* Mop (Draggable) */}
+                <motion.div
+                    drag={!wetFloorCleaned}
+                    dragMomentum={false}
+                    dragSnapToOrigin={true}
+                    onDragEnd={(e, info) => handleDragEnd('mop', info)}
+                    whileHover={{ scale: !wetFloorCleaned ? 1.05 : 1 }}
+                    whileDrag={{ scale: 1.1, rotate: -15, zIndex: 100 }}
+                    className={`absolute top-[30%] right-[3%] h-[60%] z-30 origin-bottom pointer-events-auto ${!wetFloorCleaned ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                >
+                    <img src="/images/cleanup/mop.png" alt="Mop" className="h-full object-contain drop-shadow-2xl pointer-events-none" />
+                </motion.div>
 
-                        {/* Shine Effect */}
-                        <div className="absolute top-2 left-4 right-4 h-4 bg-white/20 rounded-full blur-[1px] pointer-events-none" />
-                    </motion.button>
-                ))}
+                {/* Sparkles for completed tasks */}
+                {wetFloorCleaned && <div className="absolute bottom-[10%] right-[20%] text-4xl animate-bounce pointer-events-none">✨</div>}
+                {poopCleaned && <div className="absolute bottom-[40%] left-[58%] -translate-x-1/2 text-4xl animate-pulse pointer-events-none">✨</div>}
             </div>
 
             {isWon && (
@@ -1014,7 +966,7 @@ const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
     </div>
 );
 
-const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => {
+const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { isModule1?: boolean }) => {
     const isList = content?.includes('•');
     const points = content?.split('\n').filter(p => p.trim() !== '') || [];
 
@@ -1027,10 +979,10 @@ const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => {
 
     // Predefined positions for germ points to create a scattered horizontal look
     const positions = [
-        { top: '0%', left: '0%' },
-        { top: '15%', left: '45%' },
-        { top: '45%', left: '5%' },
-        { top: '65%', left: '40%' },
+        { top: '5%', left: '2%' },
+        { top: '40%', left: '50%' },
+        { top: '5%', left: '55%' },
+        { top: '40%', left: '5%' },
     ];
 
     return (
@@ -1045,53 +997,74 @@ const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => {
             </div>
 
             <div className={`flex flex-col lg:flex-row gap-8 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
-                <div className={`relative flex-1 ${isList ? 'h-[450px] md:h-[500px] w-full' : 'text-xl md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8'}`}>
+                <div className={`relative flex-1 ${isList && isModule1 ? 'h-[550px] md:h-[600px] w-full' : isList ? 'w-full' : 'text-xl md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8'}`}>
                     {isList ? (
-                        points.map((point, idx) => {
-                            const pos = positions[idx % positions.length];
-                            return (
-                                <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: idx * 0.2 }}
-                                    className="absolute"
-                                    style={{
-                                        top: pos.top,
-                                        left: pos.left,
-                                        width: '320px',
-                                        height: '200px'
-                                    }}
-                                >
+                        isModule1 ? (
+                            points.map((point, idx) => {
+                                const pos = positions[idx % positions.length];
+                                return (
                                     <motion.div
-                                        animate={{
-                                            scale: [1, 1.05, 1],
-                                            rotate: [0, 1, -1, 0]
+                                        key={idx}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: idx * 0.2 }}
+                                        className="absolute"
+                                        style={{
+                                            top: pos.top,
+                                            left: pos.left,
+                                            width: '320px',
+                                            height: '200px'
                                         }}
-                                        transition={{
-                                            duration: 5,
-                                            repeat: Infinity,
-                                            ease: "easeInOut",
-                                            delay: idx * 0.7
-                                        }}
-                                        className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden group"
                                     >
-                                        {/* Germ background image - using object-contain to prevent stretching */}
-                                        <div className="absolute inset-0 z-0">
-                                            <img
-                                                src={germAssets[idx % germAssets.length]}
-                                                alt="Germ Frame"
-                                                className="w-full h-full object-contain filter drop-shadow-xl group-hover:brightness-105 transition-all duration-500"
-                                            />
-                                        </div>
+                                        <motion.div
+                                            animate={{
+                                                scale: [1, 1.05, 1],
+                                                rotate: [0, 1, -1, 0]
+                                            }}
+                                            transition={{
+                                                duration: 5,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                                delay: idx * 0.7
+                                            }}
+                                            className="relative w-full h-full flex items-center justify-center p-8 overflow-hidden group"
+                                        >
+                                            {/* Germ background image - using object-contain to prevent stretching */}
+                                            <div className="absolute inset-0 z-0">
+                                                <img
+                                                    src={germAssets[idx % germAssets.length]}
+                                                    alt="Germ Frame"
+                                                    className="w-full h-full object-contain filter drop-shadow-xl group-hover:brightness-105 transition-all duration-500"
+                                                />
+                                            </div>
 
-                                        <span className="relative z-10 text-center text-sm md:text-base font-black text-white leading-tight px-6 drop-shadow-sm pointer-events-none">
+                                            <span className="relative z-10 text-center text-sm md:text-base font-black text-white leading-tight px-6 drop-shadow-sm pointer-events-none">
+                                                {point.replace('•', '').trim()}
+                                            </span>
+                                        </motion.div>
+                                    </motion.div>
+                                );
+                            })
+                        ) : (
+                            <ul className="space-y-6">
+                                {points.map((point, idx) => (
+                                    <motion.li
+                                        key={idx}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="flex items-start gap-4 text-slate-700 bg-white/40 p-5 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm"
+                                    >
+                                        <div className="mt-1 w-6 h-6 shrink-0 bg-sky-500 rounded-full flex items-center justify-center text-white text-[10px] shadow-lg">
+                                            <div className="w-2 h-2 bg-white rounded-full" />
+                                        </div>
+                                        <span className="text-xl md:text-2xl font-bold leading-tight tracking-tight">
                                             {point.replace('•', '').trim()}
                                         </span>
-                                    </motion.div>
-                                </motion.div>
-                            );
-                        })
+                                    </motion.li>
+                                ))}
+                            </ul>
+                        )
                     ) : (
                         content
                     )}
@@ -1105,12 +1078,6 @@ const ContentSlide = ({ title, content, mascot }: Partial<Slide>) => {
                 )}
             </div>
 
-            {!mascot && (
-                <div className="absolute -right-16 bottom-0 hidden lg:block pointer-events-none opacity-20">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/mascots/mascot-sitting.png" alt="Studying Hero" className="w-64" />
-                </div>
-            )}
         </div>
     );
 };
@@ -1263,26 +1230,53 @@ const ImageSlide = ({ title, image, content, mascot }: Partial<Slide>) => (
     </div>
 );
 
-const VideoSlide = ({ title, videoUrl }: Partial<Slide>) => (
-    <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-4 md:space-y-6 text-center p-2">
-        <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
-        <div className="aspect-video w-full max-h-[60vh] bg-slate-900 rounded-2xl md:rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white relative group">
-            <video
-                src={videoUrl}
-                autoPlay
-                loop
-                playsInline
-                className="w-full h-full object-cover"
-            // onEnded={(e) => {
-            //     const video = e.target as HTMLVideoElement;
-            //     video.pause();
-            // }}
-            />
-            {/* Overlay for aesthetic */}
-            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/20 rounded-[inherit]" />
+const VideoSlide = ({ title, videoUrl, content }: Partial<Slide>) => {
+    const isList = content?.includes('•');
+    const points = content?.split('\n').filter(p => p.trim() !== '') || [];
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-4 text-center p-2">
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
+            <div className="relative group rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900/5 max-w-[95%] md:max-w-full">
+                <video
+                    src={videoUrl}
+                    autoPlay
+                    loop
+                    playsInline
+                    className="w-full h-auto max-h-[45vh] md:max-h-[55vh] object-contain block"
+                />
+                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[inherit]" />
+            </div>
+            {content && (
+
+                <div className="max-w-3xl mx-auto mt-4 px-4 overflow-y-auto no-scrollbar max-h-[25vh]">
+                    {isList ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {points.map((point, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="flex items-center gap-3 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-white/60 shadow-sm"
+                                >
+                                    <div className="w-2 h-2 bg-sky-500 rounded-full shrink-0" />
+                                    <span className="text-sm md:text-base font-bold text-slate-700 text-left leading-tight">
+                                        {point.replace('•', '').trim()}
+                                    </span>
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/60">
+                            {content}
+                        </p>
+                    )}
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 const GameLauncherSlide = ({ title, gameType, content, onStart }: any) => (
     <div className="flex flex-col items-center justify-center h-full text-center space-y-8 max-w-3xl mx-auto p-4">
@@ -1825,6 +1819,7 @@ export default function LessonDetailPage() {
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'completed'>('idle');
     // Quiz states
     const [quizState, setQuizState] = useState<'idle' | 'playing' | 'completed'>('idle');
+    const [postQuizVideoPlaying, setPostQuizVideoPlaying] = useState(false);
     // Track completed slide indices
     const [completedSlides, setCompletedSlides] = useState<Record<number, boolean>>({});
     // Countdown timer state
@@ -2189,12 +2184,17 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
                                 {currentSlide.type === "title" && <TitleSlide {...currentSlide} />}
-                                {currentSlide.type === "content" && <ContentSlide {...currentSlide} />}
+                                {currentSlide.type === "content" && (
+                                    <ContentSlide
+                                        {...currentSlide}
+                                        isModule1={slides.some(s => s.title && s.title.toLowerCase().includes("germ"))}
+                                    />
+                                )}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
                                 {currentSlide.type === "video" && <VideoSlide {...currentSlide} />}
                                 {currentSlide.type === "celebration" && (
@@ -2280,7 +2280,7 @@ export default function LessonDetailPage() {
                                                 setQuizState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
                                                 playYay();
-                                                handleNext();
+                                                setPostQuizVideoPlaying(true);
                                             }}
                                         />
                                     ) : (
@@ -2292,6 +2292,31 @@ export default function LessonDetailPage() {
                                 )}
                             </div>
                         </motion.div>
+                    </AnimatePresence>
+
+                    {/* Post-Quiz Video Overlay */}
+                    <AnimatePresence>
+                        {postQuizVideoPlaying && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-100 bg-black flex items-center justify-center overflow-hidden"
+                            >
+                                <video
+                                    src={
+                                        slides.some(s => s.content && s.content.includes("Bin"))
+                                            ? "/videos/module-b/B10.mp4" : "/videos/module-a/A12.mp4"}
+                                    autoPlay
+                                    playsInline
+                                    className="w-full h-full object-contain"
+                                    onEnded={() => {
+                                        setPostQuizVideoPlaying(false);
+                                        handleNext();
+                                    }}
+                                />
+                            </motion.div>
+                        )}
                     </AnimatePresence>
                 </div>
             </main>
