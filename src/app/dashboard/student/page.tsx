@@ -107,8 +107,11 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img src="/backgrounds/school-bg.png" className="w-full h-full object-cover opacity-20 blur-sm" alt="" />
+        </div>
+        <div className="text-center relative z-10">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
@@ -126,18 +129,26 @@ export default function StudentDashboard() {
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-sky-100 selection:text-sky-900 overflow-x-hidden">
       <Navbar role="STUDENT" />
 
-      {/* --- Floating Background Decorations --- */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      {/* --- Dashboard Background --- */}
+      <div className="fixed inset-0 pointer-events-none z-0 bg-slate-50">
+        <img
+          src="/backgrounds/school-bg.png"
+          className="w-full h-full object-cover opacity-50 select-none grayscale-[0.2] brightness-110"
+          alt=""
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-white/30 via-transparent to-white/60" />
+
+        {/* Subtle Floating Decorations */}
         <motion.div
           variants={bubbleVariants}
           animate="animate"
-          className="absolute top-20 left-[5%] w-64 h-64 bg-sky-50 rounded-full blur-3xl opacity-50"
+          className="absolute top-20 left-[5%] w-64 h-64 bg-sky-100 rounded-full blur-3xl opacity-30"
         />
         <motion.div
           variants={bubbleVariants}
           animate="animate"
           style={{ transitionDelay: "1s" }}
-          className="absolute bottom-40 right-[10%] w-96 h-96 bg-yellow-50 rounded-full blur-3xl opacity-50"
+          className="absolute bottom-40 right-[10%] w-96 h-96 bg-yellow-100 rounded-full blur-3xl opacity-30"
         />
       </div>
 
@@ -148,11 +159,11 @@ export default function StudentDashboard() {
             <div>
               <h1 className="text-6xl font-black tracking-tighter text-slate-900 mb-4 leading-[0.9]">
                 Hi there, <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-sky-400 to-blue-600">
                   Hero {session?.user?.name?.split(" ")[0]}!
                 </span>
               </h1>
-              <p className="text-slate-400 font-medium text-xl max-w-xl">
+              <p className="text-slate-700 font-medium text-xl max-w-xl">
                 Welcome to your command center. Access your modules and track your progress to become the ultimate school guardian.
               </p>
             </div>
@@ -216,14 +227,14 @@ export default function StudentDashboard() {
                   <Link href={`/modules/${module.id}`} className="group block h-full">
                     <div className="bg-white rounded-[3rem] shadow-xl shadow-slate-100 border border-slate-50 overflow-hidden flex flex-col h-full hover:shadow-2xl transition-all hover:-translate-y-2 active:scale-[0.98]">
                       {/* Card Header */}
-                      <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-10 text-white relative overflow-hidden">
+                      <div className="bg-linear-to-br from-slate-900 to-slate-800 p-10 text-white relative overflow-hidden">
                         <div className="relative z-10">
                           <h3 className="text-3xl font-black tracking-tighter leading-none uppercase pr-8">
                             {module.title}
                           </h3>
                         </div>
                         {/* Decor */}
-                        <div className="absolute top-0 right-0 p-6 opacity-20 scale-[4] rotate-[15deg] pointer-events-none translate-x-4 -translate-y-4">
+                        <div className="absolute top-0 right-0 p-6 opacity-20 scale-[4] rotate-15 pointer-events-none translate-x-4 -translate-y-4">
                           <ShieldCheck className="w-12 h-12" />
                         </div>
                       </div>
@@ -253,7 +264,7 @@ export default function StudentDashboard() {
                               animate={{ width: `${module.progress?.percentage || 0}%` }}
                               className={`h-full rounded-full transition-all ${(module.progress?.percentage || 0) === 100
                                 ? "bg-green-400 shadow-[0_0_15px_rgba(74,222,128,0.5)]"
-                                : "bg-gradient-to-r from-sky-400 to-blue-500 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+                                : "bg-linear-to-r from-sky-400 to-blue-500 shadow-[0_0_15px_rgba(56,189,248,0.4)]"
                                 }`}
                             />
                           </div>
@@ -288,13 +299,13 @@ export default function StudentDashboard() {
       <footer className="py-24 border-t border-slate-100 bg-white/50 backdrop-blur-sm relative z-10">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity cursor-default">
-            <ShieldCheck className="text-slate-900 w-6 h-6" />
+            {/* <ShieldCheck className="text-slate-900 w-6 h-6" /> */}
             <div className="flex flex-col">
               <span className="font-black text-[12px] uppercase tracking-[0.2em] text-slate-900 leading-none">Restroom Association</span>
-              <span className="text-[10px] font-bold text-slate-400 mt-1">Global Safety Standards</span>
+              <span className="text-[10px] font-bold text-slate-900 mt-1">Global Safety Standards</span>
             </div>
           </div>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-300">© 2026 Toilet Hero Academy</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-900">© 2026 Toilet Hero Academy</p>
         </div>
       </footer>
     </div>

@@ -41,7 +41,7 @@ interface Question {
 
 interface Slide {
     id: string;
-    type: "title" | "content" | "image" | "video" | "game" | "quiz" | "comparison" | "celebration";
+    type: "title" | "content" | "image" | "video" | "game" | "quiz" | "comparison" | "celebration" | "pledge";
     title: string;
     subtitle?: string;
     content?: string;
@@ -314,8 +314,8 @@ const GermHunterGame = ({ onComplete }: { onComplete: () => void }) => {
         <div className="bg-gray-50/50 relative w-full h-[400px] md:h-[500px] border-4 border-dashed border-slate-200 rounded-[3rem] overflow-hidden flex items-center justify-center shadow-inner">
             {/* Background Info */}
             <div className="absolute top-6 left-6 md:top-8 md:left-8 text-left z-10">
-                <h4 className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Restroom Area</h4>
-                <p className="text-[10px] md:text-xs text-slate-300 font-bold">Germs Detected: {germs.length}</p>
+                <h4 className="text-[10px] md:text-sm font-black text-slate-700 uppercase tracking-widest mb-1">Restroom Area</h4>
+                <p className="text-[10px] md:text-xs text-slate-700 font-bold">Germs Detected: {germs.length}</p>
             </div>
 
             {/* The Sanitizer Portal */}
@@ -458,12 +458,11 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
 
     return (
         <div className="relative w-full max-w-4xl h-auto bg-sky-50/50 backdrop-blur-sm border-4 border-white rounded-3xl md:rounded-[4rem] flex flex-col items-center justify-center p-4 md:p-8">
-
             {/* Phase Indicator */}
             <div className="w-full flex justify-between items-center mb-6">
                 <div>
-                    <h4 className="text-xs md:text-sm font-black text-blue-900/40 uppercase tracking-widest mb-1">Soap & Water Superheroes</h4>
-                    <p className="text-[10px] md:text-xs text-blue-900/30 font-bold italic">
+                    <h4 className="text-xs md:text-sm font-black text-slate-700 uppercase tracking-widest mb-1">Soap & Water Superheroes</h4>
+                    <p className="text-[10px] md:text-xs text-slate-700 font-bold italic">
                         {waterPhase === 0 && "Click the faucet to wet your hands!"}
                         {waterPhase === 1 && "Rub your hands together to make bubbles!"}
                         {waterPhase === 2 && "Click the faucet again to rinse!"}
@@ -795,7 +794,7 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
             <div className="relative w-full aspect-video md:aspect-[16/9] md:h-auto bg-sky-50 rounded-[3rem] border-4 border-white shadow-2xl overflow-hidden mb-8 select-none touch-none">
                 {/* Scenario background */}
                 {background ? (
-                    <img src={background} alt="Background" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
+                    <img src={'/backgrounds/cleanup-challenge-bg.jpg'} alt="Background" className="absolute inset-0 w-full h-full object-cover opacity-80 pointer-events-none" />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[15rem] opacity-20 pointer-events-none">🚽</div>
                 )}
@@ -889,33 +888,46 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto p-4">
-            <h2 className="text-4xl md:text-6xl font-black text-blue-900 mb-4 tracking-tighter uppercase">{title}</h2>
-            <p className="text-xl md:text-2xl text-slate-500 font-bold mb-12 uppercase tracking-widest">"{subtitle}"</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-12">
-                {pledgeItems.map((item, i) => {
-                    const isChecked = checkedItems.includes(i);
-                    return (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            onClick={() => toggleItem(i)}
-                            className={`cursor-pointer p-8 rounded-[2rem] border-4 transition-all group flex flex-col items-center justify-center text-center ${isChecked
-                                ? "bg-yellow-50 border-yellow-400 shadow-xl scale-105"
-                                : "bg-white/80 border-slate-100 hover:border-yellow-200"
-                                }`}
-                        >
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${isChecked ? "bg-yellow-400 text-white" : "bg-yellow-100 text-yellow-500"
-                                }`}>
-                                <Star className={`w-6 h-6 ${isChecked ? "fill-current" : ""}`} />
-                            </div>
-                            <p className={`font-black leading-tight uppercase text-sm transition-colors ${isChecked ? "text-yellow-700" : "text-slate-700"
-                                }`}>{item}</p>
-                        </motion.div>
-                    );
-                })}
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
+            <p className="text-lg md:text-2xl text-slate-700 font-black uppercase max-w-2xl leading-relaxed px-4">
+                {subtitle}
+            </p>
+            <div className="relative w-full aspect-[16/9] max-w-6xl mb-4 rounded-3xl overflow-hidden shadow-2xl border-4 border-white mx-auto">
+                <img src="/images/pledge-bg.jpg" alt="Pledge Background" className="w-full h-full object-cover pointer-events-none select-none" draggable={false} />
+                {/* Hotspot Container */}
+                <div className="absolute bottom-[10%] left-[39%] w-[58%] h-[38%] flex justify-between">
+                    {[0, 1, 2, 3].map((index) => {
+                        const isChecked = checkedItems.includes(index);
+                        return (
+                            <motion.button
+                                key={index}
+                                onClick={() => toggleItem(index)}
+                                className={`relative w-[23%] h-full rounded-2xl cursor-pointer transition-all border-4 ${isChecked ? "border-green-500 bg-green-500/20" : "border-transparent"
+                                    }`}
+                                animate={!isChecked ? {
+                                    backgroundColor: ["rgba(255, 255, 255, 0.0)", "rgba(255, 255, 255, 0.4)", "rgba(255, 255, 255, 0.0)"],
+                                    borderColor: ["rgba(255, 255, 255, 0.0)", "rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.0)"],
+                                    boxShadow: ["0px 0px 0px rgba(255,255,255,0)", "0px 0px 20px rgba(255,255,255,0.6)", "0px 0px 0px rgba(255,255,255,0)"]
+                                } : {
+                                    scale: 1
+                                }}
+                                transition={!isChecked ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { type: "spring" }}
+                                whileHover={!isChecked ? { scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.6)" } : {}}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                {isChecked && (
+                                    <motion.div
+                                        initial={{ scale: 0, rotate: -45 }}
+                                        animate={{ scale: 1, rotate: 0 }}
+                                        className="absolute -top-4 -right-4 bg-green-500 rounded-full p-1 text-white shadow-xl z-10 border-4 border-white"
+                                    >
+                                        <CheckCircle className="w-6 h-6 md:w-8 md:h-8" />
+                                    </motion.div>
+                                )}
+                            </motion.button>
+                        );
+                    })}
+                </div>
             </div>
 
             <motion.div
@@ -924,9 +936,9 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
                 transition={{ delay: 0.8 }}
             >
                 <PlayfulButton
-                    color={checkedItems.length === pledgeItems.length ? "orange" : "blue"}
+                    color={checkedItems.length === 4 ? "orange" : "blue"}
                     className="px-12 py-6"
-                    disabled={checkedItems.length !== pledgeItems.length}
+                    disabled={checkedItems.length !== 4}
                     onClick={() => {
                         confetti({
                             particleCount: 200,
@@ -936,7 +948,7 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
                         onComplete();
                     }}
                 >
-                    {checkedItems.length === pledgeItems.length ? "I am a Toilet Hero!" : "Complete the Pledge First!"}
+                    {checkedItems.length === 4 ? "I am a Toilet Hero!" : "Complete the Pledge First!"}
                 </PlayfulButton>
             </motion.div>
         </div>
@@ -1539,9 +1551,6 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
                     <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">
                         {question.question}
                     </h3>
-                    <p className="text-sm md:text-base text-slate-500 font-bold leading-tight px-4 italic">
-                        "{question.description}"
-                    </p>
                 </div>
 
                 <div className={`mt-2 md:mt-4 w-full h-16 md:h-20 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
@@ -2184,7 +2193,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" || currentSlide.type === "pledge" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
@@ -2197,16 +2206,15 @@ export default function LessonDetailPage() {
                                 )}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
                                 {currentSlide.type === "video" && <VideoSlide {...currentSlide} />}
-                                {currentSlide.type === "celebration" && (
-                                    currentSlide.title.includes("Pledge") ? (
-                                        <PledgeSlide {...currentSlide} onComplete={() => {
-                                            setGameState('completed');
-                                            setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                        }} />
-                                    ) : (
-                                        <CelebrationSlide {...currentSlide} />
-                                    )
-                                )}
+                                {currentSlide.type === "celebration" &&
+                                    <CelebrationSlide {...currentSlide} />
+                                }
+                                {currentSlide.type === "pledge" &&
+                                    <PledgeSlide {...currentSlide} onComplete={() => {
+                                        setGameState('completed');
+                                        setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
+                                    }} />
+                                }
 
                                 {/* Game Logic */}
                                 {currentSlide.type === "game" && (
@@ -2334,14 +2342,14 @@ export default function LessonDetailPage() {
                         <span className="sm:inline">Prev</span>
                     </button>
 
-                    {/* Dot Navigation - hidden on mobile/tablet to prevent overlap */}
-                    <div className="hidden lg:flex items-center gap-2 md:gap-3 bg-slate-50/50 p-2 md:p-3 rounded-full border border-slate-100 overflow-x-auto no-scrollbar max-w-[50%]">
+                    {/* Dot Navigation - hidden on mobile/tablet to prevent flex overlap causing issues; on desktop, allow horizontal scroll if too many slides */}
+                    <div className="hidden lg:flex items-center gap-2 md:gap-3 bg-slate-50/50 p-2 md:p-3 rounded-full border border-slate-100 overflow-x-auto no-scrollbar max-w-[50%] shrink-0">
                         {slides.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => !isSlideLocked && jumpToSlide(i)}
                                 disabled={isSlideLocked}
-                                className={`transition-all duration-700 rounded-full flex-shrink-0 ${currentIdx === i
+                                className={`transition-all duration-700 rounded-full shrink-0 ${currentIdx === i
                                     ? "w-8 md:w-10 h-2 md:h-3 bg-[#2196F3] shadow-[0_0_15px_rgba(15,23,42,0.2)]"
                                     : "w-2 md:w-3 h-2 md:h-3 bg-slate-200 hover:bg-slate-300"
                                     } ${isSlideLocked && 'cursor-not-allowed opacity-50'}`}

@@ -99,6 +99,7 @@ async function main() {
                 type: "video",
                 title: "Germ Secret Revealed",
                 videoUrl: "/videos/module-a/A2.mp4",
+                background: "/images/meet-invisible-germs.png",
                 waitSeconds: 3
               },
               {
@@ -124,6 +125,7 @@ async function main() {
                 type: "video",
                 title: "How Germs Travel",
                 videoUrl: "/videos/module-a/A4.mp4",
+                background: "/backgrounds/germ-travel-bg.png",
                 order: 8,
                 waitSeconds: 3
               },
@@ -132,6 +134,7 @@ async function main() {
                 type: "video",
                 title: "Wash Your Hand!",
                 videoUrl: "/videos/module-a/A5.mp4",
+                background: "/backgrounds/handwasher-bg.png",
                 order: 9,
                 waitSeconds: 3
               },
@@ -140,6 +143,7 @@ async function main() {
                 type: "video",
                 title: "Wash Your Hand!",
                 videoUrl: "/videos/module-a/A6.mp4",
+                background: "/backgrounds/handwasher-bg.png",
                 order: 10,
                 waitSeconds: 3
               },
@@ -148,7 +152,7 @@ async function main() {
                 type: "game",
                 title: "Tiny Germs, Big Impact",
                 gameType: "Story Interaction",
-                content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away, then press the 'Wash' button to clean the hands and stop the germ from reaching the face!",
+                content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away",
                 mascot: "/mascots/mascot-scared.png",
                 background: "/videos/module-a/A11.mov"
               },
@@ -171,6 +175,7 @@ async function main() {
                 title: "Fun Quiz Time!",
                 videoUrl: "/videos/module-a/A9.mp4",
                 audio: "/audio/fun-quiz-time.mp3",
+                background: "/backgrounds/quiz-bg.png",
                 order: 14,
                 waitSeconds: 3
               },
@@ -179,6 +184,7 @@ async function main() {
                 type: "quiz",
                 title: "Fun Quiz Time!",
                 content: "Drag and drop the correct answers into the boxes to complete the quiz!",
+                background: "/backgrounds/quiz-bg.png",
                 questions: [
                   {
                     id: "q1",
@@ -236,6 +242,7 @@ async function main() {
                 type: "video",
                 title: "Be a Toilet Hero Every Day!",
                 videoUrl: "/videos/module-b/B1.mp4",
+                background: "/backgrounds/module-2-bg.jpg",
                 order: 1,
                 waitSeconds: 2
               },
@@ -299,29 +306,33 @@ async function main() {
                 type: "video",
                 title: "Always flush after use",
                 videoUrl: "/videos/module-b/B5.mp4",
-                waitSeconds: 3
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
                 order: 9,
                 type: "video",
                 title: "Put tissues in the bin",
                 videoUrl: "/videos/module-b/B6.mp4",
-                waitSeconds: 3
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
                 order: 10,
                 type: "video",
                 title: "Keep the floor dry",
                 videoUrl: "/videos/module-b/B7.mp4",
-                waitSeconds: 3
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
                 id: "slide-b4-video",
                 type: "video",
-                title: "Hero or Oops?",
+                title: "Game Time!",
                 videoUrl: "/videos/module-b/B4.mp4",
                 order: 11,
-                waitSeconds: 3
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
                 order: 12,
@@ -378,37 +389,32 @@ async function main() {
                 subtitle: "Game: Clean-Up Challenge",
                 gameType: "CleanupChallenge",
                 content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
-                background: "/backgrounds/cleanup-challenge-bg.jpg",
+                background: "/videos/module-b/B11.mp4",
               },
               {
-                id: "slide-b12-video",
-                type: "video",
-                title: "We Help The Cleaners!",
-                videoUrl: "/videos/module-b/B12.mp4",
                 order: 18,
-                waitSeconds: 3
-              },
-              {
-                order: 19,
-                type: "celebration",
+                type: "pledge",
                 title: "The Toilet Hero Pledge",
                 subtitle: "I Promise To...",
-                content: "• Use toilets properly\n• Keep toilets clean\n• Wash my hands\n• Be kind to cleaners",
-                waitSeconds: 3
+                content: "",
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
                 id: "slide-b17-video",
                 type: "video",
                 title: "Toilet Hero Pledge",
                 videoUrl: "/videos/module-b/B17.mp4",
-                order: 20,
-                waitSeconds: 3
+                order: 19,
+                waitSeconds: 3,
+                background: "/backgrounds/module-2-bg.jpg",
               },
               {
-                order: 21,
+                order: 20,
                 type: "quiz",
                 title: "Quick Hero Quiz!",
                 content: "Drag and drop the correct answers into the boxes to complete the quiz!",
+                background: "/backgrounds/quiz-bg.png",
                 questions: [
                   {
                     id: "m2-q1",
@@ -441,7 +447,7 @@ async function main() {
                 ],
               },
               {
-                order: 22,
+                order: 21,
                 type: "celebration",
                 title: "Great Job!",
                 subtitle: "You Are Now An Official Toilet Hero!",
