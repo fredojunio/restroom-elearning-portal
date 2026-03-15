@@ -388,7 +388,7 @@ async function main() {
                 title: "Clean-Up Challenge",
                 subtitle: "Game: Clean-Up Challenge",
                 gameType: "CleanupChallenge",
-                content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. Tapping the correct action fixes the scene:\n\n• Tissue on floor → Tap Bin\n• Water spill → Tap Wipe\n• Unflushed toilet → Tap Flush",
+                content: "Small Mess, Big Help\nInteractive 'Spot the Mess' game. The correct action fixes the scene:\n\n• Tissue on floor → Drag to Bin\n• Water spill → Drag mop to clean\n• Unflushed toilet → Tap to Flush",
                 background: "/videos/module-b/B11.mp4",
               },
               {

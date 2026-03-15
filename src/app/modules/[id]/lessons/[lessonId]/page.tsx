@@ -1263,7 +1263,7 @@ const VideoSlide = ({ title, videoUrl, content, audio, onReady }: Partial<Slide>
 
     useEffect(() => {
         if (videoRef.current && audio) {
-            videoRef.current.volume = 0.4;
+            videoRef.current.volume = 0.3;
         }
     }, [audio]);
     const points = content?.split('\n').filter(p => p.trim() !== '') || [];
