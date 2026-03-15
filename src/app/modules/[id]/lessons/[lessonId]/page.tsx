@@ -718,7 +718,7 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
     const [isWon, setIsWon] = useState(false);
     const [wetFloorCleaned, setWetFloorCleaned] = useState(false);
     const [poopCleaned, setPoopCleaned] = useState(false);
-    const [paperCleaned, setPaperCleaned] = useState(false);
+    const [papersCleaned, setPapersCleaned] = useState([false, false, false]);
 
     const trashRef = useRef<HTMLImageElement>(null);
     const wetFloorRef = useRef<HTMLImageElement>(null);
@@ -738,10 +738,14 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
             point.y >= rect.top - padding && point.y <= rect.bottom + padding;
     };
 
-    const handleDragEnd = (type: 'paper' | 'mop', info: any) => {
-        if (type === 'paper') {
+    const handleDragEnd = (type: 'paper' | 'mop', info: any, index?: number) => {
+        if (type === 'paper' && index !== undefined) {
             if (checkIntersection(info.point, trashRef)) {
-                setPaperCleaned(true);
+                setPapersCleaned(prev => {
+                    const next = [...prev];
+                    next[index] = true;
+                    return next;
+                });
                 playCorrectSfx();
             }
         } else if (type === 'mop') {
@@ -759,11 +763,11 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
         }
     };
 
-    const progressCount = [wetFloorCleaned, poopCleaned, paperCleaned].filter(Boolean).length;
+    const progressCount = [wetFloorCleaned, poopCleaned, ...papersCleaned].filter(Boolean).length;
     const score = progressCount * 100;
 
     useEffect(() => {
-        if (progressCount === 3) {
+        if (progressCount === 5) {
             setTimeout(() => {
                 setIsWon(true);
                 confetti({ particleCount: 150, spread: 70 });
@@ -822,20 +826,24 @@ const CleanupChallengeGame = ({ onComplete, background }: { onComplete: () => vo
                     <img src="/images/cleanup/flush.png" alt="Flush" className="w-full object-contain drop-shadow-md" />
                 </motion.button>
 
-                {/* Paper (Draggable) */}
-                {!paperCleaned && (
+                {/* Papers (Draggable) */}
+                {[0, 1, 2].map(idx => !papersCleaned[idx] && (
                     <motion.div
+                        key={`paper-${idx}`}
                         drag
                         dragMomentum={false}
                         dragSnapToOrigin={true}
-                        onDragEnd={(e, info) => handleDragEnd('paper', info)}
+                        onDragEnd={(e, info) => handleDragEnd('paper', info, idx)}
                         whileHover={{ scale: 1.1 }}
                         whileDrag={{ scale: 1.2, zIndex: 100 }}
-                        className="absolute bottom-[10%] left-[38%] w-[12%] max-w-[80px] z-20 cursor-grab active:cursor-grabbing pointer-events-auto"
+                        className={`absolute z-20 cursor-grab active:cursor-grabbing pointer-events-auto max-w-[60px] ${idx === 0 ? 'bottom-[10%] left-[32%] w-[10%]' :
+                            idx === 1 ? 'bottom-[15%] left-[42%] w-[11%]' :
+                                'bottom-[8%] left-[50%] w-[9%]'
+                            }`}
                     >
-                        <img src="/images/cleanup/paper.png" alt="Paper" className="w-full object-contain drop-shadow-lg pointer-events-none" />
+                        <img src={`/images/cleanup/paper${idx + 1}.png`} alt={`Paper ${idx + 1}`} className="w-full object-contain drop-shadow-lg pointer-events-none" />
                     </motion.div>
-                )}
+                ))}
 
                 {/* Mop (Draggable) */}
                 <motion.div
@@ -929,6 +937,10 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
                     })}
                 </div>
             </div>
+
+            <p className="text-sm md:text-base font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full mb-6 animate-pulse flex items-center gap-2 border border-blue-100">
+                click for your pledges 👆🏻
+            </p>
 
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -1108,6 +1120,9 @@ const ToiletComparisonSlide = ({ onComplete, invertChoices }: { onComplete: () =
                 spread: 70,
                 origin: { y: 0.6 }
             });
+        } else {
+            const audio = new Audio('/sfx/wrong.mp3');
+            audio.play().catch(e => console.warn("Sfx play failed:", e));
         }
     };
 
@@ -1242,8 +1257,15 @@ const ImageSlide = ({ title, image, content, mascot }: Partial<Slide>) => (
     </div>
 );
 
-const VideoSlide = ({ title, videoUrl, content }: Partial<Slide>) => {
+const VideoSlide = ({ title, videoUrl, content, audio, onReady }: Partial<Slide> & { onReady?: () => void }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
     const isList = content?.includes('•');
+
+    useEffect(() => {
+        if (videoRef.current && audio) {
+            videoRef.current.volume = 0.4;
+        }
+    }, [audio]);
     const points = content?.split('\n').filter(p => p.trim() !== '') || [];
 
     return (
@@ -1251,10 +1273,12 @@ const VideoSlide = ({ title, videoUrl, content }: Partial<Slide>) => {
             <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
             <div className="relative group rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900/5 max-w-[95%] md:max-w-full">
                 <video
+                    ref={videoRef}
                     src={videoUrl}
                     autoPlay
                     loop
                     playsInline
+                    onCanPlayThrough={() => onReady?.()}
                     className="w-full h-auto max-h-[45vh] md:max-h-[55vh] object-contain block"
                 />
                 <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[inherit]" />
@@ -1551,6 +1575,9 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
                     <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">
                         {question.question}
                     </h3>
+                    <p className="text-sm md:text-base text-slate-500 font-bold leading-tight px-4 italic">
+                        {question.description === "" ? "" : `"${question.description}"`}
+                    </p>
                 </div>
 
                 <div className={`mt-2 md:mt-4 w-full h-16 md:h-20 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
@@ -1834,6 +1861,7 @@ export default function LessonDetailPage() {
     // Countdown timer state
     const [countdown, setCountdown] = useState(0);
     const [isTimerLocked, setIsTimerLocked] = useState(false);
+    const [isVideoReady, setIsVideoReady] = useState(false);
 
     const [slides, setSlides] = useState<Slide[]>(dummySlides);
     const [initialSlideLoaded, setInitialSlideLoaded] = useState(false);
@@ -1913,6 +1941,8 @@ export default function LessonDetailPage() {
             setIsTimerLocked(false);
             setCountdown(0);
         }
+        // Reset video ready state on slide change
+        setIsVideoReady(false);
     }, [currentIdx, slides, completedSlides[currentIdx]]);
 
     // Handle Slide Audio Playback
@@ -1929,12 +1959,21 @@ export default function LessonDetailPage() {
             const audio = new Audio(audioPath);
             currentAudioRef.current = audio;
 
-            // Note: Autoplay might be blocked by browser. 
-            // Most browsers allow it after some interaction.
-            // Since the user has to log in/interact to get here, it might work.
-            audio.play().catch(err => {
-                console.warn("Audio autoplay blocked or failed:", err);
-            });
+            const playAudio = () => {
+                audio.play().catch(err => {
+                    console.warn("Audio autoplay blocked or failed:", err);
+                });
+            };
+
+            // If it's a video slide, wait for it to be ready
+            if (slides[currentIdx]?.type === 'video') {
+                if (isVideoReady) {
+                    playAudio();
+                }
+                // Otherwise wait for isVideoReady to become true via the dependency array
+            } else {
+                playAudio();
+            }
         }
 
         return () => {
@@ -1943,7 +1982,7 @@ export default function LessonDetailPage() {
                 currentAudioRef.current.currentTime = 0;
             }
         };
-    }, [currentIdx, slides]);
+    }, [currentIdx, slides, isVideoReady]);
 
     const totalSlides = slides.length;
     const currentSlide = slides[currentIdx];
@@ -2205,7 +2244,7 @@ export default function LessonDetailPage() {
                                     />
                                 )}
                                 {currentSlide.type === "image" && <ImageSlide {...currentSlide} />}
-                                {currentSlide.type === "video" && <VideoSlide {...currentSlide} />}
+                                {currentSlide.type === "video" && <VideoSlide {...currentSlide} onReady={() => setIsVideoReady(true)} />}
                                 {currentSlide.type === "celebration" &&
                                     <CelebrationSlide {...currentSlide} />
                                 }
@@ -2213,6 +2252,7 @@ export default function LessonDetailPage() {
                                     <PledgeSlide {...currentSlide} onComplete={() => {
                                         setGameState('completed');
                                         setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
+                                        handleNext();
                                     }} />
                                 }
 

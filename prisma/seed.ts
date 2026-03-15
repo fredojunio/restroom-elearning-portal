@@ -421,6 +421,7 @@ async function main() {
                     type: "DRAG_AND_DROP",
                     question: "What should you do after using the toilet?",
                     options: ["Flush properly!", "Leave it for later."],
+                    description: "",
                     correctAnswer: "Flush properly!"
                   },
                   {
@@ -428,6 +429,7 @@ async function main() {
                     type: "DRAG_AND_DROP",
                     question: "True or False: Toilets are shared spaces.",
                     options: ["TRUE!", "FALSE!"],
+                    description: "",
                     correctAnswer: "TRUE!"
                   },
                   {
@@ -435,6 +437,7 @@ async function main() {
                     type: "DRAG_AND_DROP",
                     question: "Who helps keep toilets clean?",
                     options: ["Everyone!", "Only the cleaners."],
+                    description: "",
                     correctAnswer: "Everyone!"
                   },
                   {
@@ -442,6 +445,7 @@ async function main() {
                     type: "DRAG_AND_DROP",
                     question: "Does a Toilet Hero help others?",
                     options: ["Yes, of course!", "No, just themselves."],
+                    description: "",
                     correctAnswer: "Yes, of course!"
                   }
                 ],
