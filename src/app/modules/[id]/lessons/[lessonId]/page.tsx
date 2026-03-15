@@ -480,15 +480,15 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
             </div>
 
             {/* Game Canvas */}
-            <div className="relative w-full aspect-[3/4] sm:aspect-square md:aspect-[4/3] max-w-2xl bg-[#E8F8FA] rounded-2xl md:rounded-[3rem] shadow-2xl border-4 border-sky-100 flex flex-col items-center justify-end overflow-hidden pb-4 md:pb-8">
+            <div className="relative w-full aspect-4/5 sm:aspect-square md:aspect-4/3 max-w-2xl bg-[#E8F8FA] rounded-2xl md:rounded-[3rem] shadow-2xl border-4 border-sky-100 flex flex-col items-center justify-end overflow-hidden pb-4 md:pb-8">
 
                 {/* Score/Progress HUD */}
                 {waterPhase === 1 && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-50 pointer-events-none">
-                        <div className="px-4 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-sky-100 text-blue-900/60 font-black text-[10px] uppercase tracking-widest shadow-sm">
-                            Scrub Progress: {Math.floor(scrubProgress)}%
+                    <div className="absolute top-2 md:top-4 right-2 md:left-1/2 md:-translate-x-1/2 flex flex-col items-end md:items-center gap-1 z-50 pointer-events-none">
+                        <div className="px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-sky-100 text-blue-900/60 font-black text-[8px] md:text-[10px] uppercase tracking-widest shadow-sm">
+                            Prog: {Math.floor(scrubProgress)}%
                         </div>
-                        <div className="w-32 md:w-48 h-2 bg-sky-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+                        <div className="w-20 md:w-48 h-1.5 md:h-2 bg-sky-200/50 rounded-full overflow-hidden backdrop-blur-sm">
                             <motion.div
                                 className="h-full bg-sky-500"
                                 animate={{ width: `${scrubProgress}%` }}
@@ -499,12 +499,12 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
 
                 {/* Faucet Element */}
                 <motion.div
-                    className="absolute top-4 md:top-8 left-1/3 -translate-x-1/2 z-40 cursor-pointer"
+                    className="absolute top-2 md:top-8 left-2 md:left-1/3 md:-translate-x-1/2 z-40 cursor-pointer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleFaucetClick}
                 >
-                    <img src="/images/handwash/faucet.png" alt="Faucet" className="w-32 md:w-56 drop-shadow-xl translate-y-2 md:translate-y-4" draggable={false} />
+                    <img src="/images/handwash/faucet.png" alt="Faucet" className="w-24 md:w-56 drop-shadow-xl translate-y-1 md:translate-y-4" draggable={false} />
 
                     {/* Glowing highlight when needs click */}
                     {(waterPhase === 0 || waterPhase === 2) && (
@@ -519,7 +519,7 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                 {/* Hand Container Element */}
                 <div
                     ref={handRef}
-                    className="absolute bottom-0 right-20 w-[70%] md:w-[60%] aspect-square z-20 touch-none flex items-center justify-center cursor-pointer -translate-x-4 md:-translate-x-8 -translate-y-8 md:-translate-y-12"
+                    className="absolute bottom-0 left-0 right-0 mx-auto w-[85%] md:w-[60%] aspect-square z-20 touch-none flex items-center justify-center cursor-pointer -translate-y-4 md:-translate-y-12"
                     onPointerMove={handleScrub}
                     onTouchMove={handleScrub}
                 >
@@ -567,7 +567,7 @@ const HandwashingGame = ({ onComplete }: { onComplete: () => void }) => {
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 src="/images/handwash/waterlap.png"
                                 alt="Water Lap"
-                                className="absolute z-40 w-[80%] md:w-[30%] object-contain top-[33%] left-1/3 -translate-x-1/2 mix-blend-hard-light pointer-events-none drop-shadow-lg"
+                                className="absolute z-40 w-[60%] md:w-[30%] object-contain top-[25%] left-[20%] md:top-[33%] md:left-1/3 md:-translate-x-1/2 mix-blend-hard-light pointer-events-none drop-shadow-lg"
                             />
                         )}
                     </AnimatePresence>
@@ -895,9 +895,9 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto p-4">
-            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
-            <p className="text-lg md:text-2xl text-slate-700 font-black uppercase max-w-2xl leading-relaxed px-4">
+        <div className="flex flex-col items-center justify-center h-full w-full max-w-6xl mx-auto p-2 md:p-4">
+            <h2 className="text-xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase text-center">{title}</h2>
+            <p className="text-sm md:text-2xl text-slate-700 font-black uppercase max-w-2xl leading-relaxed px-4 text-center">
                 {subtitle}
             </p>
             <div className="relative w-full aspect-[16/9] max-w-6xl mb-4 rounded-3xl overflow-hidden shadow-2xl border-4 border-white mx-auto">
@@ -938,7 +938,7 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
                 </div>
             </div>
 
-            <p className="text-sm md:text-base font-bold text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full mb-6 animate-pulse flex items-center gap-2 border border-blue-100">
+            <p className="text-[10px] md:text-base font-bold text-blue-600 bg-blue-50 px-3 md:px-4 py-1 md:py-1.5 rounded-full mb-3 md:mb-6 animate-pulse flex items-center gap-2 border border-blue-100">
                 click for your pledges 👆🏻
             </p>
 
@@ -949,7 +949,7 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
             >
                 <PlayfulButton
                     color={checkedItems.length === 4 ? "orange" : "blue"}
-                    className="px-12 py-6"
+                    className="px-8 py-4 md:px-12 md:py-6"
                     disabled={checkedItems.length !== 4}
                     onClick={() => {
                         confetti({
@@ -960,7 +960,9 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
                         onComplete();
                     }}
                 >
-                    {checkedItems.length === 4 ? "I am a Toilet Hero!" : "Complete the Pledge First!"}
+                    <span className="text-sm md:text-xl">
+                        {checkedItems.length === 4 ? "I am a Toilet Hero!" : "Unlock Pledge First!"}
+                    </span>
                 </PlayfulButton>
             </motion.div>
         </div>
@@ -979,12 +981,12 @@ const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
             className="mb-2 md:mb-4 drop-shadow-2xl"
         >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascots/mascot-pose.png" alt="Mascot" className="w-40 md:w-56 h-auto" />
+            <img src="/mascots/mascot-pose.png" alt="Mascot" className="w-32 md:w-56 h-auto" />
         </motion.div>
-        <h1 className="font-nerko tracking-wide text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center max-w-4xl">
+        <h1 className="font-nerko tracking-wide text-3xl sm:text-5xl md:text-8xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center max-w-4xl">
             {title}
         </h1>
-        <p className="text-lg md:text-2xl text-blue-900 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
+        <p className="text-base md:text-2xl text-blue-900 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
             {subtitle}
         </p>
     </div>
@@ -1012,16 +1014,16 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
     return (
         <div className="flex flex-col h-full max-w-6xl mx-auto py-4 relative">
             <div className="flex items-center gap-4 mb-4 relative z-10">
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-900 text-white rounded-[1.2rem] md:rounded-3xl flex items-center justify-center shadow-xl rotate-3">
-                    <BookOpen className="w-6 h-6 md:w-8 md:h-8" />
+                <div className="w-10 h-10 md:w-16 md:h-16 bg-slate-900 text-white rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl rotate-3 shrink-0">
+                    <BookOpen className="w-5 h-5 md:w-8 md:h-8" />
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
+                <h2 className="text-2xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
                     {title}
                 </h2>
             </div>
 
-            <div className={`flex flex-col lg:flex-row gap-8 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
-                <div className={`relative flex-1 ${isList && isModule1 ? 'h-[550px] md:h-[600px] w-full' : isList ? 'w-full' : 'text-xl md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-10 ml-8'}`}>
+            <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
+                <div className={`relative flex-1 ${isList && isModule1 ? 'min-h-[400px] md:h-[600px] w-full' : isList ? 'w-full' : 'text-lg md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-6 md:pl-10 ml-4 md:ml-8'}`}>
                     {isList ? (
                         isModule1 ? (
                             points.map((point, idx) => {
@@ -1131,11 +1133,11 @@ const ToiletComparisonSlide = ({ onComplete, invertChoices }: { onComplete: () =
             {/* Content Layer */}
             <div className="relative z-10 w-full flex flex-col items-center justify-center p-4 md:p-12">
                 <motion.div
-                    initial={{ y: -20, opacity: 0 }}
+                    initial={{ y: -10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="bg-white/90 backdrop-blur px-6 py-3 rounded-2xl shadow-xl mb-6 md:mb-12 border border-blue-100 max-w-[90%]"
+                    className="bg-white/90 backdrop-blur px-4 py-2 md:px-6 md:py-3 rounded-2xl shadow-xl mb-4 md:mb-12 border border-blue-100 max-w-[95%]"
                 >
-                    <h3 className="text-lg md:text-2xl font-black text-blue-900 uppercase tracking-widest text-center">
+                    <h3 className="text-base md:text-2xl font-black text-blue-900 uppercase tracking-widest text-center">
                         Which toilet would you choose?
                     </h3>
                 </motion.div>
@@ -2162,7 +2164,7 @@ export default function LessonDetailPage() {
             </header>
 
             {/* 3. Main Slide Content Area */}
-            <main className="relative pt-16 pb-40 md:pb-24 h-dvh flex items-center justify-center overflow-hidden">
+            <main className="relative pt-16 pb-24 md:pb-24 h-dvh flex items-center justify-center overflow-hidden">
                 {/* --- Background Image or Video --- */}
                 {(() => {
                     const bgPath = currentSlide.background
@@ -2232,7 +2234,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" || currentSlide.type === "pledge" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-5 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-320px)] md:max-h-[calc(100dvh-180px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-6`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" || currentSlide.type === "pledge" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-4 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-180px)] md:max-h-[calc(100dvh-200px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-2 md:mb-6`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
