@@ -1832,6 +1832,87 @@ const InlineQuizFlow = ({ questions, onComplete }: { questions: Question[], onCo
     );
 };
 
+// --- Asset Preloader ---
+
+const AssetPreloader = ({ slides }: { slides: Slide[] }) => {
+    // Collect all unique asset URLs to avoid duplicate preloading
+    const images = new Set<string>();
+    const videos = new Set<string>();
+    const audios = new Set<string>();
+
+    // Hardcoded essentials
+    const hardcodedImages = [
+        '/backgrounds/school-bg.png',
+        '/images/celebration-bg.jpg',
+        '/images/cleanup/trash.png',
+        '/images/cleanup/wet-floor.png',
+        '/images/cleanup/poop.png',
+        '/images/cleanup/flush.png',
+        '/images/cleanup/mop.png',
+        '/images/cleanup/paper1.png',
+        '/images/cleanup/paper2.png',
+        '/images/cleanup/paper3.png',
+        '/images/handwash/faucet.png',
+        '/images/handwash/hand.png',
+        '/images/handwash/waterlap.png',
+        '/images/handwash/bubble1.png',
+        '/images/handwash/bubble2.png',
+        '/images/handwash/bubble3.png',
+        '/images/toilet-behavior/flushing.png',
+        '/images/toilet-behavior/leaving-tissues.png',
+        '/images/toilet-behavior/washing-hand.png',
+        '/images/pledge-bg.jpg',
+        '/mascots/mascot-pose.png',
+        '/mascots/mascot-hero.png',
+        '/mascots/mascot-quiz-hero.png',
+        '/images/germs/germ-green.png',
+        '/images/germs/germ-purple.png',
+        '/images/germs/germ-blue.png',
+        '/images/sanitizer.png',
+        '/images/points/germ-green01.png',
+        '/images/points/germ-purple02.png',
+        '/images/points/germ-purple03.png',
+        '/images/points/germ-blue04.png',
+        '/images/toilet-hero-badge.png'
+    ];
+    
+    const hardcodedAudio = [
+        '/sfx/yay.mp3',
+        '/sfx/next.mp3',
+        '/sfx/correct.mp3',
+        '/sfx/wrong.mp3',
+        '/sfx/germ.mp3',
+        '/sfx/celebration.mp3',
+        '/sfx/cring.mp3'
+    ];
+
+    hardcodedImages.forEach(src => images.add(src));
+    hardcodedAudio.forEach(src => audios.add(src));
+
+    slides.forEach(slide => {
+        if (slide.image) images.add(slide.image);
+        if (slide.mascot) images.add(slide.mascot);
+        if (slide.videoUrl) videos.add(slide.videoUrl);
+        if (slide.audio) audios.add(slide.audio);
+
+        if (slide.background) {
+            if (slide.background.match(/\.(mp4|mov|webm)$/i)) {
+                videos.add(slide.background);
+            } else {
+                images.add(slide.background);
+            }
+        }
+    });
+
+    return (
+        <div className="hidden" aria-hidden="true">
+            {Array.from(images).map(src => <img key={src} src={src} alt="" />)}
+            {Array.from(videos).map(src => <video key={src} src={src} preload="auto" muted playsInline />)}
+            {Array.from(audios).map(src => <audio key={src} src={src} preload="auto" />)}
+        </div>
+    );
+};
+
 // --- Main Page Component ---
 
 export default function LessonDetailPage() {
@@ -2109,6 +2190,7 @@ export default function LessonDetailPage() {
 
     return (
         <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+            <AssetPreloader slides={slides} />
             {/* 1. Header (Sticky) */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-xl border-b border-slate-100">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
