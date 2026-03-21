@@ -219,6 +219,11 @@ const dummySlides: Slide[] = [
 // --- Success Popup Component ---
 
 const GameSuccessModal = ({ title, description, onContinue }: { title: string, description: string, onContinue: () => void }) => {
+    useEffect(() => {
+        const audio = new Audio('/sfx/yay.mp3');
+        audio.play().catch(e => console.warn("Yay audio play failed:", e));
+    }, []);
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -972,21 +977,21 @@ const PledgeSlide = ({ title, subtitle, content, onComplete }: Partial<Slide> & 
 // --- Sub-Components (Standard Slides) ---
 
 const TitleSlide = ({ title, subtitle }: Partial<Slide>) => (
-    <div className="flex flex-col items-center justify-center text-center h-full space-y-6 md:space-y-8 relative">
+    <div className="flex flex-col items-center justify-center text-center h-full space-y-4 md:space-y-6 relative max-w-3xl mx-auto">
 
         <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", bounce: 0.5 }}
-            className="mb-2 md:mb-4 drop-shadow-2xl"
+            className="mb-1 md:mb-2 drop-shadow-2xl"
         >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascots/mascot-pose.png" alt="Mascot" className="w-32 md:w-56 h-auto" />
+            <img src="/mascots/mascot-pose.png" alt="Mascot" className="w-24 md:w-40 h-auto" />
         </motion.div>
-        <h1 className="font-nerko tracking-wide text-3xl sm:text-5xl md:text-8xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center max-w-4xl">
+        <h1 className="font-nerko tracking-wide text-2xl sm:text-4xl md:text-6xl font-black tracking-tighter text-blue-900 drop-shadow-sm leading-none pb-2 uppercase text-center max-w-4xl">
             {title}
         </h1>
-        <p className="text-base md:text-2xl text-blue-900 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
+        <p className="text-sm md:text-lg text-blue-900 font-black uppercase tracking-[0.2em] md:tracking-[0.3em] max-w-2xl leading-relaxed px-4">
             {subtitle}
         </p>
     </div>
@@ -1012,18 +1017,18 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
     ];
 
     return (
-        <div className="flex flex-col h-full max-w-6xl mx-auto py-4 relative">
-            <div className="flex items-center gap-4 mb-4 relative z-10">
-                <div className="w-10 h-10 md:w-16 md:h-16 bg-slate-900 text-white rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl rotate-3 shrink-0">
-                    <BookOpen className="w-5 h-5 md:w-8 md:h-8" />
+        <div className="flex flex-col h-full max-w-4xl mx-auto py-2 relative">
+            <div className="flex items-center gap-3 mb-2 relative z-10">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-slate-900 text-white rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg rotate-3 shrink-0">
+                    <BookOpen className="w-4 h-4 md:w-6 md:h-6" />
                 </div>
-                <h2 className="text-2xl md:text-5xl font-black tracking-tighter text-blue-900 uppercase">
+                <h2 className="text-xl md:text-3xl font-black tracking-tighter text-blue-900 uppercase">
                     {title}
                 </h2>
             </div>
 
-            <div className={`flex flex-col lg:flex-row gap-4 lg:gap-8 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
-                <div className={`relative flex-1 ${isList && isModule1 ? 'min-h-[400px] md:h-[600px] w-full' : isList ? 'w-full' : 'text-lg md:text-2xl leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-6 md:pl-10 ml-4 md:ml-8'}`}>
+            <div className={`flex flex-col lg:flex-row gap-3 lg:gap-6 lg:items-center relative z-10 w-full grow ${isList ? '' : 'items-center lg:items-start'}`}>
+                <div className={`relative flex-1 ${isList && isModule1 ? 'min-h-[300px] md:h-[480px] w-full' : isList ? 'w-full' : 'text-base md:text-lg leading-relaxed text-slate-500 whitespace-pre-line font-medium border-l-4 border-sky-100 pl-4 md:pl-8 ml-2 md:ml-4'}`}>
                     {isList ? (
                         isModule1 ? (
                             points.map((point, idx) => {
@@ -1038,8 +1043,8 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
                                         style={{
                                             top: pos.top,
                                             left: pos.left,
-                                            width: '320px',
-                                            height: '200px'
+                                            width: '260px',
+                                            height: '160px'
                                         }}
                                     >
                                         <motion.div
@@ -1064,7 +1069,7 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
                                                 />
                                             </div>
 
-                                            <span className="relative z-10 text-center text-sm md:text-base font-black text-white leading-tight px-6 drop-shadow-sm pointer-events-none">
+                                            <span className="relative z-10 text-center text-xs md:text-sm font-black text-white leading-tight px-4 drop-shadow-sm pointer-events-none">
                                                 {point.replace('•', '').trim()}
                                             </span>
                                         </motion.div>
@@ -1079,12 +1084,12 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.1 }}
-                                        className="flex items-start gap-4 text-slate-700 bg-white/40 p-5 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm"
+                                        className="flex items-start gap-4 text-slate-700 bg-white/40 p-3 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm"
                                     >
-                                        <div className="mt-1 w-6 h-6 shrink-0 bg-sky-500 rounded-full flex items-center justify-center text-white text-[10px] shadow-lg">
-                                            <div className="w-2 h-2 bg-white rounded-full" />
+                                        <div className="mt-1 w-5 h-5 shrink-0 bg-sky-500 rounded-full flex items-center justify-center text-white text-[8px] shadow-lg">
+                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                         </div>
-                                        <span className="text-xl md:text-2xl font-bold leading-tight tracking-tight">
+                                        <span className="text-lg md:text-xl font-bold leading-tight tracking-tight">
                                             {point.replace('•', '').trim()}
                                         </span>
                                     </motion.li>
@@ -1099,7 +1104,7 @@ const ContentSlide = ({ title, content, mascot, isModule1 }: Partial<Slide> & { 
                 {mascot && (
                     <div className="hidden lg:block shrink-0 relative z-20">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={mascot} alt="Mascot" className="w-[350px] h-auto drop-shadow-2xl" />
+                        <img src={mascot} alt="Mascot" className="w-[260px] h-auto drop-shadow-2xl" />
                     </div>
                 )}
             </div>
@@ -1271,7 +1276,7 @@ const VideoSlide = ({ title, videoUrl, content, audio, onReady }: Partial<Slide>
     const points = content?.split('\n').filter(p => p.trim() !== '') || [];
 
     return (
-        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-4 text-center p-2">
+        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-2 text-center p-2">
             <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
             <div className="relative group rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900/5 max-w-[95%] md:max-w-full">
                 <video
@@ -1281,13 +1286,13 @@ const VideoSlide = ({ title, videoUrl, content, audio, onReady }: Partial<Slide>
                     loop
                     playsInline
                     onCanPlayThrough={() => onReady?.()}
-                    className="w-full h-auto max-h-[45vh] md:max-h-[55vh] object-contain block"
+                    className={`w-full h-auto ${(!content || content.trim() === "") ? 'max-h-[50vh] md:max-h-[55vh]' : 'max-h-[30vh] md:max-h-[42vh]'} object-contain block`}
                 />
                 <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[inherit]" />
             </div>
             {content && (
 
-                <div className="max-w-3xl mx-auto mt-4 px-4 overflow-y-auto no-scrollbar max-h-[25vh]">
+                <div className="max-w-3xl mx-auto mt-2 px-4 overflow-y-auto no-scrollbar max-h-[40vh]">
                     {isList ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {points.map((point, idx) => (
@@ -1563,26 +1568,26 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
             {/* Target Area */}
             <div
                 ref={targetRef}
-                className={`relative w-full max-w-md p-6 md:p-10 rounded-3xl md:rounded-[3rem] shadow-xl border-4 transition-all duration-500 flex flex-col items-center gap-4 md:gap-6 ${isDropped
+                className={`relative w-full max-w-2xl p-8 md:p-10 rounded-3xl md:rounded-[3rem] shadow-xl border-4 transition-all duration-500 flex flex-col items-center gap-4 md:gap-6 ${isDropped
                     ? 'bg-indigo-50 border-indigo-500 scale-105 shadow-indigo-100/50'
                     : 'bg-white border-slate-100'
                     }`}
             >
-                <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-3xl md:text-4xl shadow-inner transition-colors duration-500 ${isDropped ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'
+                <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl md:text-5xl shadow-inner transition-colors duration-500 ${isDropped ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'
                     }`}>
                     {isDropped ? <ShieldCheck className="w-8 h-8 md:w-10 md:h-10" /> : (question.question.includes('True') ? '🤔' : '🧼')}
                 </div>
 
                 <div className="space-y-1 md:space-y-2 text-center">
-                    <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">
+                    <h3 className="text-2xl md:text-4xl font-black text-slate-900 leading-tight">
                         {question.question}
                     </h3>
-                    <p className="text-sm md:text-base text-slate-500 font-bold leading-tight px-4 italic">
+                    <p className="text-lg md:text-xl text-slate-500 font-bold leading-tight px-4 italic">
                         {question.description === "" ? "" : `"${question.description}"`}
                     </p>
                 </div>
 
-                <div className={`mt-2 md:mt-4 w-full h-16 md:h-20 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
+                <div className={`mt-2 md:mt-4 w-full h-16 md:h-24 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
                     ? 'bg-white border-indigo-400 text-indigo-700 shadow-inner'
                     : 'bg-slate-50 border-slate-200 text-slate-300'
                     }`}>
@@ -1623,7 +1628,7 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
                                         zIndex: 100,
                                         boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
                                     }}
-                                    className="px-6 py-3 md:px-10 md:py-5 bg-white border-2 border-slate-100 rounded-2xl md:rounded-3xl font-black text-sm md:text-base text-slate-700 shadow-lg cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                                    className="px-8 py-4 md:px-12 md:py-6 bg-white border-2 border-slate-100 rounded-2xl md:rounded-3xl font-black text-lg md:text-xl text-slate-700 shadow-lg cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:text-indigo-600 transition-colors"
                                 >
                                     {opt}
                                 </motion.div>
@@ -2101,7 +2106,7 @@ export default function LessonDetailPage() {
                         🧼
                     </motion.div>
                     <div className="space-y-2 text-center">
-                        <h2 className="text-2xl font-black text-blue-900 uppercase tracking-widest animate-pulse">Prepping the Classroom...</h2>
+                        <h2 className="text-2xl font-black text-blue-900 uppercase tracking-widest animate-pulse">Preparing the Classroom...</h2>
                         <p className="text-blue-900/40 font-bold italic">Getting your hero training ready!</p>
                     </div>
                 </div>
@@ -2234,7 +2239,7 @@ export default function LessonDetailPage() {
                                 opacity: { duration: 0.2 },
                                 scale: { duration: 0.3 }
                             }}
-                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" || currentSlide.type === "pledge" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} p-4 md:p-12 w-full max-w-[95vw] h-auto min-h-[40dvh] max-h-[calc(100dvh-180px)] md:max-h-[calc(100dvh-200px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-2 md:mb-6`}
+                            className={`w-full ${currentSlide.type === "game" || currentSlide.type === "comparison" || currentSlide.type === "quiz" || currentSlide.type === "video" || currentSlide.type === "pledge" ? "" : "bg-white/20 backdrop-blur shadow-[0_0_50px_rgba(0,0,0,0.05)] rounded-4xl md:rounded-5xl border border-white/40"} ${currentSlide.type === 'title' || currentSlide.type === 'content' ? 'p-6 md:p-10 max-w-4xl' : 'p-4 md:p-12 max-w-[95vw]'} w-full h-auto min-h-[40dvh] max-h-[calc(100dvh-180px)] md:max-h-[calc(100dvh-200px)] flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar mb-2 md:mb-6`}
                         >
                             {/* Dynamic Slide Switcher */}
                             <div className="w-full m-auto">
@@ -2265,7 +2270,6 @@ export default function LessonDetailPage() {
                                             <HandwashingGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                playYay();
                                                 handleNext();
                                                 // setTimeout(handleNext, 500);
                                             }} />
@@ -2273,14 +2277,12 @@ export default function LessonDetailPage() {
                                             <WhosNextGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                playYay();
                                                 handleNext();
                                             }} />
                                         ) : currentSlide.gameType === "HeroOrOops" ? (
                                             <HeroOrOopsGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                playYay();
                                                 handleNext();
                                             }} invertChoices={currentSlide.invertChoices} />
                                         ) : currentSlide.gameType === "CleanupChallenge" ? (
@@ -2288,7 +2290,6 @@ export default function LessonDetailPage() {
                                                 onComplete={() => {
                                                     setGameState('completed');
                                                     setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                    playYay();
                                                     handleNext();
                                                 }}
                                                 background={currentSlide.background}
@@ -2297,7 +2298,6 @@ export default function LessonDetailPage() {
                                             <GermHunterGame onComplete={() => {
                                                 setGameState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                playYay();
                                                 handleNext();
                                             }} />
                                         )
@@ -2314,7 +2314,6 @@ export default function LessonDetailPage() {
                                         onComplete={() => {
                                             setGameState('completed');
                                             setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                            playYay();
                                             handleNext();
                                         }}
                                         invertChoices={currentSlide.invertChoices}
@@ -2329,7 +2328,6 @@ export default function LessonDetailPage() {
                                             onComplete={() => {
                                                 setQuizState('completed');
                                                 setCompletedSlides(prev => ({ ...prev, [currentIdx]: true }));
-                                                playYay();
                                                 setPostQuizVideoPlaying(true);
                                             }}
                                         />
