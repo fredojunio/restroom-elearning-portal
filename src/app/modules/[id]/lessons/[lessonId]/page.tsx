@@ -1276,47 +1276,58 @@ const VideoSlide = ({ title, videoUrl, content, audio, onReady }: Partial<Slide>
     const points = content?.split('\n').filter(p => p.trim() !== '') || [];
 
     return (
-        <div className="flex flex-col items-center justify-center h-full max-w-4xl mx-auto py-2 space-y-2 text-center p-2">
-            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase">{title}</h2>
-            <div className="relative group rounded-xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900/5 max-w-[95%] md:max-w-full">
-                <video
-                    ref={videoRef}
-                    src={videoUrl}
-                    autoPlay
-                    loop
-                    playsInline
-                    onCanPlayThrough={() => onReady?.()}
-                    className={`w-full h-auto ${(!content || content.trim() === "") ? 'max-h-[50vh] md:max-h-[55vh]' : 'max-h-[30vh] md:max-h-[42vh]'} object-contain block`}
-                />
-                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[inherit]" />
-            </div>
-            {content && (
+        <div className="flex flex-col h-full w-full max-w-6xl mx-auto py-2 px-4 gap-4 md:gap-6 overflow-y-auto no-scrollbar">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-blue-900 leading-tight uppercase text-center">{title}</h2>
+            
+            <div className={`flex flex-col ${content ? 'lg:flex-row lg:items-center lg:gap-10' : 'items-center'} w-full grow`}>
+                <div className={`${content ? 'lg:w-[60%]' : 'w-full'} flex flex-col items-center justify-center`}>
+                    <div className="relative group rounded-xl overflow-hidden shadow-2xl border-4 border-white w-fit mx-auto">
+                        <video
+                            ref={videoRef}
+                            src={videoUrl}
+                            autoPlay
+                            loop
+                            playsInline
+                            onCanPlayThrough={() => onReady?.()}
+                            className={`block h-auto ${(!content || content.trim() === "") ? 'max-h-[50vh] md:max-h-[55vh]' : 'max-h-[30vh] md:max-h-[45vh] lg:max-h-[55vh]'} max-w-full mx-auto`}
+                        />
+                        <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[inherit]" />
+                    </div>
+                </div>
 
-                <div className="max-w-3xl mx-auto mt-2 px-4 overflow-y-auto no-scrollbar max-h-[40vh]">
-                    {isList ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {points.map((point, idx) => (
+                {content && (
+                    <div className="flex-1 lg:w-[40%] mt-6 lg:mt-0 flex flex-col justify-center text-center lg:text-left">
+                        <div className="overflow-y-auto no-scrollbar max-h-[45vh] lg:max-h-[60vh] pr-2">
+                            {isList ? (
+                                <div className="flex flex-col gap-3">
+                                    {points.map((point, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className="group flex items-start gap-4 p-4 rounded-2xl bg-white/40 border border-white/60 shadow-sm backdrop-blur-sm hover:bg-white/60 transition-all duration-300"
+                                        >
+                                            <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0" />
+                                            <span className="text-base md:text-lg font-bold text-slate-700 leading-snug tracking-tight text-left">
+                                                {point.replace('•', '').trim()}
+                                            </span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            ) : (
                                 <motion.div
-                                    key={idx}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.1 }}
-                                    className="flex items-center gap-3 bg-white/50 backdrop-blur-sm p-3 rounded-xl border border-white/60 shadow-sm"
+                                    className="p-6 rounded-2xl bg-white/40 border border-white/60 shadow-sm backdrop-blur-sm text-lg md:text-xl font-medium text-slate-600 leading-relaxed italic border-l-4 border-l-blue-400 text-left"
                                 >
-                                    <div className="w-2 h-2 bg-sky-500 rounded-full shrink-0" />
-                                    <span className="text-sm md:text-base font-bold text-slate-700 text-left leading-tight">
-                                        {point.replace('•', '').trim()}
-                                    </span>
+                                    {content}
                                 </motion.div>
-                            ))}
+                            )}
                         </div>
-                    ) : (
-                        <p className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/60">
-                            {content}
-                        </p>
-                    )}
-                </div>
-            )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -1400,14 +1411,21 @@ const CelebrationSlide = ({ id, title, subtitle, content, mascot, image }: Parti
 
     useEffect(() => {
         const audio = new Audio('/sfx/celebration.mp3');
+        const yay = new Audio('/sfx/yay.mp3');
+        
         audio.play().catch(error => {
             console.warn("Celebration audio auto-play was prevented by the browser:", error);
+        });
+        yay.play().catch(error => {
+            console.warn("Yay audio auto-play was prevented by the browser:", error);
         });
 
         // Cleanup if necessary (though usually not needed for a one-shot SFX on mount)
         return () => {
             audio.pause();
             audio.src = "";
+            yay.pause();
+            yay.src = "";
         };
     }, []);
 
@@ -1564,30 +1582,30 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
     };
 
     return (
-        <div className="flex flex-col items-center gap-6 md:gap-12 py-2 md:py-4 w-full">
+        <div className="flex flex-col items-center gap-4 md:gap-6 py-2 md:py-4 w-full">
             {/* Target Area */}
             <div
                 ref={targetRef}
-                className={`relative w-full max-w-2xl p-8 md:p-10 rounded-3xl md:rounded-[3rem] shadow-xl border-4 transition-all duration-500 flex flex-col items-center gap-4 md:gap-6 ${isDropped
+                className={`relative w-full max-w-2xl p-6 md:p-8 rounded-3xl md:rounded-[3rem] shadow-xl border-4 transition-all duration-500 flex flex-col items-center gap-2 md:gap-4 ${isDropped
                     ? 'bg-indigo-50 border-indigo-500 scale-105 shadow-indigo-100/50'
                     : 'bg-white border-slate-100'
                     }`}
             >
-                <div className={`w-16 h-16 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-3xl md:text-5xl shadow-inner transition-colors duration-500 ${isDropped ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'
+                <div className={`w-14 h-14 md:w-16 md:h-16 rounded-3xl flex items-center justify-center text-2xl md:text-3xl shadow-inner transition-colors duration-500 ${isDropped ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-600'
                     }`}>
                     {isDropped ? <ShieldCheck className="w-8 h-8 md:w-10 md:h-10" /> : (question.question.includes('True') ? '🤔' : '🧼')}
                 </div>
 
                 <div className="space-y-1 md:space-y-2 text-center">
-                    <h3 className="text-2xl md:text-4xl font-black text-slate-900 leading-tight">
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight">
                         {question.question}
                     </h3>
-                    <p className="text-lg md:text-xl text-slate-500 font-bold leading-tight px-4 italic">
+                    <p className="text-base md:text-lg text-slate-500 font-bold leading-tight px-4 italic">
                         {question.description === "" ? "" : `"${question.description}"`}
                     </p>
                 </div>
 
-                <div className={`mt-2 md:mt-4 w-full h-16 md:h-24 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
+                <div className={`mt-2 md:mt-4 w-full h-12 md:h-16 rounded-2xl border-2 border-dashed flex items-center justify-center transition-all duration-500 ${isDropped
                     ? 'bg-white border-indigo-400 text-indigo-700 shadow-inner'
                     : 'bg-slate-50 border-slate-200 text-slate-300'
                     }`}>
@@ -1610,10 +1628,10 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
             </div>
 
             {/* Draggable Options */}
-            <div className="relative min-h-[5rem] md:min-h-[6rem] h-auto w-full flex justify-center items-center">
+            <div className="relative min-h-[4rem] md:min-h-[5rem] h-auto w-full flex justify-center items-center">
                 <AnimatePresence>
                     {!isDropped && (
-                        <div className="flex flex-wrap justify-center gap-3 md:gap-6">
+                        <div className="flex flex-wrap justify-center gap-2 md:gap-3">
                             {question.options?.map((opt, i) => (
                                 <motion.div
                                     key={opt}
@@ -1628,7 +1646,7 @@ const DragAndDropQuestion = ({ question, onCorrect }: { question: Question, onCo
                                         zIndex: 100,
                                         boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
                                     }}
-                                    className="px-8 py-4 md:px-12 md:py-6 bg-white border-2 border-slate-100 rounded-2xl md:rounded-3xl font-black text-lg md:text-xl text-slate-700 shadow-lg cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                                    className="px-6 py-2 md:px-8 md:py-3 bg-white border-2 border-slate-100 rounded-2xl md:rounded-3xl font-black text-sm md:text-base text-slate-700 shadow-lg cursor-grab active:cursor-grabbing hover:border-indigo-400 hover:text-indigo-600 transition-colors"
                                 >
                                     {opt}
                                 </motion.div>

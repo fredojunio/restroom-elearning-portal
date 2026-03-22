@@ -209,7 +209,7 @@ async function main() {
                 order: 16,
                 type: "celebration",
                 title: "What a Toilet Hero!",
-                content: "Students receive praise from the mascot and a 'Health Defender' badge.\n\nThis creates a sense of achievement and motivates them to continue to Module B.",
+                content: "Students receive praise from the mascot and a 'Health Defender' badge.",
                 mascot: "/mascots/mascot-hero.png",
                 background: "/images/celebration-bg.jpg",
                 waitSeconds: 3
