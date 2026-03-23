@@ -154,7 +154,7 @@ async function main() {
                 gameType: "Story Interaction",
                 content: "Spot the animated germ moving from the toilet to the hand? Quickly tap to scrub it away",
                 mascot: "/mascots/mascot-scared.png",
-                background: "/videos/module-a/A11.mov"
+                background: "/videos/module-a/A11.mp4"
               },
               {
                 order: 12,
